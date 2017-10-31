@@ -1,0 +1,2 @@
+#!/usr/bin/env bash 
+source C:\Users\mguo123\PyMOL\Scripts\activate "$@"

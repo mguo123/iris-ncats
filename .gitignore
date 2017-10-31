@@ -1,2 +1,7 @@
 node_modules/*
 backend/app/large_files/*
+*.pyc
+*/*/*/*.pyc
+data/*
+envs/*
+backend/app/user_functions/ncats/results
