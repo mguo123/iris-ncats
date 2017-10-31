@@ -206,6 +206,14 @@ class Array(EnvVar):
     def error_message(self, text):
         return ["I could not find '{}' in the environment or convert it to an Array. Please try again:".format(text)]
 
+    def type_from_string(self, x):
+        try: 
+            result = x.split(',')
+            result = np.array([float(x) for x in result])
+            return True, result
+        except:
+            return False, None
+            
 # the type for lists
 class List(EnvVar):
     def is_type(self, x):
@@ -215,6 +223,13 @@ class List(EnvVar):
     def error_message(self, text):
         return ["I could not find '{}' in the environment or convert it to an List. Please try again:".format(text)]
 
+    def type_from_string(self, x):
+        try: 
+            result = x.split(',')
+            # result = np.array([float(x) for x in result])
+            return True, result
+        except:
+            return False, None
 # the type for functions
 # (functions are a reference to iris commands themselves!)
 class Function(EnvVar):

@@ -25,6 +25,19 @@ class LoadCSV(IrisCommand):
 
 loadCSV = LoadCSV()
 
+class ViewDf(IrisCommand):
+    title = "view {dataframe_name}"
+    argument_types = {
+        "dataframe_name": t.String("What dataframe do you want to see?")
+    }
+    def command(self, dataframe_name):
+        print("HERRREEEEEEEE")
+        print(self.iris.env[dataframe_name].df)
+        print('DOOOOONNNNEEE')
+        return self.iris.env[dataframe_name].df
+
+ViewDf = ViewDf()
+
 class SaveDf(IrisCommand):
     title = "save {dataframe} to csv"
     argument_types = {

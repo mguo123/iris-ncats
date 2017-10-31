@@ -11,6 +11,7 @@ from .. import gencode
 import copy
 import sys
 import inspect
+import numpy as np
 
 # the Function class returns a value, as well as a representation of the
 # the program that produced that value
@@ -141,7 +142,8 @@ class Function(Scope, AssignableMachine):
         print(self)
         self.output = []
         # if we have gathered all the arguments
-        if len(self.command_args) == 0 or all([self.read_variable(arg) != None for arg in self.command_args]):
+        if len(self.command_args) == 0 or np.asarray([self.read_variable(arg) != None for arg in self.command_args]).all():
+        # if len(self.command_args) == 0 or all([self.read_variable(arg) != None for arg in self.command_args]):
             # so here we want to create a new function
             program_so_far = compile_function(self, {arg:self.read_variable(arg) for arg in self.command_args})
             # get a concrete representation of the args
