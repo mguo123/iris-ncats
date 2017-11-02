@@ -4,48 +4,48 @@
 # Modified margaret, 10/26/17
 
 
-import pickle,os
-# from optparse import OptionParser
-from collections import defaultdict
-from scipy.stats import hypergeom
+# import pickle,os
+# # from optparse import OptionParser
+# from collections import defaultdict
+# from scipy.stats import hypergeom
 
-# import association file data
-rscs_dir = '../rscs/'
-g_to_rsids = pickle.load(open(rscs_dir+'gene_to_rsid_eQTL.pkl','rb'))
-rs_to_data = pickle.load(open(rscs_dir+'rsid_g_pval_rsqr.pkl','rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
-g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb')) #
-g_to_OMIM = pickle.load(open(rscs_dir+'OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
-g_to_phW_snps = pickle.load(open(rscs_dir+'gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
-phW_snps_to_phen = pickle.load(open(rscs_dir+'rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
-all_assoc = pickle.load(open(rscs_dir+'all_assoc_to_nodes.pkl','rb')) # all associations, and their genes/SNPs
-intome_size = pickle.load(open(rscs_dir+'interactome_size.pkl','rb'))
-phen_to_cui = pickle.load(open(rscs_dir+'phenotype_to_cui.pkl','rb')) # phenotypes to cuis
+# # import association file data
+# rscs_dir = '../rscs/'
+# g_to_rsids = pickle.load(open(rscs_dir+'gene_to_rsid_eQTL.pkl','rb'))
+# rs_to_data = pickle.load(open(rscs_dir+'rsid_g_pval_rsqr.pkl','rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
+# g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb')) #
+# g_to_OMIM = pickle.load(open(rscs_dir+'OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
+# g_to_phW_snps = pickle.load(open(rscs_dir+'gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
+# phW_snps_to_phen = pickle.load(open(rscs_dir+'rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
+# all_assoc = pickle.load(open(rscs_dir+'all_assoc_to_nodes.pkl','rb')) # all associations, and their genes/SNPs
+# intome_size = pickle.load(open(rscs_dir+'interactome_size.pkl','rb'))
+# phen_to_cui = pickle.load(open(rscs_dir+'phenotype_to_cui.pkl','rb')) # phenotypes to cuis
 
 def get_rsid_list(gene_list):
-    genes_rsids = [[gene,rs] for gene in gene_list for rs in g_to_rsids[gene]]
+    genes_rsids = [[gene,rs] for gene in gene_list for rs in G_TO_RSIDS[gene]]
     return genes_rsids
 
 def get_disease_associations(gene_list):
-    dis_assoc = [[g,disease,dscore] for g in gene_list for (disease,dscore) in g_to_disGenNet[g].items() if g in g_to_disGenNet]
+    dis_assoc = [[g,disease,dscore] for g in gene_list for (disease,dscore) in G_TO_DISGENNET[g].items() if g in G_TO_DISGENNET]
     return dis_assoc
 
 def get_phenotype_associations(gene_list):
     pheno = []
     for g in gene_list:
-        if g in g_to_OMIM:
-            if ';' in g_to_OMIM[g]:
-                for ph in g_to_OMIM[g].split(';'):
+        if g in G_TO_OMIM:
+            if ';' in G_TO_OMIM[g]:
+                for ph in G_TO_OMIM[g].split(';'):
                     pheno.append((g,ph))
             else:
-                pheno.append((g,g_to_OMIM[g]))
+                pheno.append((g,G_TO_OMIM[g]))
     return pheno
 
 def get_pheWAS_SNPs(gene_list):
-    genes_snps = list(set([(gene,snp) for gene in gene_list for snp in g_to_phW_snps[gene]]))
+    genes_snps = list(set([(gene,snp) for gene in gene_list for snp in G_TO_PHW_SNPS[gene]]))
     return genes_snps
 
 def get_snp_pheWAS(snp_list):
-    snp_pheWAS = [[snp,phW_snps_to_phen[snp][0]] for snp in snp_list]
+    snp_pheWAS = [[snp,PHW_SNPS_TO_PHEN[snp][0]] for snp in snp_list]
     return snp_pheWAS
 
 def get_network_interactions(f):
@@ -101,8 +101,8 @@ def calc_hyp(net_assoc,all_assoc,N,Q,n):
         # if prb<BH:
             genes = phen_genes[phen]
             gene_str = ','.join(genes)
-            if phen in phen_to_cui:
-                cui = phen_to_cui[phen][0]
+            if phen in PHEN_TO_CUI:
+                cui = PHEN_TO_CUI[phen][0]
             else:
                 cui = phen
             sig_assoc.append([rank,phen,cui,assnet,assint,prd,BH,gene_str])
@@ -143,10 +143,10 @@ def get_associations(netf, aname, rdir):
     net_assoc = get_assoc(node_list)
 
     # Multiple hypothesis correct
-    N = intome_size
+    N = INTOME_SIZE
     Q = 0.001
     n = len(node_list)
-    sig_assoc = calc_hyp(net_assoc,all_assoc,N,Q,n) 
+    sig_assoc = calc_hyp(net_assoc,ALL_ASSOC,N,Q,n) 
     network_name = os.path.basename(netf).split('.txt')[0]
     outfname = os.path.join(rdir,network_name+'_assocations.txt')
     print ('saving to output', outfname)

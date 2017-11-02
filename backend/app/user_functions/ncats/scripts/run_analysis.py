@@ -4,18 +4,18 @@
 # Modified margaret, 10/26/17
 
 
-import csv, pickle, os, sys, find_neighborhood_beta
-import networkx as nx
-import numpy as np
-import matplotlib
-matplotlib.use("AGG")
-import matplotlib.pyplot as plt
-import pandas as pd
-from textwrap import wrap
-from collections import defaultdict
-from find_neighborhood_beta import find_neighborhood as fgn
-# import get_associations
-from get_associations_deprecated import get_associations
+# import csv, pickle, os, sys, find_neighborhood_beta
+# import networkx as nx
+# import numpy as np
+# import matplotlib
+# matplotlib.use("AGG")
+# import matplotlib.pyplot as plt
+# import pandas as pd
+# from textwrap import wrap
+# from collections import defaultdict
+# from find_neighborhood_beta import find_neighborhood as fgn
+# # import get_associations
+# from get_associations_deprecated import get_associations
 
 def write_neighborhood_to_file(pth_dic,outf):
     for (pth,pscore) in pth_dic.items():
@@ -96,7 +96,7 @@ def check_if_drug_in_network(dts, netxobj):
         # print(find_neighborhood_beta)
         for i, drug_target in enumerate(target_list):
             # if drug_target not in netxobj.nodes_iter():
-            if drug_target not in find_neighborhood_beta.G:
+            if drug_target not in GENE_GRAPH:
                 print(drug_target, 'not found in network of drug', drug)
                 not_found = np.append(not_found, drug_target)
     all_drug_targets = np.unique(all_drug_targets)
@@ -104,7 +104,7 @@ def check_if_drug_in_network(dts, netxobj):
     print(not_found.shape[0], 'not found of ', all_drug_targets.shape[0], 'total targets')
     
 def run_all_drugs(dts,rdir,netxobj,scr_thr):
-    find_neighborhood_beta.G = netxobj
+    GENE_GRAPH = netxobj
     all_merge_files = []
     # print('dts', dts)
     for (drug,target_list) in dts:
@@ -113,7 +113,7 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
         # print(find_neighborhood_beta)
         for drug_target in target_list:
             # if drug_target not in netxobj.nodes_iter():
-            if drug_target not in find_neighborhood_beta.G:
+            if drug_target not in GENE_GRAPH:
                 print(drug_target, 'not found in network')
                 continue        
             print('Gene: '+drug_target)

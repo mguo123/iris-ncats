@@ -33,10 +33,8 @@ def preprocess_names(drug, disease):
     drug = drug.lower()
     first_letter = drug[0].upper()
     modified_drug_name = first_letter + drug[1:]
-    modified_disease = disease.lower()
+    modified_disease = disease.lower().strip('\"')
     return modified_drug_name, modified_disease
-
-
 
 def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_found=False):
     if not os.path.exists(storage_dir):
@@ -49,7 +47,7 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
     # loading data: interactome
     networkf = '../rscs/merged_interact_netx.pkl' #non-specific interaction network #### CHANGE LOCATION
     print('loading interactome data', networkf)
-    find_neighborhood_beta.G = pickle.load(open(networkf,'rb'))
+    GENE_GRAPH = pickle.load(open(networkf,'rb'))
 
     # loading random data: 
     ann.rand_dir = '../results/rand_iRefplus_intome/summary/'
@@ -66,7 +64,7 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
         threshold = SCORE_THRESHOLD_START # STARTING THRESHOLD
         answer_found = False
         while not answer_found and threshold >= SCORE_THRESHOLD_MIN :
-            all_merge_files = ann.run_all_drugs(dts,storage_dir,find_neighborhood_beta.G,threshold)
+            all_merge_files = ann.run_all_drugs(dts,storage_dir,GENE_GRAPH,threshold)
 
 
             # get/store output data
@@ -102,14 +100,16 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
 def run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = 'results_drugs_multi', iterate_until_found=False):
     print('running drug_multi from', input_file )
     # get in input_file of two columns of drugs and diseases, that shouldbe paired together
-    with open(input_file, 'r') as f:
-        x= f.readlines()
-    drug_arr = []
-    disease_arr = []
-    for i, line in enumerate(x[1:]): # skip header
-        drug, disease = line.strip().split('\t')
-        drug_arr.append(drug)
-        disease_arr.append(disease)
+    if input_file.endswith('.txt'):
+        with open(input_file, 'r') as f:
+            x= f.readlines()
+            x = np.array([line.strip().split('\t') for line in x][1:])
+            drug_arr = x[:,0]
+            disease_arr = x[:,1]
+    elif input_file.endswith('.csv'):
+        data = pd.read_csv(input_file, sep=',')
+        drug_arr = np.array(data[list(data)[0]])
+        disease_arr = np.array(data[list(data)[1]])
 
     #iterate through list
     answer_found_arr = []
@@ -118,6 +118,7 @@ def run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_
         answer_found, answer = run_drug_single(drug, disease, storage_dir, iterate_until_found)
         answer_found_arr.append(answer_found)
         answer_arr.append(answer)
+
 
     #get output as txt
     output_filename = os.path.join(storage_dir, 'results_drug_disease_matching.txt')
@@ -243,7 +244,7 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
     print('written output to', output_filename)
 
 ##### STUFF I'm RUNNING
-retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = True)
+# retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = True)
 # run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = 'results_drugs_multi2', iterate_until_found=False)
 
 # analysis_name = 'ncats_test_intome_6_remove24_min_networkassoc' 
@@ -290,10 +291,10 @@ retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_di
 
 ### IGNORE ME #### check to see if all the drugs have targets in the network
 # print(len(dts), 'len dts')
-# ann.check_if_drug_in_network(dts, find_neighborhood_beta.G)
+# ann.check_if_drug_in_network(dts, GENE_GRAPH)
 # raise ValueError("TESTING")
 # create networks, merge, do phenotype enrichment
-# all_merge_files = ann.run_all_drugs(dts,rdir,find_neighborhood_beta.G,SCORE_THRESHOLD)
+# all_merge_files = ann.run_all_drugs(dts,rdir,GENE_GRAPH,SCORE_THRESHOLD)
 
 
 

@@ -3,9 +3,9 @@
 # adding augment-network function
 # written 6-7-17 JLW
 
-import itertools, os, sys, time, pickle
-import networkx as nx
-from collections import defaultdict
+# import itertools, os, sys, time, pickle
+# import networkx as nx
+# from collections import defaultdict
 
 def pairwise(iterable):
 	a,b = itertools.tee(iterable)

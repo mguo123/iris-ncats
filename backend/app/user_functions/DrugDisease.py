@@ -6,6 +6,10 @@ from iris import state_machine as sm
 from iris import util as util
 from iris import iris_objects
 
+from app.user_functions.ncats.scripts import run_test, run_main
+
+run_test.run_drug_single('a', 'b')
+
 class DrugDisease(IrisCommand):
     # what iris will call the command + how it will appear in a hint
     title = "find the mechanism of action of {drug} for treating {disease}"
@@ -18,14 +22,10 @@ class DrugDisease(IrisCommand):
     
     # core logic of the command
     def command(self, drug, disease):
-        # import numpy
+        # import numpyfrom ncats.scripts import run_te
         # return numpy.random.randint(100)
-        import sys
-        print (sys.path)
-        sys.path.append("/Users/margaret/Documents/iris-agent") #### NEED TO FIX!!!! 
-        print (sys.path)
-        from node_modules.ncats.scripts import run_test
-        return run_test.run_drug_single(drug, disease)
+
+        return run_main.run_drug_single(drug, disease)
         
     # wrap the output of a command to display to user
     # by default this will be an identity function
@@ -53,9 +53,6 @@ class DrugDiseaseMulti(IrisCommand):
         # import numpy
         # return numpy.random.randint(100)
         assert(len(drug_list) == len(disease_list))
-        import sys
-        sys.path.append("/Users/margaret/Documents/iris-agent") #### NEED TO FIX!!!! 
-        from node_modules.ncats.scripts import run_test
         results = []
         for drug, disease in zip(drug_list, disease_list):
             result = run_test.run_drug_single(drug, disease)
@@ -95,10 +92,7 @@ class DrugDiseaseCSV(IrisCommand):
         self.iris.add_to_env('drug_disease_list', new_df)
         # print('added to environment')
 
-        import sys
-        sys.path.append("/Users/margaret/Documents/iris-agent") #### NEED TO FIX!!!! 
-
-        from node_modules.ncats.scripts import run_test
+        from ncats.scripts import run_test
         print('path', paired_csv.path)
         print('storage_dir', saved_dir)
         run_test.run_drug_multi(paired_csv.path, storage_dir = saved_dir, iterate_until_found=False)

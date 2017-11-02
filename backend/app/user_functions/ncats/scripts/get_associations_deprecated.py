@@ -2,47 +2,50 @@
 # protein-protein network data
 # written 3-23-17, JLW
 
-import pickle,os
-# from optparse import OptionParser
-from collections import defaultdict
-from scipy.stats import hypergeom
 
-# import association file data
-rscs_dir = '../rscs/'
-g_to_rsids = pickle.load(open(rscs_dir+'gene_to_rsid_eQTL.pkl','rb'))
-rs_to_data = pickle.load(open(rscs_dir+'rsid_g_pval_rsqr.pkl','rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
-g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb')) #
-g_to_OMIM = pickle.load(open(rscs_dir+'OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
-g_to_phW_snps = pickle.load(open(rscs_dir+'gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
-phW_snps_to_phen = pickle.load(open(rscs_dir+'rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
-all_assoc = pickle.load(open(rscs_dir+'all_assoc_to_nodes.pkl','rb')) # all associations, and their genes/SNPs
-intome_size = pickle.load(open(rscs_dir+'interactome_size.pkl','rb'))
+#### USE settings.py to import all dependancies
+# examples: from settings import *
+# import pickle,os
+# # from optparse import OptionParser
+# from collections import defaultdict
+# from scipy.stats import hypergeom
+
+# # import association file data
+# rscs_dir = '../rscs/'
+# g_to_rsids = pickle.load(open(rscs_dir+'gene_to_rsid_eQTL.pkl','rb'))
+# rs_to_data = pickle.load(open(rscs_dir+'rsid_g_pval_rsqr.pkl','rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
+# g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb')) #
+# g_to_OMIM = pickle.load(open(rscs_dir+'OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
+# g_to_phW_snps = pickle.load(open(rscs_dir+'gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
+# phW_snps_to_phen = pickle.load(open(rscs_dir+'rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
+# all_assoc = pickle.load(open(rscs_dir+'all_assoc_to_nodes.pkl','rb')) # all associations, and their genes/SNPs
+# intome_size = pickle.load(open(rscs_dir+'interactome_size.pkl','rb'))
 
 def get_rsid_list(gene_list):
-    genes_rsids = [[gene,rs] for gene in gene_list for rs in g_to_rsids[gene]]
+    genes_rsids = [[gene,rs] for gene in gene_list for rs in G_TO_RSIDS[gene]]
     return genes_rsids
 
 def get_disease_associations(gene_list):
-    dis_assoc = [[g,disease,dscore] for g in gene_list for (disease,dscore) in g_to_disGenNet[g].items() if g in g_to_disGenNet]
+    dis_assoc = [[g,disease,dscore] for g in gene_list for (disease,dscore) in G_TO_DISGENNET[g].items() if g in G_TO_DISGENNET]
     return dis_assoc
 
 def get_phenotype_associations(gene_list):
     pheno = []
     for g in gene_list:
-        if g in g_to_OMIM:
-            if ';' in g_to_OMIM[g]:
-                for ph in g_to_OMIM[g].split(';'):
+        if g in G_TO_OMIM:
+            if ';' in G_TO_OMIM[g]:
+                for ph in G_TO_OMIM[g].split(';'):
                     pheno.append((g,ph))
             else:
-                pheno.append((g,g_to_OMIM[g]))
+                pheno.append((g,G_TO_OMIM[g]))
     return pheno
 
 def get_pheWAS_SNPs(gene_list):
-    genes_snps = list(set([(gene,snp) for gene in gene_list for snp in g_to_phW_snps[gene]]))
+    genes_snps = list(set([(gene,snp) for gene in gene_list for snp in G_TO_PHW_SNPS[gene]]))
     return genes_snps
 
 def get_snp_pheWAS(snp_list):
-    snp_pheWAS = [[snp,phW_snps_to_phen[snp][0]] for snp in snp_list]
+    snp_pheWAS = [[snp,PHW_SNPS_TO_PHEN[snp][0]] for snp in snp_list]
     return snp_pheWAS
 
 def get_network_interactions(f):
@@ -93,11 +96,11 @@ def get_associations(netf, aname, rdir):
     assoc_count = defaultdict(int)
     for alist in disease_associations+phenotypes+snps_pheno:
         assoc_count[alist[1]]+=1
-    N = intome_size
+    N = INTOME_SIZE
     n = len(node_list)
     assoc_analy = []
     for (a,k) in assoc_count.items():
-        K = len(all_assoc[a])
+        K = len(ALL_ASSOC[a])
         prb = 1 - hypergeom.cdf(k,N,K,n)
         assoc_analy.append([a,k,K,prb])
     # Multiple hypothesis correct
