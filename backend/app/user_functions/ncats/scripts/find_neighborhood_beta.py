@@ -3,9 +3,9 @@
 # adding augment-network function
 # written 6-7-17 JLW
 
-# import itertools, os, sys, time, pickle
-# import networkx as nx
-# from collections import defaultdict
+import itertools, os, sys, time, pickle
+import networkx as nx
+from collections import defaultdict
 
 def pairwise(iterable):
 	a,b = itertools.tee(iterable)
@@ -18,7 +18,7 @@ def score_path(pth): # pass a list of nodes in a shortest path
 	else: # create pairwise edges, pull scores
 		split_path = pth.split('@')
 		prws = pairwise(split_path)
-		edge_scores = [G.get_edge_data(a,b)['weight'] for (a,b) in prws]
+		edge_scores = [GENE_GRAPH.get_edge_data(a,b)['weight'] for (a,b) in prws]
 		score=1
 		for e in edge_scores:
 			score*=e
@@ -30,13 +30,13 @@ def extend_path(pth): # should be a list of paths, will return a list of new pat
 		last_gene = split_path[-1]
 		former_path = split_path[-2]
 
-		nbrs = [n for n in nx.all_neighbors(G,last_gene)]
+		nbrs = [n for n in nx.all_neighbors(GENE_GRAPH,last_gene)]
 		new_paths = [pth+'@'+nbr for nbr in nbrs if nbr!=former_path]
 
 	else: # when a signle gene is passed
 		last_gene = pth
 
-		nbrs = [n for n in nx.all_neighbors(G,last_gene)]
+		nbrs = [n for n in nx.all_neighbors(GENE_GRAPH,last_gene)]
 		new_paths = [pth+'@'+nbr for nbr in nbrs]
 
 	return new_paths

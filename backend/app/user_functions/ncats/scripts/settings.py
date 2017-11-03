@@ -3,25 +3,26 @@
 ### IMPORT ALL MODULES AND FILES NEEDED FOR the NCATS module
 
 import sys, os
-import csv
-import pandas as pd
-import numpy as np
-from scipy.stats import hypergeom
 import pickle
-import networkx as nx
-import numpy as np
-from collections import defaultdict
-import matplotlib
-import matplotlib.pyplot as plt
-import pandas as pd
-from textwrap import wrap
-from collections import defaultdict
-import itertools, time
+# import csv
+# import pandas as pd
+# import numpy as np
+# from scipy.stats import hypergeom
+# import networkx as nx
+# import numpy as np
+# from collections import defaultdict
+# import matplotlib
+# import matplotlib.pyplot as plt
+# import pandas as pd
+# from textwrap import wrap
+# from collections import defaultdict
+# import itertools, time
 
 # to import the rest of the modules more easily
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__))) # points to scripts DIR
 
-import run_main
+from collections import defaultdict
+
 from get_results import get_results
 from get_output_data import get_output_data
 import find_neighborhood_beta
@@ -31,6 +32,9 @@ from get_associations_deprecated import get_associations
 
 # import association file data
 # Define variables with paths
+global PARENT_DIR
+global RSCS_DIR
+global RESULTS_DIR
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
 RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
 RESULTS_DIR = os.path.join(PARENT_DIR, 'results')
@@ -40,29 +44,26 @@ RESULTS_DIR = os.path.join(PARENT_DIR, 'results')
 NETWORKF = os.path.join(RSCS_DIR,'merged_interact_netx.pkl')#non-specific interaction network 
 
 print('loading interactome data from', NETWORKF)
-GENE_GRAPH = pickle.load(open(NETWORKF,'rb'))
-print("(((((((((()))))))))")
-print(GENE_GRAPH.nodes())
-raise ValueError("Passed!!")
+find_neighborhood_beta.GENE_GRAPH = pickle.load(open(NETWORKF,'rb'))
+# print("(((((((((()))))))))")
+# print(GENE_GRAPH.nodes())
 
 # loading random data: 
-ann.rand_dir = os.path.join(RESULTS_DIR, 'rand_iRefplus_intome/summary/')
+ann.RAND_DIR = os.path.join(RESULTS_DIR, 'rand_iRefplus_intome/summary/')
 
 # load drug targets, then format
 DTF = os.path.join(RSCS_DIR, 'drug_intome_targets.pkl')
 print('loading drug targets', DTF)
 DTD = pickle.load(open(DTF,'rb'))
 
-print('loading graph files')
-G_TO_RSIDS = pickle.load(open(os.path.join(RSCS_DIR,'gene_to_rsid_eQTL.pkl'),'rb'))
-RS_TO_DATA = pickle.load(open(os.path.join(RSCS_DIR,'rsid_g_pval_rsqr.pkl'),'rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
-G_TO_DISGENNET = pickle.load(open(os.path.join(RSCS_DIR,'disGeNet_gene_dis_score_dict.pkl'),'rb')) #
-G_TO_OMIM = pickle.load(open(os.path.join(RSCS_DIR,'OMIM_genes_to_phenotypes.pkl'),'rb')) # OMIM phenotypes
-G_TO_PHW_SNPS = pickle.load(open(os.path.join(RSCS_DIR,'gene_to_rs_phWAS.pkl'),'rb')) # gene to SNPs from PheWAS
-PHW_SNPS_TO_PHEN = pickle.load(open(os.path.join(RSCS_DIR,'rs_to_phenOdds_phWAS.pkl'),'rb')) # SNPs to phenotype
-ALL_ASSOC = pickle.load(open(os.path.join(RSCS_DIR,'all_assoc_to_nodes.pkl'),'rb'))# all associations, and their genes/SNPs
-INTOME_SZIE = pickle.load(open(os.path.join(RSCS_DIR,'interactome_size.pkl'),'rb'))
 
+# load phenotype mapping data (map disease list of NCATs to possible phenotypes)
+MAPPING_DICT = pickle.load(open(os.path.join(RSCS_DIR, 'conds_phen_matches_word_overlap.pkl') , 'rb'))
+POSSIBLE_HEADER_RESULTS_FILE = ['phenotype','rank','BHcorrPval', 'Pval', 'assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen\n']
+# print('************')
+# key = [(x,MAPPING_DICT[x]) for x in MAPPING_DICT.keys() if 'acne' in x]
+# print(key,)
+# print(len(key))
 # Analysis parameters
 
 SCORE_THRESHOLD_START = 0.8

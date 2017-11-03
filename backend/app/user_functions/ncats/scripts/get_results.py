@@ -21,7 +21,7 @@ def get_sum(mf,gtphen): # pass a merged phenotype result file
 
         if float(prb) < float(BH) and float(asii)>10:
             sig_genes = gtpd[ph]
-            sig_phens_data.append((ph,rank,BH,asii,asin,str(pern),sig_genes))
+            sig_phens_data.append((ph,rank,BH,prb, asii,asin,str(pern),sig_genes))
 
         elif float(prb) > float(BH):
             break # exit the loop as soon as stop criteria are met
@@ -57,16 +57,22 @@ def get_results(storage_dir, drug, old_format = False, save_file = True):
         sum_asscs = get_sum(mapf,gtphen)
 
         outfname = os.path.join(drug_dir,drug+'_merged_assc_full_summary.txt')
-        outf = open(outfname,'w')
         
         if save_file:
-            print('writing output to', outfname)
-            outf.write('\t'.join(['phenotype','rank','BHcorrPval','assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen\n']))
-            for [ph,rank,BH,asii,asin,pern,sig_genes] in sum_asscs:
-                sig_gn_str = ','.join(sig_genes)
-                outf.write('\t'.join([ph,rank,BH,asii,asin,pern,sig_gn_str,'\n']))        
-            outf.close()
+            outf = open(outfname,'w')
 
+            print('writing output to', outfname)
+            outf.write('\t'.join(['phenotype','rank','BHcorrPval', 'Pval', 'assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen\n']))
+            # for line in sum_asscs:
+            #     print(line)
+            for line in sum_asscs:
+                if line is not None:
+                    # print(len(line), line[0])
+                    [ph,rank,BH,prb, asii,asin,pern,sig_genes] = line
+                    sig_gn_str = ','.join(sig_genes)
+                    outf.write('\t'.join([ph,rank,BH,prb, asii,asin,pern,sig_gn_str,'\n']))        
+            outf.close()
+        # print(sum_asscs)
         return sum_asscs
 
     else:

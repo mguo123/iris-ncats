@@ -45,8 +45,13 @@ def preprocess_names(drug, disease):
     return modified_drug_name, modified_disease
 
 def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_found=False):
-    if not os.path.exists(storage_dir):
-        os.mkdir(storage_dir)
+    '''
+    Takes in strings for drug and disease then 
+    outputs the phenotypes found in the network and the genes associated with them
+    '''
+    results_storage_dir = os.path.join(RESULTS_DIR, storage_dir)
+    if not os.path.exists(results_storage_dir):
+        os.mkdir(results_storage_dir)
 
 
     drug, disease = preprocess_names(drug, disease)
@@ -64,7 +69,7 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
     # DTF = '../rscs/drug_intome_targets.pkl'
     # print('loading drug targets', DTF)
     # DTD = pickle.load(open(DTF,'rb'))
-    
+
     print('running analysis of', drug, 'to treat', disease)
     if drug in DTD:
         dts = [(drug.replace(' ',''), DTD[drug])] # remove white spaces for later analysis
@@ -73,21 +78,21 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
         threshold = SCORE_THRESHOLD_START # STARTING THRESHOLD
         answer_found = False
         while not answer_found and threshold >= SCORE_THRESHOLD_MIN :
-            all_merge_files = ann.run_all_drugs(dts,storage_dir,GENE_GRAPH,threshold)
+            all_merge_files = ann.run_all_drugs(dts,results_storage_dir,find_neighborhood_beta.GENE_GRAPH,threshold)
 
 
             # get/store output data
-            assoc_to_genes = get_output_data(storage_dir, drug)
-            sum_asscs = get_results(storage_dir, drug)
-            # print('here!!!', sum_asscs)
+            assoc_to_genes = get_output_data(results_storage_dir, drug)
+            sum_asscs = get_results(results_storage_dir, drug)
+            print('here!!!', sum_asscs)
 
     #             #### POST PROCESSING ####
             answer_found, answer = interpret_results(sum_asscs, disease)
-            if answer_found:
+            if  answer_found == 'found':
                 print(answer, 'thres', threshold)
                 ' '.join((str(threshold), answer))
-                #'phenotype','rank','BHcorrPval','assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen', 'threshold'
-                return str(answer_found), answer 
+                #'phenotype','rank','BHcorrPval', 'Pval', 'assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen', 'threshold'
+                return True, answer_found, answer, drug
             else:
                 if iterate_until_found:
                     threshold -= SCORE_DELTA
@@ -95,18 +100,18 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
                 else:
                     threshold = -1
 
-        print( disease, 'not found to be treated by', drug, 'but found possible matches', answer)
-        return str(answer_found), answer
+        print( disease, 'not found to be treated by', drug, 'but found possible matches')
+        return False, str(answer_found), answer, drug
 #     z = pickle.load(open('conds_phen_matches_word_overlap.pkl', 'rb'))
 # for key, value in z.items():
 #     print(key, value)
 
     else:
         print('Drug', drug, 'not in database')
-        return 'False', 'None'
+        return False, ' '.join(['Drug', drug, 'not in database']), 'None', drug
 
 
-def run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = 'results_drugs_multi', iterate_until_found=False):
+def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', iterate_until_found=False):
     print('running drug_multi from', input_file )
     # get in input_file of two columns of drugs and diseases, that shouldbe paired together
     if input_file.endswith('.txt'):
@@ -130,7 +135,7 @@ def run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_
 
 
     #get output as txt
-    output_filename = os.path.join(storage_dir, 'results_drug_disease_matching.txt')
+    output_filename = os.path.join(RESULTS_DIR, storage_dir, 'results_drug_disease_matching.txt')
     with open(output_filename, 'w')  as f:
         f.write('\t'.join(('drug', 'condition', 'answer_found', 'answer\n')))
 
@@ -142,34 +147,46 @@ def run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_
 
 
 def interpret_results(sum_asscs, disease, mapping_dict = None):
+    '''
+    sum_accs: list of [ph,rank,BH,prb, asii,asin,pern,sig_genes] for each ph that is found by the algorithm to be significant plus the disease of interest
+    mapping_dict: dictionary of disease (keys) to list of possible phenotypes that the network produces (values)
+    RETURNS!!!
+    '''
+    print('interpretting results')
     if mapping_dict is None:
-        mapping_pkl = '../rscs/conds_phen_matches_word_overlap.pkl'
-        mapping_dict = pickle.load(open(mapping_pkl, 'rb'))
-
-    answer_found = False
+        mapping_pkl = MAPPING_DICT
 
 
     ph_to_sig_genes_dict = defaultdict(list)
     all_possible_diseases = []
     for line in sum_asscs:
-        if len(line) == 7:
-            [ph,rank,BH,asii,asin,pern,sig_genes] = line
-            ph_to_sig_genes_dict[ph.lower().strip()] = ''.join(sig_genes)
-            all_possible_diseases.append('\t'.join([BH, ph,sig_genes]))
- 
-    # check if there is a one-to-one match, returns three columns disease is the match we are looking for possible ph is found from network, the sig genes is list of genes
-    possible_phenotypes_matched = mapping_dict[disease.lower()]
-    # print('possible_phenotypes_matched  ', possible_phenotypes_matched  )
-    for possible_ph in possible_phenotypes_matched:
-        if possible_ph.lower().strip() in ph_to_sig_genes_dict.keys():
-            answer_found = True
-            sig_genes  = ph_to_sig_genes_dict[possible_ph.lower().strip()]
-            print('\t'.join([disease, possible_ph, sig_genes]))
-            return answer_found, '\t'.join([disease, possible_ph, sig_genes])
-    
-    # if no match just return all possible phenotypes that it treats, where the first column is the probability 
+        if len(line) == len(POSSIBLE_HEADER_RESULTS_FILE):
+            [ph,rank,BH,prb, asii,asin,pern,sig_genes] = line
+            BH = '%.3g' % float(BH)
+            prb = '%.3g' % float(prb)
+            ph_to_sig_genes_dict[ph.lower().strip()] = ','.join(sig_genes)
+            all_possible_diseases.append('\t'.join([prb, BH, ph,','.join(sig_genes)]))
+
     all_possible_diseases_string = '\t'.join(all_possible_diseases)
-    return answer_found, all_possible_diseases_string
+
+
+    # check if there is a one-to-one match, returns three columns disease is the match we are looking for possible ph is found from network, the sig genes is list of genes
+    # substrings are okay
+    possible_phenotypes_matched = [dis_key for dis_key in MAPPING_DICT.keys() if disease.lower() in dis_key]
+    if len(possible_phenotypes_matched ) > 0: # the disease is in the mapped list 
+        for possible_ph in possible_phenotypes_matched:
+            if possible_ph.lower().strip() in ph_to_sig_genes_dict.keys():
+                sig_genes  = ph_to_sig_genes_dict[possible_ph.lower().strip()]
+                # print(possible_ph, sig_genes, 'FOUND IN possible_phenotypes_matched')
+                print('\t'.join([prb, BH, disease, sig_genes]))
+                return 'found', '\t'.join([prb, BH, disease, sig_genes])
+            print(possible_ph)
+
+        # if no match just return all possible phenotypes that it treats, where the first column is the probability 
+        
+        return ' '.join(['could not find', disease, '- phenotype match in results']), all_possible_diseases_string
+    else:
+        return ' '.join(['could not find', disease, 'in database']), all_possible_diseases_string
 
 
 # def reverse_mapping_dict(mapping_dict):

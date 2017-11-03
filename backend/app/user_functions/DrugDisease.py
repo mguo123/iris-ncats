@@ -25,7 +25,10 @@ class DrugDisease(IrisCommand):
         # import numpyfrom ncats.scripts import run_te
         # return numpy.random.randint(100)
 
-        return run_main.run_drug_single(drug, disease)
+        answer= run_main.run_drug_single(drug, disease)
+        print (answer)
+        print('!!!!!!!!!')
+        return answer
         
     # wrap the output of a command to display to user
     # by default this will be an identity function
@@ -33,7 +36,21 @@ class DrugDisease(IrisCommand):
     def explanation(self, result):
 
         # return ["Book a flight to DC to get the answer. Here's your lucky number", result]
-        return ["Answer was found: " + result[0], "Answer: ", result[1]]
+        answer_found_bool, answer_found_exp_str, ph_genes_str, drug = result
+        if answer_found_bool:
+            # FROM backend, ph_genes_str = '\t'.join([prb, BH, disease, sig_genes]) # was done this way to save results in csv (for multi run)
+            [prb, BH, disease, sig_genes] = ph_genes_str.split('\t')
+            prob_string = ' '.join([drug, 'was found to treat', disease, 'with probability:', prb, 'for significance level', BH])
+            sig_genes_string = ' '.join(['Signficant genes were found as:', sig_genes])
+            return ["Answer was found!", prob_string, sig_genes_string, 'find the results in results folder']
+        else:
+            answer_explanation_string = ' '.join(['Answer was not found because:', answer_found_exp_str])
+            multi_answer_line = 'The following phenotypes and significant gene associations were found (in order probability, significance level, phenotype, and finally a list of genes associated'
+            ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
+            ph_genes_array_grouped = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
+            result = [answer_explanation_string, multi_answer_line] + ph_genes_array_grouped
+
+            return result
 
 _DrugDisease = DrugDisease()
 

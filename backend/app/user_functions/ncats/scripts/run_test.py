@@ -18,10 +18,10 @@ RESULTS_DIR = os.path.join(PARENT_DIR, 'results')
 import pickle
 NETWORKF = os.path.join(RSCS_DIR,'merged_interact_netx.pkl')#non-specific interaction network 
 
-print('loading interactome data from', NETWORKF)
-GENE_GRAPH = pickle.load(open(NETWORKF,'rb'))
-print("(((((((((()))))))))")
-print(GENE_GRAPH)
+# print('loading interactome data from', NETWORKF)
+# GENE_GRAPH = pickle.load(open(NETWORKF,'rb'))
+# print("(((((((((()))))))))")
+# print(GENE_GRAPH)
 
 
 # import csv

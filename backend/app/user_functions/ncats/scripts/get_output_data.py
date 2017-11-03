@@ -5,16 +5,16 @@
 # Modified margaret, 10/26/17
 
 
-# import csv, os, pickle
-# # from optparse import OptionParser
-# from collections import defaultdict
-
+import csv, os, pickle
+# from optparse import OptionParser
+from collections import defaultdict
 # # resources for pulling associations
-# rscs_dir = '../rscs/'
-# g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb'))
-# g_to_OMIM = pickle.load(open(rscs_dir+'OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
-# g_to_phW_snps = pickle.load(open(rscs_dir+'gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
-# phW_snps_to_phen = pickle.load(open(rscs_dir+'rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
+PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
+RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
+g_to_disGenNet = pickle.load(open(RSCS_DIR+'/disGeNet_gene_dis_score_dict.pkl','rb'))
+g_to_OMIM = pickle.load(open(RSCS_DIR+'/OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
+g_to_phW_snps = pickle.load(open(RSCS_DIR+'/gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
+phW_snps_to_phen = pickle.load(open(RSCS_DIR+'/rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
 
 def get_nodes(f):
     d = [l.strip().split('\t') for l in open(f,'rU').readlines()]

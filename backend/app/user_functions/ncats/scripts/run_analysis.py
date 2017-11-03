@@ -4,18 +4,18 @@
 # Modified margaret, 10/26/17
 
 
-# import csv, pickle, os, sys, find_neighborhood_beta
-# import networkx as nx
-# import numpy as np
-# import matplotlib
+import csv, pickle, os, sys, find_neighborhood_beta
+import networkx as nx
+import numpy as np
+import matplotlib
 # matplotlib.use("AGG")
-# import matplotlib.pyplot as plt
-# import pandas as pd
-# from textwrap import wrap
-# from collections import defaultdict
-# from find_neighborhood_beta import find_neighborhood as fgn
+import matplotlib.pyplot as plt
+import pandas as pd
+from textwrap import wrap
+from collections import defaultdict
+from find_neighborhood_beta import find_neighborhood as fgn
 # # import get_associations
-# from get_associations_deprecated import get_associations
+import get_associations_deprecated # import get_associations
 
 def write_neighborhood_to_file(pth_dic,outf):
     for (pth,pscore) in pth_dic.items():
@@ -41,7 +41,7 @@ def calculate_specificity(pth_dic,outf,outf2,scr_thr):
             sn = sn.replace('+','-')
             sn = sn.replace(':','-')
             sn = sn.replace('/','-')
-        grf = rand_dir+'_'.join([sn,str(scr_thr),'randPathScores','.pkl'])
+        grf = RAND_DIR+'_'.join([sn,str(scr_thr),'randPathScores','.pkl'])
         if not os.path.exists(grf): # genes that have no specificity scores (i.e. no connections above the threshold)
             continue
         gpathlist = pickle.load(open(grf,'rb'))
@@ -93,7 +93,6 @@ def check_if_drug_in_network(dts, netxobj):
         # print(target_list)
         all_drug_targets = np.append(all_drug_targets, target_list)
         # print(netxobj.__dict__.keys())
-        # print(find_neighborhood_beta)
         for i, drug_target in enumerate(target_list):
             # if drug_target not in netxobj.nodes_iter():
             if drug_target not in GENE_GRAPH:
@@ -110,10 +109,9 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
     for (drug,target_list) in dts:
         print(drug, target_list)
         # print(netxobj.__dict__.keys())
-        # print(find_neighborhood_beta)
         for drug_target in target_list:
             # if drug_target not in netxobj.nodes_iter():
-            if drug_target not in GENE_GRAPH:
+            if drug_target not in netxobj:
                 print(drug_target, 'not found in network')
                 continue        
             print('Gene: '+drug_target)
@@ -148,7 +146,7 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
         spnn = merge_networks(allf,res_dir,drug)
         # print('merged networks')
         aname = 'merged'
-        sig_assoc = get_associations(spnn, aname, res_dir)
+        sig_assoc = get_associations_deprecated.get_associations(spnn, aname, res_dir)
 
         all_merge_files.append(res_dir+spnn)
 

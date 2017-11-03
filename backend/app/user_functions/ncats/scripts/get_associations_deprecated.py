@@ -5,21 +5,20 @@
 
 #### USE settings.py to import all dependancies
 # examples: from settings import *
-# import pickle,os
+import pickle,os
 # # from optparse import OptionParser
-# from collections import defaultdict
-# from scipy.stats import hypergeom
-
-# # import association file data
-# rscs_dir = '../rscs/'
-# g_to_rsids = pickle.load(open(rscs_dir+'gene_to_rsid_eQTL.pkl','rb'))
-# rs_to_data = pickle.load(open(rscs_dir+'rsid_g_pval_rsqr.pkl','rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
-# g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb')) #
-# g_to_OMIM = pickle.load(open(rscs_dir+'OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
-# g_to_phW_snps = pickle.load(open(rscs_dir+'gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
-# phW_snps_to_phen = pickle.load(open(rscs_dir+'rs_to_phenOdds_phWAS.pkl','rb')) # SNPs to phenotype
-# all_assoc = pickle.load(open(rscs_dir+'all_assoc_to_nodes.pkl','rb')) # all associations, and their genes/SNPs
-# intome_size = pickle.load(open(rscs_dir+'interactome_size.pkl','rb'))
+from collections import defaultdict
+from scipy.stats import hypergeom
+PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
+RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
+G_TO_RSIDS = pickle.load(open(os.path.join(RSCS_DIR,'gene_to_rsid_eQTL.pkl'),'rb'))
+RS_TO_DATA = pickle.load(open(os.path.join(RSCS_DIR,'rsid_g_pval_rsqr.pkl'),'rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
+G_TO_DISGENNET = pickle.load(open(os.path.join(RSCS_DIR,'disGeNet_gene_dis_score_dict.pkl'),'rb')) #
+G_TO_OMIM = pickle.load(open(os.path.join(RSCS_DIR,'OMIM_genes_to_phenotypes.pkl'),'rb')) # OMIM phenotypes
+G_TO_PHW_SNPS = pickle.load(open(os.path.join(RSCS_DIR,'gene_to_rs_phWAS.pkl'),'rb')) # gene to SNPs from PheWAS
+PHW_SNPS_TO_PHEN = pickle.load(open(os.path.join(RSCS_DIR,'rs_to_phenOdds_phWAS.pkl'),'rb')) # SNPs to phenotype
+ALL_ASSOC = pickle.load(open(os.path.join(RSCS_DIR,'all_assoc_to_nodes.pkl'),'rb'))# all associations, and their genes/SNPs
+INTOME_SIZE = pickle.load(open(os.path.join(RSCS_DIR,'interactome_size.pkl'),'rb'))
 
 def get_rsid_list(gene_list):
     genes_rsids = [[gene,rs] for gene in gene_list for rs in G_TO_RSIDS[gene]]
