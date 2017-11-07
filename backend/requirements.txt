@@ -32,6 +32,7 @@ multidict==2.1.4
 nbconvert==5.1.1
 nbformat==4.3.0
 notebook==4.4.1
+nltk==3.2.5
 numpy==1.11.2
 oauthlib==2.0.2
 olefile==0.44

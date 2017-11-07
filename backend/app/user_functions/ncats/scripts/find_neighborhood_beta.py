@@ -53,7 +53,7 @@ def fast_track(pstack,pth,sterm): # method to fast track some paths that are alt
 	new_stack = list(set(pstack).difference(set(redun))) #remove redundant
 	return (new_stack,fast_track) # return trimmed stack, and only the high-scoring redundant paths
 
-def find_neighborhood(gene,sterm): # sterm = termination path score
+def find_neighborhood(gene,sterm): # sterm = termination path score also known as threshold
 	stack = [gene]
 	approved = set()
 	#stime = time.time()

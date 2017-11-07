@@ -3,7 +3,6 @@
 # Modified margaret, 10/26/17
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-print(sys.path)
 from settings import *
 
 
@@ -83,8 +82,8 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
 
             # get/store output data
             assoc_to_genes = get_output_data(results_storage_dir, drug)
-            sum_asscs = get_results(results_storage_dir, drug)
-            print('here!!!', sum_asscs)
+            sum_asscs = get_results(results_storage_dir, drug, disease)
+            # print('here!!!', sum_asscs)
 
     #             #### POST PROCESSING ####
             answer_found, answer = interpret_results(sum_asscs, disease)
@@ -111,7 +110,7 @@ def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_
         return False, ' '.join(['Drug', drug, 'not in database']), 'None', drug
 
 
-def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', iterate_until_found=False):
+def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False):
     print('running drug_multi from', input_file )
     # get in input_file of two columns of drugs and diseases, that shouldbe paired together
     if input_file.endswith('.txt'):
@@ -126,21 +125,28 @@ def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', iterate_unti
         disease_arr = np.array(data[list(data)[1]])
 
     #iterate through list
+    answer_found_bool_arr = []
     answer_found_arr = []
     answer_arr = []
+    duration_arr = []
     for drug, disease in zip(drug_arr, disease_arr):
-        answer_found, answer = run_drug_single(drug, disease, storage_dir, iterate_until_found)
+        start = time.time()
+        answer_found_bool, answer_found, answer, drug = run_drug_single(drug, disease, storage_dir, iterate_until_found)
+        stop = time.time()
+        duration = '%.1f' % (stop - start)
+        answer_found_bool_arr.append(answer_found_bool)
         answer_found_arr.append(answer_found)
         answer_arr.append(answer)
+        duration_arr.append(duration)
 
 
     #get output as txt
-    output_filename = os.path.join(RESULTS_DIR, storage_dir, 'results_drug_disease_matching.txt')
+    output_filename = os.path.join(RESULTS_DIR, storage_dir, save_file)
     with open(output_filename, 'w')  as f:
-        f.write('\t'.join(('drug', 'condition', 'answer_found', 'answer\n')))
+        f.write('\t'.join(('drug', 'condition', 'time_of_run(s)', 'answer_found_bool', 'answer_found', 'answer\n')))
 
         for i in range(len(drug_arr)):
-            line = '\t'.join((drug_arr[i], disease_arr[i], answer_found_arr[i], answer_arr[i]))
+            line = '\t'.join((drug_arr[i], disease_arr[i], duration[i], answer_found_bool_arr[i], answer_found_arr[i], answer_arr[i]))
             f.write(''.join((line, '\n')))
 
     print('written output to', output_filename)
@@ -165,14 +171,18 @@ def interpret_results(sum_asscs, disease, mapping_dict = None):
             BH = '%.3g' % float(BH)
             prb = '%.3g' % float(prb)
             ph_to_sig_genes_dict[ph.lower().strip()] = ','.join(sig_genes)
-            all_possible_diseases.append('\t'.join([prb, BH, ph,','.join(sig_genes)]))
+            all_possible_diseases.append('\t'.join([prb, BH, ph,', '.join(sig_genes)]))
 
     all_possible_diseases_string = '\t'.join(all_possible_diseases)
 
 
     # check if there is a one-to-one match, returns three columns disease is the match we are looking for possible ph is found from network, the sig genes is list of genes
     # substrings are okay
-    possible_phenotypes_matched = [dis_key for dis_key in MAPPING_DICT.keys() if disease.lower() in dis_key]
+    possible_diseases = [dis_key for dis_key in MAPPING_DICT.keys() if disease.lower() in dis_key]
+    possible_phenotypes_matched = []
+    for poss_dis in possible_diseases:
+        possible_phenotypes_matched = possible_phenotypes_matched + MAPPING_DICT[poss_dis]
+
     if len(possible_phenotypes_matched ) > 0: # the disease is in the mapped list 
         for possible_ph in possible_phenotypes_matched:
             if possible_ph.lower().strip() in ph_to_sig_genes_dict.keys():
@@ -180,13 +190,13 @@ def interpret_results(sum_asscs, disease, mapping_dict = None):
                 # print(possible_ph, sig_genes, 'FOUND IN possible_phenotypes_matched')
                 print('\t'.join([prb, BH, disease, sig_genes]))
                 return 'found', '\t'.join([prb, BH, disease, sig_genes])
-            print(possible_ph)
+            # print(possible_ph)
 
         # if no match just return all possible phenotypes that it treats, where the first column is the probability 
         
-        return ' '.join(['could not find', disease, '- phenotype match in results']), all_possible_diseases_string
+        return ' '.join(['could not find disease - phenotype match in results']), all_possible_diseases_string
     else:
-        return ' '.join(['could not find', disease, 'in database']), all_possible_diseases_string
+        return ' '.join(['could not find disease match in database']), all_possible_diseases_string
 
 
 # def reverse_mapping_dict(mapping_dict):
@@ -236,19 +246,19 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
         disease_arr.append(disease)
     
     # Get mapping tdict
-    mapping_pkl = '../rscs/conds_phen_matches_word_overlap.pkl'
-    mapping_dict = pickle.load(open(mapping_pkl, 'rb'))
+    # mapping_pkl = '../rscs/conds_phen_matches_word_overlap.pkl'
+    # mapping_dict = pickle.load(open(mapping_pkl, 'rb'))
     #iterate through list
     answer_found_arr = []
     answer_arr = []
     for i, (drug, disease) in enumerate(zip(drug_arr, disease_arr)):
-        # if i == 65:
+        # if i == 47:  #### DEBUG
         if i < len(drug_arr):
             print('getting results', i, drug, disease)
-            sum_asscs = retrieve_summary_per_drug_txt(drug, storage_dir)
-            # sum_asscs = get_results(storage_dir, drug, old_format = old_format,  save_file = False) #True)   
+            # sum_asscs = retrieve_summary_per_drug_txt(drug, storage_dir)
+            sum_asscs = get_results(storage_dir, drug, old_format = old_format,  save_file = False) #True)   
             if sum_asscs is not None: 
-                answer_found, answer = interpret_results(sum_asscs, disease,mapping_dict)
+                answer_found, answer = interpret_results(sum_asscs, disease,MAPPING_DICT)
             else:
 
                 answer_found, answer = 'False', 'No diseases detected in network'
@@ -257,7 +267,7 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
             answer_arr.append(answer)
         
     #get output as txt
-    output_filename = os.path.join(storage_dir, 'results_drug_disease_matching_test.txt')
+    output_filename = os.path.join(storage_dir, 'results_drug_disease_matching_test2.txt')
     # output_filename = os.path.join(storage_dir, 'results_drug_disease_matching.txt')
     with open(output_filename, 'w')  as f:
         f.write('\t'.join(('drug', 'condition', 'answer_found', 'answer\n')))
@@ -271,7 +281,7 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
 
 ##### STUFF I'm RUNNING
 # retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = True)
-# run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = 'results_drugs_multi2', iterate_until_found=False)
+# run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_multi2', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False)
 
 # analysis_name = 'ncats_test_intome_6_remove24_min_networkassoc' 
 # rdir = '../results/'+analysis_name+'/'

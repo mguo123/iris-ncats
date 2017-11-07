@@ -3,15 +3,15 @@ from iris import IrisCommand
 
 class GeneticConditionDisease(IrisCommand):
     # what iris will call the command + how it will appear in a hint
-    title = "find out how {genetic_condition} protects against {disease}"
+    title = "how does {condition} protects against {disease}?"
     
     # give an example for iris to recognize the command
-    examples = ["find out how {genetic_condition} protects against {disease}", "protective mechanism of genetic_condition", "protective mechanism of genetic_condition against disease", "protective genetic_condition", "protective mechanism of {genetic_condition} against {disease}", "how does {genetic_condition} protect against {disease}"]
+    examples = ["find out how {condition} protects against {disease}", "protective mechanism of condition", "protective mechanism of condition against disease", "protective condition", "protective mechanism of {condition} against {disease}", "how does {condition} protect against {disease}"]
     # type annotations for each command argument, to help Iris collect missing values from a user
-    argument_types = {"genetic_condition":t.String("What is the genetic_condition you want to analyze?"), "disease":t.String("What is the disease you want to analyze?")}
+    argument_types = {"condition":t.String("Just for confirmation: What is the condition you want to analyze?"), "disease":t.String("What is the disease you want to analyze?")}
     
     # core logic of the command
-    def command(self, genetic_condition, disease):
+    def command(self, condition, disease):
         import numpy
         return numpy.random.randint(100)
         

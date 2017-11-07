@@ -145,12 +145,20 @@ def get_associations(netf, aname, rdir):
     network_name = os.path.basename(netf).split('.txt')[0]
     outf_name = os.path.join(rdir,network_name+'_assocations.txt')
     # outf = open(rdir+'/'+network_name+'_assoc_prb.txt','w')
-    outf = open(outf_name,'w')
+    outf = open(outf_name,'w', encoding='utf-8')
     print('Total nodes: '+str(N))
     print('Neighborhood size: '+str(n))
     outf.write('\t'.join(['rank','phenotype','assoc in neigh','assoc in intom','probability','Benjamini-Hochberg','\n']))
     for [i,a,k,K,prb,BH] in mhc_assoc:
-        outf.write('\t'.join([str(i),a,str(k),str(K),str(prb),str(BH),'\n']))   
+        # print(str(i))
+        # print(a.encode('utf-8') , 'a')
+        # print(str(k), 'k')
+        # print(str(K), 'K')
+        # print(str(prb), 'prb')
+        # print(str(BH), 'BH')
+        new_line = '\t'.join([str(i),a ,str(k),str(K),str(prb),str(BH)+'\n'])
+        # print(new_line)
+        outf.write(new_line)   
     outf.close()
 
 # if __name__ == "__main__":
