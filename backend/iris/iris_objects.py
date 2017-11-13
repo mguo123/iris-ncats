@@ -10,10 +10,56 @@ import pandas as pd
 # this file contains classes that define wrapper APIs for common data in the iris environment
 # for example, Models (predictive model) or Dataframes
 
+### FROM BACKUP ####
+class IrisValue:
+    def __init__(self, value, name=None):
+        self.value = value
+        self.name = name
+
+class IrisValues(IrisValue):
+    def __init__(self, values, names):
+        self.values = values
+        self.names = names
+
+class IrisId(IrisValue):
+    def __init__(self, value, id, name=None):
+        self.value = value
+        self.id = id
+        if not name:
+            self.name = value
+        else:
+            self.name = name
+
+class IrisImage(IrisId):
+    type="Image"
+    def __init__(self, plt, name):
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        self.value = base64.b64encode(buf.read()).decode('utf-8')
+        self.name = name
+
+
+
+
 # wrapper for vega types (nothing special here, just an indicator to let frontent know this is vega data)
+
 class IrisVega:
     type="Vega"
 
+# define a vega schema for an image
+class IrisVegaImage(IrisVega):
+    def __init__(self, name, file_path = "https://vega.github.io/images/idl-logo.png", values = []):
+        self.name = name
+        self.spec = {
+            "mark": "image",
+            "encoding": {
+                    "url": {"value": file_path}
+                # "url": {"value": file_path}
+                }
+            }
+        self.data = { }
+            
 # define a vega schema for a bar chart
 class IrisBar(IrisVega):
     def __init__(self, name, keys, data, bar_label="label", value_label="value"):
@@ -115,6 +161,9 @@ class IrisDataframe:
     # "data" is a list of lists or ndarray (matrix) that holds the data
     # "type_convert_data" indicates whether the Dataframe should attempt automatic type inference
     def __init__(self, data, column_names=None, column_types=None, empty=False):
+        self.column_names = column_names
+        self.column_types = column_types
+        self.empty = empty
         if not empty:
             if column_names:
                 self.df = pd.DataFrame(data, columns=column_names)

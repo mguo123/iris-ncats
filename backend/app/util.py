@@ -22,6 +22,10 @@ def detect_type(x):
         return "list"
     elif isinstance(x, iris_objects.IrisModel):
         return "model"
+    elif isinstance(x, iris_objects.IrisImage):
+        return "image"
+    elif isinstance(x, iris_objects.IrisVegaImage):
+        return "image_vega"
     elif isinstance(x, iris_objects.IrisDataframe):
         return "dataframe"
     elif isinstance(x, iris_objects.FunctionWrapper):

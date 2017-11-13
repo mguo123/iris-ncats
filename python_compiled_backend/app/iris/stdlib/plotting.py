@@ -205,3 +205,25 @@ class PlotBar(IrisCommand):
         return plot_data
 
 plotBar = PlotBar()
+
+
+
+class PlotImage(IrisCommand):
+    title = "load and display {image_file}"
+    examples = ["plot image", "load and display {image_file}", "load {image_file}", "display {image_file}"]
+    argument_types = { "image_file" : t.File(question="What image would you like to load?")}
+
+    def command(self, image_file):
+        import numpy as np
+        import matplotlib
+        matplotlib.use('AGG')
+        import matplotlib.pyplot as plt
+        import matplotlib.image as mpimg
+        name = 'testing'
+        img=mpimg.imread(image_file) 
+        imgplot = plt.imshow(img)
+        
+        return iris_objects.IrisImage(imgplot, name)
+
+
+plotImage = PlotImage()

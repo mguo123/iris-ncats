@@ -12,9 +12,9 @@ class GeneticConditionDisease(IrisCommand):
     
     # core logic of the command
     def command(self, condition, disease):
-        import numpy
+        import numpy as np
         return numpy.random.randint(100)
-        
+
     # wrap the output of a command to display to user
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble

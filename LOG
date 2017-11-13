@@ -37,6 +37,7 @@ REGISTERING AS plot auc curve for {model} ['plot auc curve for {model}', 'plot a
 REGISTERING AS plot two-sample test {data} ['plot two-sample test {data}', 'plot p-values {data}']
 REGISTERING AS plot a histogram on {data} ['plot a histogram on {data}', 'plot histogram {data}', 'histogram {data}']
 REGISTERING AS plot bars {data1} {data2} ['plot bars {data1} {data2}', 'plot barchart {data1} {data2}', 'barchart {data1} {data2}']
+REGISTERING AS load and display {image_file} ['load and display {image_file}', 'plot image', 'load and display {image_file}', 'load {image_file}', 'display {image_file}']
 REGISTERING AS take mean of {array} ['take mean of {array}', 'mean of {array} of numbers', 'mean {array}', 'average of {array}', 'average value of {array}']
 REGISTERING AS log-transform {array} ['log-transform {array}', 'log-transform {array} of numbers', 'log {array}', 'log of {array}', 'log value of {array}']
 REGISTERING AS compute pearson correlation: {x} and {y} ['compute pearson correlation: {x} and {y}', 'pearson correlation between {x} and {y}', 'pearson correlation {x} {y}', 'how are {x} and {y} correlated']

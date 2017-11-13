@@ -10,6 +10,10 @@ class StateMachineRunner:
         self.current_state = state_machine
         self.previous_state = []
         self.previous_context = []
+        # self.first_round = True
+    # def initialize_print(self):
+    #     pass
+
     # get current state machine output
     def current_output(self):
         # If there's an error, we'll return that, else the state output

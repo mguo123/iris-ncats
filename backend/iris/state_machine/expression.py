@@ -120,7 +120,7 @@ class Function(Scope, AssignableMachine):
         self.query = text
     # we want to set initial output after title is defined
     def set_output(self):
-        self.output = [{"type":"title", "text": "Sure, I can answer:" + self.title.lower(), "title":self.title.lower()} + ""]
+        self.output = [{"type":"title", "text": "Sure, I can answer:" + self.title.lower(), "title":self.title.lower()}]
     # helper to get training examples for this function
     def training_examples(self):
         # TODO: probably just factor this out to IrisCommand (Function objects don't have a class index)
@@ -315,6 +315,8 @@ class IrisCommand(Function):
                 out = out # do nothing
             elif isinstance(r, iris_objects.FunctionWrapper):
                 out.append("<Bound function: {}>".format(r.name))
+            # elif isinstance(r, iris_objects.IrisImage):
+            #     out.append({"type": "image", "value": r.value})
             elif isinstance(r, iris_objects.IrisModel):
                 out.append("<{} X={} y={}>".format(r.model.__class__.__name__, util.print_list(r.dataframe_X.columns(), 4), util.print_list(r.dataframe_y.columns(), 4)))
             elif isinstance(r, iris_objects.IrisVega):

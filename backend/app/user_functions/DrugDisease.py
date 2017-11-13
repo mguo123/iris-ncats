@@ -57,6 +57,7 @@ class DrugDisease(IrisCommand):
             ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
             ph_genes_array_grouped = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
             ph_genes_array_grouped_iris = iris_objects.IrisDataframe(column_names=["probability", "Benjamin Hochberg significance cutoff", "Phenotype", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_grouped)
+            self.iris.add_to_env('drug_disease_results', ph_genes_array_grouped_iris)
             result.append(ph_genes_array_grouped_iris)  
 
             return result

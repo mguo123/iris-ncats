@@ -208,7 +208,7 @@ class PlotHistogram(IrisCommand):
         import matplotlib
         matplotlib.use('AGG')
         import matplotlib.pyplot as plt
-        f = plt.figure(self.iris.gen_plot_id(name))
+        f = plt.figure(123)
         plt.hist(data)#.to_matrix())
         plot_data = iris_objects.IrisImage(f, name)
         self.iris.add_to_env(name, plot_data)
@@ -245,3 +245,33 @@ class PlotBar(IrisCommand):
         return plot_data
 
 plotBar = PlotBar()
+
+
+class PlotImage(IrisCommand):
+    title = "load and display {image_file}"
+    examples = ["plot image", "load and display {image_file}", "load {image_file}", "display {image_file}"]
+    argument_types = { "image_file" : t.File(question="What image would you like to load?")}
+
+    def command(self, image_file):
+        # import numpy as np
+        # # import Image
+        # import matplotlib
+        # matplotlib.use('AGG')
+        # import matplotlib.pyplot as plt
+        # import matplotlib.image as mpimg
+        # print('here before imread')
+        # f = plt.figure()
+        # img=mpimg.imread(image_file.path) 
+        # # img = Image.open(image_file)
+        # print('after imread')
+        # imgplot = plt.imshow(img)
+        # print('after imshow')
+        name = 'testing'
+
+        # plot_data =  iris_objects.IrisImage(f, name)
+        plot_data = iris_objects.IrisVegaImage(name, image_file.path)
+        print('after Iris objects ')
+        # self.iris.add_to_env(name, plot_data)
+        return plot_data
+
+plotImage = PlotImage()
