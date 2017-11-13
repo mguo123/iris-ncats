@@ -7,7 +7,7 @@ from .gencode import make_script
 class EventLoop:
     def __init__(self, iris = IRIS_MODEL):
         # initiate with an automata that will call any given command from user request
-        self.machine = sm.StateMachineRunner(sm.DoAll([sm.ApplySearch()]))
+        self.machine = sm.StateMachineRunner(sm.ApplySearch())
         self.iris = IRIS_MODEL
         # store ASTs in iris env as we go
         self.iris.env["ASTS"] = []
