@@ -17,7 +17,13 @@ class FunctionInfo extends Component {
 
     render = () => {
       if (this.props.doc.title === ""){
-        return <div className="func_info"><div className="func_title">Search for a command to see documentation</div></div>
+        return (<div className="func_info">
+          <div className="func_title">Iris Help Center</div>
+           <div className="func_description">
+            Welcome to Iris! Type in a command within the message window to continue. Or type &quot;quit&quot; to exit task.
+          </div>
+          </div>
+              )
       }
       else{
         return (<div className="func_info">

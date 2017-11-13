@@ -176,6 +176,7 @@ def get_target_interactions(qID):
             url = "https://www.ebi.ac.uk/proteins/api/proteins/interaction/{}".format(uniID)
             return(requests.get(url).json())
 
+
 def get_pathways(target_name):
     """
     get_pathways(target_name)
@@ -189,11 +190,11 @@ def get_pathways(target_name):
     qID = get_target_id(target_name)
 
     # Get tissue information from the properties for that target
-    pathway_info = target_prop_data(qID, "*Pathway*")
+    pathway_info = target_prop_data(qID, "*Pathway")
 
     # Grab PATHWAY annotations for each gene
-    pathways = []
-    for prop in pathways:
+    pathways = set()
+    for prop in pathway_info:
         pathways.add(prop['term'])
     if len(pathways) == 0:
         pathways.add("unknown")
@@ -227,7 +228,7 @@ def get_GO_terms(target_name):
         elif prop["label"] == 'GO Function':
             GO_function.add(prop['term'])
         elif prop["label"] == 'GO Component':
-            GO_component.add(prob['term'])
+            GO_component.add(prop['term'])
     if len(GO_process) == 0:
         GO_process.add("unknown")
     if len(GO_function) == 0:
@@ -335,8 +336,10 @@ if __name__ == "__main__":
     # print(get_disease_id("acne vulgaris"))
     # qID = get_target_id(ligand_targets[0])
     # print(qID)
-    # print(get_target_id('RARG'))
-    print(get_drug_tissues("adapalene"))
+    print(get_GO_terms('RARG'))
+    print(get_target_id('RARG'))
+    print(get_pathways('RARG'))
+    # print(get_drug_tissues("adapalene"))
     # print(get_tissues_oi(["RARA"]))
     # temp = get_target_interactions(qID)
     # print("GENE TARGETS:", ligand_targets)
