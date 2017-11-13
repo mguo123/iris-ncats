@@ -253,25 +253,27 @@ class PlotImage(IrisCommand):
     argument_types = { "image_file" : t.File(question="What image would you like to load?")}
 
     def command(self, image_file):
-        import numpy as np
-        # import Image
-        import matplotlib
-        matplotlib.use('AGG')
-        import matplotlib.pyplot as plt
-        import matplotlib.image as mpimg
-        print('here before imread')
-        f = plt.figure()
-        img=mpimg.imread(image_file.path) 
-        # img = Image.open(image_file)
-        print('after imread')
-        imgplot = plt.imshow(img)
-        print('after imshow')
-        name = 'testing'
+        import os
+        os.system("open " + image_file.path)
+        # import numpy as np
+        # # import Image
+        # import matplotlib
+        # matplotlib.use('AGG')
+        # import matplotlib.pyplot as plt
+        # import matplotlib.image as mpimg
+        # print('here before imread')
+        # f = plt.figure()
+        # img=mpimg.imread(image_file.path) 
+        # # img = Image.open(image_file)
+        # print('after imread')
+        # imgplot = plt.imshow(img)
+        # print('after imshow')
+        # name = 'testing'
 
-        plot_data =  iris_objects.IrisImage(f, name)
-        # plot_data = iris_objects.IrisVegaImage(name, image_file.path)
-        print('after Iris objects ')
+        # plot_data =  iris_objects.IrisImage(f, name)
+        # # plot_data = iris_objects.IrisVegaImage(name, image_file.path)
+        # print('after Iris objects ')
         # self.iris.add_to_env(name, plot_data)
-        return plot_data
+        return "See plot"
 
 plotImage = PlotImage()

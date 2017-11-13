@@ -19,10 +19,24 @@ class DrugDisease(IrisCommand):
     examples = ["why does {drug} work against {disease}", "why does {drug} treat disease", "what are the targets of {drug} relevant to {disease}", "mechanism of action", "treat disease", "how drug works", "how drug works on disease", "how does drug affect disease", "how does {drug} affect {disease}" "How does {drug} treat {disease}", "What is the mechanism of action for {drug} treating {disease}", "is {disease} treatable by {drug}"]
     
     # type annotations for each command argument, to help Iris collect missing values from a user
-    argument_types = {"drug":t.String("Just for confirmation: What is the drug you want to analyze?"), "disease":t.String("What is the disease you want to analyze?")}
+    argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"), 
+                        "disease":t.String("What is the disease you want to analyze?"),
+                        # "bool_all":t.YesNo("Would you like to customize your output? If you select No, we will provide you with all the information we think might be useful.",
+                        #     yes=#customize output
+                        "bool_image":t.YesNo("Would you like to visual the results as a diagram?",
+                                    yes=True, no=False),
+                        "bool_full_GO":t.YesNo("Would you like to only significant GO enrichment results (Yes-signficant; No-all)?",
+                                    yes=True, no=False),
+                        "bool_other_disease":t.YesNo("Would you like to list other diseases that can be treated by this drug?",
+                                    yes=True, no=False),
+                        "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
+                                    yes=true, no=False)
+                            
+                        }
+                            # no=False)} #use defaults
     
     # core logic of the command
-    def command(self, drug, disease):
+    def command(self, drug, disease, bool_image, bool_full_GO, bool_other_disease, bool_pubmed):
         # import numpyfrom ncats.scripts import run_te
         # return numpy.random.randint(100)
 
@@ -67,7 +81,7 @@ _DrugDisease = DrugDisease()
 
 class DrugDiseaseMulti(IrisCommand):
     # what iris will call the command + how it will appear in a hint
-    title = "find the mechanism of action of this list of drug-disease pairs"
+    title = "Can you find the mechanism of action of this list of drug-disease pairs"
     
     # give an example for iris to recognize the command
     examples = ["multiple drugs and diseases", "how list of drugs works", "how multiple drug works on disease", "how do these drugs affect these diseases", "how does this list of {drug_list} affect {disease_list}" ]
@@ -102,7 +116,7 @@ _DrugDiseaseMulti = DrugDiseaseMulti()
 
 class DrugDiseaseCSV(IrisCommand):
     # what iris will call the command + how it will appear in a hint
-    title = "drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"
+    title = "Can you find the mechanism of action of these drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"
     
     # give an example for iris to recognize the command
     examples = ["multiple drugs and diseases from csv", "csv of drug disease matches", "loaded drug disease match", "find the mechanism of action of drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"]
