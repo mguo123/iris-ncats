@@ -10,16 +10,12 @@ import pandas as pd
 # this file contains classes that define wrapper APIs for common data in the iris environment
 # for example, Models (predictive model) or Dataframes
 
-### FROM BACKUP ####
+# all of this is old and should be upgraded...
+
 class IrisValue:
     def __init__(self, value, name=None):
         self.value = value
         self.name = name
-
-class IrisValues(IrisValue):
-    def __init__(self, values, names):
-        self.values = values
-        self.names = names
 
 class IrisId(IrisValue):
     def __init__(self, value, id, name=None):
@@ -39,8 +35,7 @@ class IrisImage(IrisId):
         self.value = base64.b64encode(buf.read()).decode('utf-8')
         self.name = name
 
-
-
+# end old...
 
 # wrapper for vega types (nothing special here, just an indicator to let frontent know this is vega data)
 

@@ -38,7 +38,7 @@ const appendMessagesConvo = (convo, action) => {
 // TODO: This definition state is pretty long, messy
 // Also not clear what "args" represents in a conversation with multiple sub-convos
 // Maybe it is only important to represent the convo title, if so maybe that should be refactored
-const conversation = (state = {'history': [], 'currentConvo': { 'messages': [], 'title': null, 'hidden': false, 'id': 0, 'args': {} }, 'state': 'START'}, action) => {
+const conversation = (state = {'history': [], 'currentConvo': { 'messages': [], 'title': null, 'hidden': false, 'id': 1, 'args': {} }, 'state': 'START'}, action) => {
     const { history, currentConvo } = state;
     let newConvo;
     switch (action.type) {
