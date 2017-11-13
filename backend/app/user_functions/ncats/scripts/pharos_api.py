@@ -332,13 +332,15 @@ def get_drug_tissues(drug_name):
 
 
 if __name__ == "__main__":
+    get_drug_tissues("adapalene")
     # ligand_targets = get_ligand_targets("adapalene")
     # print(get_disease_id("acne vulgaris"))
     # qID = get_target_id(ligand_targets[0])
     # print(qID)
-    print(get_GO_terms('RARG'))
-    print(get_target_id('RARG'))
-    print(get_pathways('RARG'))
+
+    # print(get_GO_terms('RARG'))
+    # print(get_target_id('RARG'))
+    # print(get_pathways('RARG'))
     # print(get_drug_tissues("adapalene"))
     # print(get_tissues_oi(["RARA"]))
     # temp = get_target_interactions(qID)
