@@ -11,13 +11,13 @@ print('results_dir', results_dir)
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-# from app.user_functions.ncats.EBC_api import EBC_api
-# from app.user_functions.ncats.Pharos_api import pharos_api
-# from app.user_functions.ncats.GO_api import go_api
+from app.user_functions.ncats.EBC_api import EBC_api
+from app.user_functions.ncats.Pharos_api import pharos_api
+from app.user_functions.ncats.GO_api import go_api
 
-from ncats.EBC_api import EBC_api
-from ncats.Pharos_api import pharos_api
-from ncats.GO_api import go_api
+# from ncats.EBC_api import EBC_api
+# from ncats.Pharos_api import pharos_api
+# from ncats.GO_api import go_api
 
 """
 Q2_query
