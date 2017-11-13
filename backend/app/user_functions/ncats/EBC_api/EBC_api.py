@@ -1,10 +1,12 @@
 import pickle
 import numpy as np
 from fuzzywuzzy import process
-import os
+import os, sys
 
 # Path to the sys
-EBC_reference_dir = "./ncats/EBC_api/EBC_DB/"
+EBC_path = os.path.abspath(os.path.dirname(__file__))
+
+EBC_reference_dir = os.path.join(EBC_path, "EBC_DB")
 
 # Import reference dictionary objects
 pkl_file = open(os.path.join(EBC_reference_dir, 'chem_GNDT_dict.pkl'), 'rb')

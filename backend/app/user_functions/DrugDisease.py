@@ -7,7 +7,7 @@ from iris import util as util
 from iris import iris_objects
 
 from app.user_functions.ncats.scripts import run_test, run_main
-
+from app.user_functions.Q2_main import Q2_query
 import numpy as np
 # run_test.run_drug_single('a', 'b')
 
@@ -30,51 +30,54 @@ class DrugDisease(IrisCommand):
                         "bool_other_disease":t.YesNo("Would you like to list other diseases that can be treated by this drug?",
                                     yes=True, no=False),
                         "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
-                                    yes=true, no=False)
+                                    yes=True, no=False)
                             
                         }
                             # no=False)} #use defaults
     
     # core logic of the command
     def command(self, drug, disease, bool_image, bool_full_GO, bool_other_disease, bool_pubmed):
-        # import numpyfrom ncats.scripts import run_te
-        # return numpy.random.randint(100)
 
-        answer= run_main.run_drug_single(drug, disease)
+        # for deriving the list of 
+        answer = Q2_query(drug, disease, gen_image=bool_image, output_full=bool_full_GO)
+        print('answer')
+        # answer= run_main.run_drug_single(drug, disease)
         # print (answer)
         # print('!!!!!!!!!')
-        return answer
+        iris_answer = iris_objects.IrisDataframe(data=answer)
+    
+        return iris_answer
         
     # wrap the output of a command to display to user
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
+        return result
+        ##### JEN'S STUFF ######
+        # answer_found_bool, answer_found_exp_str, ph_genes_str, drug = result
+        # if answer_found_bool:
+        #     # FROM backend, ph_genes_str = '\t'.join([prb, BH, disease, sig_genes]) # was done this way to save results in csv (for multi run)
+        #     [prb, BH, disease, sig_genes] = ph_genes_str.split('\t')
+        #     if float(prb) < float(BH):
+        #         prob_string = ' '.join([drug, 'was found to treat', disease, 'with probability:', prb, 'for Benjamini–Hochberg significance level', BH])
+        #         sig_genes_string = ' '.join(['Signficant genes were found as:', sig_genes])
+        #     else:
+        #         prob_string = ' '.join([drug, 'was found to treat', disease, ', but probability', prb, 'was not significant for Benjamini–Hochberg singificance level', BH])
+        #         sig_genes_string = ' '.join(['Associated genes were found as:', sig_genes])
 
-        # return ["Book a flight to DC to get the answer. Here's your lucky number", result]
-        answer_found_bool, answer_found_exp_str, ph_genes_str, drug = result
-        if answer_found_bool:
-            # FROM backend, ph_genes_str = '\t'.join([prb, BH, disease, sig_genes]) # was done this way to save results in csv (for multi run)
-            [prb, BH, disease, sig_genes] = ph_genes_str.split('\t')
-            if float(prb) < float(BH):
-                prob_string = ' '.join([drug, 'was found to treat', disease, 'with probability:', prb, 'for Benjamini–Hochberg significance level', BH])
-                sig_genes_string = ' '.join(['Signficant genes were found as:', sig_genes])
-            else:
-                prob_string = ' '.join([drug, 'was found to treat', disease, ', but probability', prb, 'was not significant for Benjamini–Hochberg singificance level', BH])
-                sig_genes_string = ' '.join(['Associated genes were found as:', sig_genes])
+        #     return ["Answer was found!", prob_string, sig_genes_string, 'find the results in results folder']
+        # else:
+        #     answer_explanation_string = [' '.join(['Answer was not found because:', answer_found_exp_str])]
+        #     multi_answer_line = ['We queried the gene neighborhood of drug targets and found the following phenotypes to be significant', 'Here we list significant phenotypes in order of probability. Column headings are probability, significance level cutoff, phenotype, and a list of genes associated']
+        #     result = answer_explanation_string + multi_answer_line
 
-            return ["Answer was found!", prob_string, sig_genes_string, 'find the results in results folder']
-        else:
-            answer_explanation_string = [' '.join(['Answer was not found because:', answer_found_exp_str])]
-            multi_answer_line = ['We queried the gene neighborhood of drug targets and found the following phenotypes to be significant', 'Here we list significant phenotypes in order of probability. Column headings are probability, significance level cutoff, phenotype, and a list of genes associated']
-            result = answer_explanation_string + multi_answer_line
+        #     ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
+        #     ph_genes_array_grouped = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
+        #     ph_genes_array_grouped_iris = iris_objects.IrisDataframe(column_names=["probability", "Benjamin Hochberg significance cutoff", "Phenotype", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_grouped)
+        #     self.iris.add_to_env('drug_disease_results', ph_genes_array_grouped_iris)
+        #     result.append(ph_genes_array_grouped_iris)  
 
-            ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
-            ph_genes_array_grouped = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
-            ph_genes_array_grouped_iris = iris_objects.IrisDataframe(column_names=["probability", "Benjamin Hochberg significance cutoff", "Phenotype", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_grouped)
-            self.iris.add_to_env('drug_disease_results', ph_genes_array_grouped_iris)
-            result.append(ph_genes_array_grouped_iris)  
-
-            return result
+        #     return result
 
 _DrugDisease = DrugDisease()
 

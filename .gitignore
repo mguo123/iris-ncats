@@ -4,4 +4,6 @@ backend/app/large_files/*
 */*/*/*.pyc
 data/*
 envs/*
+backend/app/user_functions/ncats/EBC_api/EBC_DB/gene_gene_GNDT_dict.pkl
+backend/app/user_functions/ncats/EBC_api/EBC_DB/chemical_disease_GNDT_dict.pkl
 backend/app/user_functions/ncats/results

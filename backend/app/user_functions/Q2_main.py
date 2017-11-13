@@ -1,12 +1,20 @@
-from ncats.EBC_api import EBC_api
-from ncats.Pharos_api import pharos_api
-from ncats.GO_api import go_api
+
 
 import pickle
 import subprocess
 import os
 
-results_dir = "./ncats/results/Q2/"
+# sys.path.insert(0, os.path.abspath(os.path.dirname(__file__))) # points to E DIR
+
+overall_path = os.path.abspath(os.path.dirname(__file__))
+results_dir = os.path.join(overall_path, "ncats/results/Q2/")
+print('results_dir', results_dir)
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+from app.user_functions.ncats.EBC_api import EBC_api
+from app.user_functions.ncats.Pharos_api import pharos_api
+from app.user_functions.ncats.GO_api import go_api
 
 """
 Q2_query
@@ -58,6 +66,8 @@ def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
 
     # Get list of drug targets from Pharos
     drug_genes = pharos_api.get_ligand_targets(drug)
+    # # Get list of tissues from Pharos
+    # drug_tissues = pharos_api.get_drug_tissues(drug)
 
     # If Pharos did not return targets, pull them from the literature
     if drug_genes is None:
@@ -97,6 +107,7 @@ def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
 
     return(result)
 
+# unit testing
 if __name__ == "__main__":
     drug="lisinopril"
 

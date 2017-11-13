@@ -1,19 +1,22 @@
 from iris import state_types as t
 from iris import IrisCommand
+from app.user_functions.Q1_main import Q1_query
+
 
 class GeneticConditionDisease(IrisCommand):
     # what iris will call the command + how it will appear in a hint
-    title = "how does {condition} protects against {disease}?"
-    
+    # title = "how does {condition} protects against {condition}?"
+    title = "what protects against {condition}"
     # give an example for iris to recognize the command
-    examples = ["find out how {condition} protects against {disease}", "protective mechanism of condition", "protective mechanism of condition against disease", "protective condition", "protective mechanism of {condition} against {disease}", "how does {condition} protect against {disease}"]
+    examples = ["what protects against {condition}", "what genetic conditions might offer protection against {condition} and why", "protective mechanism of condition against disease", "protective condition", "protection against disease"]
     # type annotations for each command argument, to help Iris collect missing values from a user
-    argument_types = {"condition":t.String("Just for confirmation: What is the condition you want to analyze?"), "disease":t.String("What is the disease you want to analyze?")}
+    argument_types = {"condition":t.String("Just for confirmation: What is the condition do you want to analyze?")} 
+                        # ,"genetic_disease":t.String("What is the genetic disease do you think it might link to? If unknown, type none")}
     
     # core logic of the command
-    def command(self, condition, disease):
-        import numpy as np
-        return numpy.random.randint(100)
+    def command(self, condition):
+        # import numpy as np
+        return Q1_query(condition)
 
     # wrap the output of a command to display to user
     # by default this will be an identity function

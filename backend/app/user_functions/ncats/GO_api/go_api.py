@@ -9,7 +9,9 @@ from statsmodels.stats.multitest import fdrcorrection
 
 import goenrich.export
 
-DB_path = "./ncats/GO_api/GO_DB"
+GO_path = os.path.abspath(os.path.dirname(__file__))
+
+DB_path = os.path.join(GO_path,"GO_DB")
 
 """
 Q2_query
@@ -163,7 +165,6 @@ if __name__ == "__main__":
 
 # Paths for package style loading
 else:
-    print("other path")
     O = goenrich.obo.ontology(os.path.join(DB_path, 'go.obo'))
 
     gene2go = goenrich.read.gene2go(os.path.join(DB_path,'gene2go.gz'))

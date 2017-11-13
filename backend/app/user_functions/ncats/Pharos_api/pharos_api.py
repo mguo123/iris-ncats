@@ -332,7 +332,7 @@ def get_drug_tissues(drug_name):
 
 
 if __name__ == "__main__":
-    get_drug_tissues("adapalene")
+    # get_drug_tissues("adapalene")
     # ligand_targets = get_ligand_targets("adapalene")
     # print(get_disease_id("acne vulgaris"))
     # qID = get_target_id(ligand_targets[0])

@@ -156,14 +156,21 @@ class IrisDataframe:
     # "data" is a list of lists or ndarray (matrix) that holds the data
     # "type_convert_data" indicates whether the Dataframe should attempt automatic type inference
     def __init__(self, data, column_names=None, column_types=None, empty=False):
-        self.column_names = column_names
-        self.column_types = column_types
-        self.empty = empty
-        if not empty:
-            if column_names:
-                self.df = pd.DataFrame(data, columns=column_names)
-            else:
-                self.df = pd.DataFrame(data)
+
+        print(type(data), '*********')
+        if isinstance(data, pd.DataFrame):
+            self.df = data
+            self.column_names = list(self.df.columns.values)
+
+        else:
+            self.column_names = column_names
+            self.column_types = column_types
+            self.empty = empty
+            if not empty:
+                if column_names:
+                    self.df = pd.DataFrame(data, columns=column_names)
+                else:
+                    self.df = pd.DataFrame(data)
 
     def columns(self):
         return self.df.columns.tolist()
