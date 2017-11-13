@@ -1,6 +1,5 @@
 
 
-import pickle
 import subprocess
 import os
 
@@ -12,9 +11,13 @@ print('results_dir', results_dir)
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-from app.user_functions.ncats.EBC_api import EBC_api
-from app.user_functions.ncats.Pharos_api import pharos_api
-from app.user_functions.ncats.GO_api import go_api
+# from app.user_functions.ncats.EBC_api import EBC_api
+# from app.user_functions.ncats.Pharos_api import pharos_api
+# from app.user_functions.ncats.GO_api import go_api
+
+from ncats.EBC_api import EBC_api
+from ncats.Pharos_api import pharos_api
+from ncats.GO_api import go_api
 
 """
 Q2_query
@@ -41,7 +44,7 @@ N'
 
 """
 
-def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
+def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=False, output_full=False):
 
     # Pre-process query
     drug = QDrug.strip().lower()
@@ -53,6 +56,8 @@ def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
 
     # Get list of genes causally annotated to a disease
     dis_gene_list = EBC_api.get_disease_gene_list(disease, freq_correct=True)
+
+
 
     # If first query did not work, try getting nearest matches for the query and try again
     if dis_gene_list is None:
@@ -76,7 +81,6 @@ def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
         drug_gene_list = EBC_api.query_drug_target(drug)
 
     else:
-
         # If targets are from Pharos, map them to their Uniprot IDs
         drug_gene_list = []
         for gene in drug_genes:
@@ -84,6 +88,7 @@ def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
 
     # If either disease or drug list comes up empty
     # the query has failed and we return a statement to that effect
+
     if dis_gene_list is None and drug_gene_list is None:
         return "Drug and disease not recognized, better luck next time..."
     elif dis_gene_list is None:
@@ -94,17 +99,44 @@ def Q2_query(QDrug, QDisease, gen_image=False, output_full=False):
     # If we have targets
     else:
         # Select the top 25 genes from the disease gene list for GO enrichment
-        dis_gene_list = list(map(int, dis_gene_list))[:25]
+        dis_genes = [(EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x),"EntrezID:"+ x) for x in dis_gene_list]
+        dis_gene_list = list(map(int, dis_gene_list))
+
+        # dis_gene_names = EBC_api.get_disease_gene_list(disease, freq_correct=True, gene_names=True)
+        # print(dis_gene_names[:10])
+        # disease_tissues = pharos_api.get_tissues_oi(dis_gene_names[:5])
+        # print(disease_tissues)
+        # print(drug_genes)
+
+        # Get drug tissues
+        # drug_tissues = pharos_api.get_tissues_oi(drug_genes)
+        # print(drug_tissues)
+
+
+
+        drug_genes = [(EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), "EntrezID:"+x) for x in drug_gene_list]
 
         # Get the GO terms for the drug targets
         drug_gene_list = list(map(int,drug_gene_list))
-        drug_targets = go_api.get_GO_terms(drug_gene_list)
 
-        # Get GO Enrichment statistics
-        result = go_api.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets)
-        if gen_image:
+
+
+        drug_targets = GO_API.get_GO_terms(drug_gene_list)
+
+#        Get GO Enrichment statistics
+        result = GO_API.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets)
+        if output_full is False:
+            result = result.loc[result['rejected'] == 1.0, ['namespace', 'name', 'p', 'q']]
+            result = result.sort(['q'])
+        if gen_interaction_image:
             subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name)+ '.dot', '-o', os.path.join(results_dir, out_name) + '.png'])
+        if gen_tissues_image:
+            pass
 
+
+        result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes}
+
+    # return(drug_tissues)
     return(result)
 
 # unit testing
@@ -113,9 +145,22 @@ if __name__ == "__main__":
 
     disease="hypertension"
 
+    GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
+
     print(drug,disease)
     result = Q2_query(drug, disease)
     if type(result) is not str:
-        print(result.shape)
+        print(result)
+    else:
+        print(result)
+
+    drug="tacrine"
+
+    disease="alzheimer-disease"
+
+    print(drug,disease)
+    result = Q2_query(drug, disease)
+    if type(result) is not str:
+        print(result)
     else:
         print(result)
