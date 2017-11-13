@@ -177,6 +177,9 @@ def query_gene(gene, relationship="B", gene_name=False, gen_counts=False):
 def resolve_gene_to_EntrezGeneID(geneName):
     return(gene_dict.get(geneName))
 
+def resolve_EntrezGeneID_to_NCBIGeneName(geneName):
+    return(gene_dict.get(geneName))
+
 def get_disease_gene_list(disease, relationship = "U", gene_names = False, freq_correct = False, return_scores=False):
 
     disease_id = disease_dict.get(disease.lower())

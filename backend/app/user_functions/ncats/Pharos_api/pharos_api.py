@@ -126,8 +126,12 @@ def get_target_id(target_common_name):
     Output: 
     target_id - corresponding Pharos ID for the target
     """
-    resp = query("targets", target_common_name)
-    target_id = resp['id']
+    try:
+        resp = query("targets", target_common_name)
+        target_id = resp['id']
+    except:
+        target_id = None
+
     return target_id
 
 
@@ -251,7 +255,8 @@ def get_target_tissue(target_name):
     """
     # Query for the Pharos ID of the Gene target
     qID = get_target_id(target_name)
-
+    if qID is None:
+        return []
     # Get tissue information from the properties for that target
     tissue_info = target_prop_data(qID, "*Tissue")
 
