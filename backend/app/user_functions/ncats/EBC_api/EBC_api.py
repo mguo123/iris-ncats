@@ -130,38 +130,45 @@ def query_disease(disease, relationship="U", gen_counts=False):
 
 ################################
 
-def query_chemical_disease(drug, disease, relationship="T", gen_counts=False):
+def query_chemical_disease(drug, disease, relationship="T", gen_counts=False, get_PMIDs=False):
     chem_id = chem_dict.get(drug.lower())
     disease_id = disease_dict.get(disease.lower())
     disease_set = set()
-    count = {'Mp': 0, 'C': 0, 'T': 0, 'J': 0, 'Sa': 0, 'Pr': 0, 'Pa': 0}
-    if chem_id in chem_disease_dict:
-        for entry in chem_disease_dict.get(chem_id):
-            id = entry[0]
-            if id == disease_id:
-                # print(drug, disease, entry[1])
-                if gen_counts:
-                    count[entry[1]] += 1
-                # if entry[1] == relationship:
-                #     if gen_counts:
-                #         if id in count:
-                #             count[id] += 1
-                #         else:
-                #             count[id] = 1
-                #     else:
-                #         disease_set.add(id)
+    if gen_counts:
+        count = {'Mp': 0, 'C': 0, 'T': 0, 'J': 0, 'Sa': 0, 'Pr': 0, 'Pa': 0}
+        if chem_id in chem_disease_dict:
+            for entry in chem_disease_dict.get(chem_id):
+                id = entry[0]
+                if id == disease_id:
+                    # print(drug, disease, entry[1])
+                    if gen_counts:
+                        count[entry[1]] += 1
+                    # if entry[1] == relationship:
+                    #     if gen_counts:
+                    #         if id in count:
+                    #             count[id] += 1
+                    #         else:
+                    #             count[id] = 1
+                    #     else:
+                    #         disease_set.add(id)
         return(count)
+
+    elif get_PMIDs:
+        PMIDs = []
+        if chem_id in chem_disease_dict:
+            for entry in chem_disease_dict.get(chem_id):
+                id = entry[0]
+                print(entry)
+                if id == disease_id:
+                    if entry[1] == relationship:
+                        PMIDs.append(entry[2])
+        return(PMIDs)
         # if gen_counts:
         #     return(count)
         # else:
         #     return(list(disease_set))
     else:
         return(None)
-
-
-##########################################
-
-
 
 def query_gene(gene, relationship="B", gene_name=False, gen_counts=False):
     gene_set = set()
