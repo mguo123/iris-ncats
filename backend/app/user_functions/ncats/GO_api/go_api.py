@@ -73,7 +73,7 @@ class GO_api:
 
 
 
-    def analyze(self, O, query, background_attribute, **kwargs):
+    def analyze(self, O, query, background_attribute, target_list, **kwargs):
         """ run enrichment analysis for query
 
         :param O: Ontology graph after backgroud was set
@@ -108,11 +108,11 @@ class GO_api:
                 if term in G:
                     G.node[term].update({'name' : node['name'], 'x' : x,
                         'q' : q, 'n' : n, 'significant' : rej, 'drug_target': False})
-            self.to_graphviz(G.reverse(copy=False), **options)
+            self.to_graphviz(G.reverse(copy=False), target_list, **options)
         return df
 
 
-    def to_graphviz(self, G, gvfile, target_list, graph_label='', **kwargs):
+    def to_graphviz(self, G, target_list, gvfile, graph_label='', **kwargs):
         """ export graph of signifcant findings to dot file.
         A png can be generated from the commandline using graphviz
 

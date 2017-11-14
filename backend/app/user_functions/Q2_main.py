@@ -3,11 +3,13 @@
 import subprocess
 import os
 
+import pandas as pd
+
 # sys.path.insert(0, os.path.abspath(os.path.dirname(__file__))) # points to E DIR
 
 overall_path = os.path.abspath(os.path.dirname(__file__))
 results_dir = os.path.join(overall_path, "ncats/results/Q2/")
-print('results_dir', results_dir)
+
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
@@ -100,8 +102,14 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
 
     # If we have targets
     else:
+
+        PMIDs = EBC_api.query_chemical_disease(drug, disease, get_PMIDs=True)
+        print(PMIDs)
+
         # Select the top 25 genes from the disease gene list for GO enrichment
-        dis_genes = [(EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x),"EntrezID:"+ x) for x in dis_gene_list]
+        dis_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x),x] for x in dis_gene_list]
+
+        dis_genes = pd.DataFrame(dis_genes, columns=["Gene", "Entrez ID"])
         dis_gene_list = list(map(int, dis_gene_list))
 
         # dis_gene_names = EBC_api.get_disease_gene_list(disease, freq_correct=True, gene_names=True)
@@ -116,12 +124,11 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
 
 
 
-        drug_genes = [(EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), "EntrezID:"+x) for x in drug_gene_list]
-
+        drug_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
+        drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
+        
         # Get the GO terms for the drug targets
         drug_gene_list = list(map(int,drug_gene_list))
-
-
 
         drug_targets = GO_API.get_GO_terms(drug_gene_list)
 
@@ -154,10 +161,10 @@ if __name__ == "__main__":
 
     print(drug,disease)
     result = Q2_query(drug, disease)
-    if type(result) is not str:
-        print(result)
-    else:
-        print(result)
+    # if type(result) is not str:
+    #     print(result)
+    # else:
+    #     print(result)
 
     drug="tacrine"
 
@@ -165,7 +172,7 @@ if __name__ == "__main__":
 
     print(drug,disease)
     result = Q2_query(drug, disease)
-    if type(result) is not str:
-        print(result)
-    else:
-        print(result)
+    # if type(result) is not str:
+    #     print(result)
+    # else:
+    #     print(result)
