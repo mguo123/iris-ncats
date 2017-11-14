@@ -8,7 +8,7 @@ from collections import defaultdict
 from scipy.stats import hypergeom
 
 # import association file data
-rscs_dir = '../rscs/'
+rscs_dir = '../shared_data/'
 g_to_rsids = pickle.load(open(rscs_dir+'gene_to_rsid_eQTL.pkl','rb'))
 rs_to_data = pickle.load(open(rscs_dir+'rsid_g_pval_rsqr.pkl','rb')) # rsid_g_pval_rsqr[rs]=[g,pv,rsq] 
 g_to_disGenNet = pickle.load(open(rscs_dir+'disGeNet_gene_dis_score_dict.pkl','rb')) #

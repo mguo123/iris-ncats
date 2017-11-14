@@ -35,15 +35,53 @@ from settings import *
 # SCORE_THRESHOLD_MIN = 0.5
 # SCORE_DELTA = 0.05
 
-def preprocess_names(drug, disease):
+def preprocess_names(drug, disease=None):
 
     drug = drug.lower()
     first_letter = drug[0].upper()
     modified_drug_name = first_letter + drug[1:]
-    modified_disease = disease.lower().strip('\"')
-    return modified_drug_name, modified_disease
+    if disease is not None:
+        modified_disease = disease.lower().strip('\"')
+        return modified_drug_name, modified_disease
+    else:
+        return modified_drug_name
 
-def run_drug_single(drug, disease, storage_dir = 'results_drugs', iterate_until_found=False):
+def find_drug_indications(drug, storage_dir = 'Q2'):
+    '''
+    similar to run_drug single except finds the significaent diseases of drug
+    '''
+    #create storage directory
+    results_storage_dir = os.path.join(RESULTS_DIR, storage_dir)
+    if not os.path.exists(results_storage_dir):
+        os.mkdir(results_storage_dir)
+
+    drug = preprocess_names(drug)
+
+    if drug in DTD:
+        dts = [(drug.replace(' ',''), DTD[drug])] # remove white spaces for later analysis
+
+        # create networks, merge, do phenotype enrichment
+        threshold = SCORE_THRESHOLD_START # STARTING THRESHOLD
+
+        # get the merged files
+        all_merge_files = ann.run_all_drugs(dts,results_storage_dir,find_neighborhood_beta.GENE_GRAPH,threshold)
+
+
+        # get/store output data
+        assoc_to_genes = get_output_data(results_storage_dir, drug)
+        sum_asscs = get_results(results_storage_dir, drug)
+        # print('here!!!', sum_asscs)
+
+#             #### POST PROCESSING ####
+        answer = interpret_results(sum_asscs)
+        
+        return answer, drug
+
+    else:
+        return answer, drug
+
+
+def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False):
     '''
     Takes in strings for drug and disease then 
     outputs the phenotypes found in the network and the genes associated with them
@@ -152,7 +190,7 @@ def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 
     print('written output to', output_filename)
 
 
-def interpret_results(sum_asscs, disease, mapping_dict = None):
+def interpret_results(sum_asscs, disease=None, mapping_dict = None):
     '''
     sum_accs: list of [ph,rank,BH,prb, asii,asin,pern,sig_genes] for each ph that is found by the algorithm to be significant plus the disease of interest
     mapping_dict: dictionary of disease (keys) to list of possible phenotypes that the network produces (values)
@@ -174,7 +212,8 @@ def interpret_results(sum_asscs, disease, mapping_dict = None):
             all_possible_diseases.append('\t'.join([prb, BH, ph,', '.join(sig_genes)]))
 
     all_possible_diseases_string = '\t'.join(all_possible_diseases)
-
+    if disease is None:
+        return all_possible_diseases_string
 
     # check if there is a one-to-one match, returns three columns disease is the match we are looking for possible ph is found from network, the sig genes is list of genes
     # substrings are okay

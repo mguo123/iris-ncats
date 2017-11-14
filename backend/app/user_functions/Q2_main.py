@@ -15,6 +15,8 @@ from app.user_functions.ncats.EBC_api import EBC_api
 from app.user_functions.ncats.Pharos_api import pharos_api
 from app.user_functions.ncats.GO_api import go_api
 
+GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
+
 # from ncats.EBC_api import EBC_api
 # from ncats.Pharos_api import pharos_api
 # from ncats.GO_api import go_api
@@ -45,7 +47,7 @@ N'
 """
 
 def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=False, output_full=False):
-
+    #
     # Pre-process query
     drug = QDrug.strip().lower()
 
@@ -124,17 +126,20 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
         drug_targets = GO_API.get_GO_terms(drug_gene_list)
 
 #        Get GO Enrichment statistics
-        result = GO_API.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets)
+        go_result = GO_API.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets)
         if output_full is False:
-            result = result.loc[result['rejected'] == 1.0, ['namespace', 'name', 'p', 'q']]
-            result = result.sort(['q'])
+            go_result = go_result.loc[go_result['rejected'] == 1.0, ['namespace', 'name', 'p', 'q']]
+            go_result = go_result.sort(['q'])
+
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes}
+
         if gen_interaction_image:
             subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name)+ '.dot', '-o', os.path.join(results_dir, out_name) + '.png'])
+            result["image_file"] = os.path.join(results_dir, out_name) + '.png'
         if gen_tissues_image:
             pass
 
 
-        result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes}
 
     # return(drug_tissues)
     return(result)

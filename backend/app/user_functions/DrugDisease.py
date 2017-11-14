@@ -6,9 +6,10 @@ from iris import state_machine as sm
 from iris import util as util
 from iris import iris_objects
 
-from app.user_functions.ncats.scripts import run_test, run_main
+from app.user_functions.ncats.scripts import run_main
 from app.user_functions.Q2_main import Q2_query
 import numpy as np
+import os
 # run_test.run_drug_single('a', 'b')
 
 class DrugDisease(IrisCommand):
@@ -25,9 +26,9 @@ class DrugDisease(IrisCommand):
                         #     yes=#customize output
                         "bool_image":t.YesNo("Would you like to visual the results as a diagram?",
                                     yes=True, no=False),
-                        "bool_full_GO":t.YesNo("Would you like to only significant GO enrichment results (Yes-signficant; No-all)?",
-                                    yes=True, no=False),
-                        "bool_other_disease":t.YesNo("Would you like to list other diseases that can be treated by this drug?",
+                        # "bool_full_GO":t.YesNo("Would you like to only significant GO enrichment results (Yes-signficant; No-all)?",
+                        #             yes=True, no=False),
+                        "bool_other_disease":t.YesNo("Would you like to know other diseases that can be treated by this drug?",
                                     yes=True, no=False),
                         "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
                                     yes=True, no=False)
@@ -36,11 +37,12 @@ class DrugDisease(IrisCommand):
                             # no=False)} #use defaults
     
     # core logic of the command
-    def command(self, drug, disease, bool_image, bool_full_GO, bool_other_disease, bool_pubmed):
+    def command(self, drug, disease, bool_image, bool_other_disease, bool_pubmed):
 
-        answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_tissues_image=bool_other_disease, output_full=bool_full_GO)
+        answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_tissues_image=bool_other_disease, output_full=False)
         print('answer')
-        # answer= run_main.run_drug_single(drug, disease)
+        if bool_other_disease:
+            answer["other_disease"] = run_main.find_drug_indications(drug)
         # print (answer)
         # print('!!!!!!!!!')
     
@@ -51,20 +53,37 @@ class DrugDisease(IrisCommand):
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
 
-        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes}
+        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "image_file": image_path
         result_array = []
+        # print(result)
         # if "GOENRICH" in result:
         result_array.append('Genes found to be targetted by given drug are: (will formate as table)')
         drug_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["drug_genes"]]
         result_array = result_array + drug_genes_tuples
         result_array.append('Genes found to be associated with disease are: (will formate as table)')
-        dis_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["dis_genes"]]
+        dis_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["disease_genes"]]
         result_array = result_array + dis_genes_tuples
+
+
         result_array.append('Significant GO Terms associated with the drug-disease interaction are shown')
-        result_array.append(result['GOENRICH'])
+        go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
+        self.iris.add_to_env('drug_disease_go_terms', go_term_object)
+        result_array.append(go_term_object)
 
+        if "image_file" in result:
+            os.system("open " + result["image_file"])
 
-        return result
+        if "other_disease" in result:
+            ph_genes_str, drug = result["other_disease"]
+            multi_answer_line = ['We queried the gene neighborhood of drug targets and found the following phenotypes to be significant', 'Here we list significant phenotypes in order of probability. Column headings are probability, significance level cutoff, phenotype, and a list of genes associated']
+            result_array = result_array + multi_answer_line
+            ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
+            ph_genes_array_grouped = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
+            ph_genes_array_grouped_iris = iris_objects.IrisDataframe(column_names=["probability", "Benjamin Hochberg significance cutoff", "Phenotype", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_grouped)
+            self.iris.add_to_env('drug_indications', ph_genes_array_grouped_iris)
+            result_array.append(ph_genes_array_grouped_iris)  
+
+        return result_array
         ##### JEN'S STUFF ######
         # answer_found_bool, answer_found_exp_str, ph_genes_str, drug = result
         # if answer_found_bool:
@@ -94,73 +113,73 @@ class DrugDisease(IrisCommand):
 _DrugDisease = DrugDisease()
 
 
-class DrugDiseaseMulti(IrisCommand):
-    # what iris will call the command + how it will appear in a hint
-    title = "Can you find the mechanism of action of this list of drug-disease pairs"
+# class DrugDiseaseMulti(IrisCommand):
+#     # what iris will call the command + how it will appear in a hint
+#     title = "Can you find the mechanism of action of this list of drug-disease pairs"
     
-    # give an example for iris to recognize the command
-    examples = ["multiple drugs and diseases", "how list of drugs works", "how multiple drug works on disease", "how do these drugs affect these diseases", "how does this list of {drug_list} affect {disease_list}" ]
+#     # give an example for iris to recognize the command
+#     examples = ["multiple drugs and diseases", "how list of drugs works", "how multiple drug works on disease", "how do these drugs affect these diseases", "how does this list of {drug_list} affect {disease_list}" ]
 
-    # type annotations for each command argument, to help Iris cosllect missing values from a user
-    argument_types = {"drug_list":t.List("What drugs do you want to analyze?"), "disease_list":t.List("What diseases do you want to analyze? List must be the same length as the list of drugs.")}
+#     # type annotations for each command argument, to help Iris cosllect missing values from a user
+#     argument_types = {"drug_list":t.List("What drugs do you want to analyze?"), "disease_list":t.List("What diseases do you want to analyze? List must be the same length as the list of drugs.")}
     
-    # core logic of the command
-    def command(self, drug_list, disease_list):
-        # import numpy
-        # return numpy.random.randint(100)
-        assert(len(drug_list) == len(disease_list))
-        results = []
-        for drug, disease in zip(drug_list, disease_list):
-            result = run_test.run_drug_single(drug, disease)
-            result_txt = ' '.join(('Answer Found:', result[0], 'Answer:', result[1]))
-            results.append(' '.join((drug, disease, result_txt)))
-        return '\t'.join(results)
+#     # core logic of the command
+#     def command(self, drug_list, disease_list):
+#         # import numpy
+#         # return numpy.random.randint(100)
+#         assert(len(drug_list) == len(disease_list))
+#         results = []
+#         for drug, disease in zip(drug_list, disease_list):
+#             result = run_test.run_drug_single(drug, disease)
+#             result_txt = ' '.join(('Answer Found:', result[0], 'Answer:', result[1]))
+#             results.append(' '.join((drug, disease, result_txt)))
+#         return '\t'.join(results)
         
-    # wrap the output of a command to display to user
-    # by default this will be an identity function
-    # each element of the list defines a separate chat bubble
-    def explanation(self, results):
+#     # wrap the output of a command to display to user
+#     # by default this will be an identity function
+#     # each element of the list defines a separate chat bubble
+#     def explanation(self, results):
 
-        # return ["Book a flight to DC to get the answer. Here's your lucky number", result]
+#         # return ["Book a flight to DC to get the answer. Here's your lucky number", result]
 
-        return results.split('\t')
+#         return results.split('\t')
 
-_DrugDiseaseMulti = DrugDiseaseMulti()
+# _DrugDiseaseMulti = DrugDiseaseMulti()
 
 
 
-class DrugDiseaseCSV(IrisCommand):
-    # what iris will call the command + how it will appear in a hint
-    title = "Can you find the mechanism of action of these drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"
+# class DrugDiseaseCSV(IrisCommand):
+#     # what iris will call the command + how it will appear in a hint
+#     title = "Can you find the mechanism of action of these drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"
     
-    # give an example for iris to recognize the command
-    examples = ["multiple drugs and diseases from csv", "csv of drug disease matches", "loaded drug disease match", "find the mechanism of action of drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"]
+#     # give an example for iris to recognize the command
+#     examples = ["multiple drugs and diseases from csv", "csv of drug disease matches", "loaded drug disease match", "find the mechanism of action of drug-disease pairs from csv {paired_csv} and saved to {saved_dir}"]
 
-    # type annotations for each command argument, to help Iris cosllect missing values from a user
-    argument_types = {"paired_csv":t.File("What drugs do you want to analyze?"), "saved_dir":t.String("Where do you want to save the results")}
+#     # type annotations for each command argument, to help Iris cosllect missing values from a user
+#     argument_types = {"paired_csv":t.File("What drugs do you want to analyze?"), "saved_dir":t.String("Where do you want to save the results")}
 
-    # core logic of the command
-    def command(self, paired_csv, saved_dir):
-        import pandas as pd
-        new_df = iris_objects.IrisDataframe(None, empty=True)
-        new_df.df = pd.read_csv(paired_csv.path, sep='\t')
-        # print('read in file')
-        self.iris.add_to_env('drug_disease_list', new_df)
-        # print('added to environment')
+#     # core logic of the command
+#     def command(self, paired_csv, saved_dir):
+#         import pandas as pd
+#         new_df = iris_objects.IrisDataframe(None, empty=True)
+#         new_df.df = pd.read_csv(paired_csv.path, sep='\t')
+#         # print('read in file')
+#         self.iris.add_to_env('drug_disease_list', new_df)
+#         # print('added to environment')
 
-        from ncats.scripts import run_test
-        print('path', paired_csv.path)
-        print('storage_dir', saved_dir)
-        run_test.run_drug_multi(paired_csv.path, storage_dir = saved_dir, iterate_until_found=False)
-        return ' '.join(("written results to:", saved_dir))
+#         from ncats.scripts import run_test
+#         print('path', paired_csv.path)
+#         print('storage_dir', saved_dir)
+#         run_test.run_drug_multi(paired_csv.path, storage_dir = saved_dir, iterate_until_found=False)
+#         return ' '.join(("written results to:", saved_dir))
         
-    # wrap the output of a command to display to user
-    # by default this will be an identity function
-    # each element of the list defines a separate chat bubble
-    def explanation(self, results):
+#     # wrap the output of a command to display to user
+#     # by default this will be an identity function
+#     # each element of the list defines a separate chat bubble
+#     def explanation(self, results):
 
-        return results
+#         return results
 
-_DrugDiseaseCSV = DrugDiseaseCSV()
+# _DrugDiseaseCSV = DrugDiseaseCSV()
 
 

@@ -3,7 +3,7 @@ import nltk
 import os
 ## REPLACE WITH YOUR LOCAL PATH
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
-RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
+RSCS_DIR = os.path.join(PARENT_DIR, 'shared_data')
 PATH_TO_GIANT_TISSUES_LIST=os.path.join(RSCS_DIR, 'list_of_GIANT_tissues.txt')
 
 

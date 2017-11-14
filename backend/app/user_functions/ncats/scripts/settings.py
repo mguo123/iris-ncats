@@ -39,7 +39,7 @@ global PARENT_DIR
 global RSCS_DIR
 global RESULTS_DIR
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
-RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
+RSCS_DIR = os.path.join(PARENT_DIR, 'shared_data')
 RESULTS_DIR = os.path.join(PARENT_DIR, 'results')
 
 

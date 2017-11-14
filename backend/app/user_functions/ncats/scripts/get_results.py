@@ -9,7 +9,7 @@ import numpy as np
 # from optparse import OptionParser
 from collections import defaultdict
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
-RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
+RSCS_DIR = os.path.join(PARENT_DIR, 'shared_data')
 MAPPING_DICT = pickle.load(open(os.path.join(RSCS_DIR, 'conds_phen_matches_word_overlap.pkl') , 'rb'))
 POSSIBLE_HEADER_RESULTS_FILE = ['phenotype','rank','BHcorrPval', 'Pval', 'assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen\n']
 

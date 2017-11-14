@@ -10,7 +10,7 @@ import csv, os, pickle
 from collections import defaultdict
 # # resources for pulling associations
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
-RSCS_DIR = os.path.join(PARENT_DIR, 'rscs')
+RSCS_DIR = os.path.join(PARENT_DIR, 'shared_data')
 g_to_disGenNet = pickle.load(open(RSCS_DIR+'/disGeNet_gene_dis_score_dict.pkl','rb'))
 g_to_OMIM = pickle.load(open(RSCS_DIR+'/OMIM_genes_to_phenotypes.pkl','rb')) # OMIM phenotypes
 g_to_phW_snps = pickle.load(open(RSCS_DIR+'/gene_to_rs_phWAS.pkl','rb')) # gene to SNPs from PheWAS
