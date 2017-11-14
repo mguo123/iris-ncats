@@ -38,20 +38,32 @@ class DrugDisease(IrisCommand):
     # core logic of the command
     def command(self, drug, disease, bool_image, bool_full_GO, bool_other_disease, bool_pubmed):
 
-        # for deriving the list of 
-        answer = Q2_query(drug, disease, gen_image=bool_image, output_full=bool_full_GO)
+        answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_tissues_image=bool_other_disease, output_full=bool_full_GO)
         print('answer')
         # answer= run_main.run_drug_single(drug, disease)
         # print (answer)
         # print('!!!!!!!!!')
-        iris_answer = iris_objects.IrisDataframe(data=answer)
     
-        return iris_answer
+        return answer
         
     # wrap the output of a command to display to user
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
+
+        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes}
+        result_array = []
+        # if "GOENRICH" in result:
+        result_array.append('Genes found to be targetted by given drug are: (will formate as table)')
+        drug_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["drug_genes"]]
+        result_array = result_array + drug_genes_tuples
+        result_array.append('Genes found to be associated with disease are: (will formate as table)')
+        dis_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["dis_genes"]]
+        result_array = result_array + dis_genes_tuples
+        result_array.append('Significant GO Terms associated with the drug-disease interaction are shown')
+        result_array.append(result['GOENRICH'])
+
+
         return result
         ##### JEN'S STUFF ######
         # answer_found_bool, answer_found_exp_str, ph_genes_str, drug = result
