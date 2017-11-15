@@ -91,6 +91,11 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
     # If either disease or drug list comes up empty
     # the query has failed and we return a statement to that effect
+    # print('dis_gene_list', dis_gene_list)
+    # print('drug_gene_list', drug_gene_list)
+    # remove None from drug_gene_list and dis_gene_list
+    drug_gene_list = [x for x in drug_gene_list if x is not None]
+    dis_gene_list = [x for x in dis_gene_list if x is not None]
 
     if dis_gene_list is None and drug_gene_list is None:
         return "Drug and disease not recognized, better luck next time..."
@@ -98,10 +103,8 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         return "Disease not recognized"
     elif drug_gene_list is None:
         return "Drug not recognized"
-
     # If we have targets
     else:
-
         PMIDs = EBC_api.query_chemical_disease(drug, disease, get_PMIDs=True)
         PMID_df = pd.DataFrame([[x, ""] for x in PMIDs], columns = ["PMIDS", "Title"])
         PMID_df_short = PMID_df[:min(5, len(PMID_df))]
@@ -121,8 +124,6 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         # Get drug tissues
         # drug_tissues = pharos_api.get_tissues_oi(drug_genes)
         # print(drug_tissues)
-
-
 
         drug_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
@@ -151,7 +152,9 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
 
         if gen_interaction_image:
-            subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name)+ '.dot', '-o', os.path.join(results_dir, out_name) + '.png'])
+            file_name = os.path.join(results_dir, out_name) + '.png'
+            subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name)+ '.dot', '-o', file_name])
+            result["image_file"] = file_name
         if gen_tissues_image:
             pass
 
@@ -169,25 +172,34 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
 # unit testing
 if __name__ == "__main__":
-    drug="lisinopril"
+    drug="metformin"
 
-    disease="hypertension"
+    disease="depression"
 
     GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
 
     # print(drug,disease)
     result = Q2_query(drug, disease)
+    # print(result)
+    # drug="lisinopril"
+
+    # disease="hypertension"
+
+    # GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
+
+    # # print(drug,disease)
+    # result = Q2_query(drug, disease)
     # if type(result) is not str:
     #     print(result)
     # else:
     #     print(result)
 
-    drug="tacrine"
+    # drug="tacrine"
 
-    disease="alzheimer-disease"
+    # disease="alzheimer-disease"
 
-    # print(drug,disease)
-    result = Q2_query(drug, disease)
+    # # print(drug,disease)
+    # result = Q2_query(drug, disease)
     # if type(result) is not str:
     #     print(result)
     # else:

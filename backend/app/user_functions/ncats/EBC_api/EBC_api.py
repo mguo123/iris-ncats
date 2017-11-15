@@ -158,7 +158,7 @@ def query_chemical_disease(drug, disease, relationship="T", gen_counts=False, ge
         if chem_id in chem_disease_dict:
             for entry in chem_disease_dict.get(chem_id):
                 id = entry[0]
-                print(entry)
+                # prin t(entry)
                 if id == disease_id:
                     if entry[1] == relationship:
                         PMIDs.append(entry[2])
