@@ -17,8 +17,6 @@ from app.user_functions.ncats.EBC_api import EBC_api
 from app.user_functions.ncats.Pharos_api import pharos_api
 from app.user_functions.ncats.GO_api import go_api
 
-GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
-
 # from ncats.EBC_api import EBC_api
 # from ncats.Pharos_api import pharos_api
 # from ncats.GO_api import go_api
@@ -49,7 +47,7 @@ N'
 """
 
 def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_interaction_image=False, output_full=False):
-    #
+
     # Pre-process query
     drug = QDrug.strip().lower()
 
@@ -136,21 +134,27 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
 #        Get GO Enrichment statistics
         go_result = GO_API.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets)
+        go_result['gene_target'] = go_result['term'].isin(drug_targets)
+
         if output_full is False:
-            go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'namespace', 'p', 'q', "term"]]
-            go_result = go_result.sort(['q'])
+            go_result = go_result.loc[go_result['rejected'] == 1.0, ['namespace', 'term', 'p', 'q', 'gene_target']]
+            go_result = go_result.sort_values(by=['q'])
+            #
+
+        # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
         result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
 
+
         if gen_interaction_image:
             subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name)+ '.dot', '-o', os.path.join(results_dir, out_name) + '.png'])
-            result["image_file"] = os.path.join(results_dir, out_name) + '.png'
         if gen_tissues_image:
             pass
 
+        # Get Pubmed id
         if gen_pubmed:
             if len(PMIDs) > 0:
                 result["pubmed"] = PMID_df
@@ -170,7 +174,7 @@ if __name__ == "__main__":
 
     GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
 
-    print(drug,disease)
+    # print(drug,disease)
     result = Q2_query(drug, disease)
     # if type(result) is not str:
     #     print(result)
@@ -181,7 +185,7 @@ if __name__ == "__main__":
 
     disease="alzheimer-disease"
 
-    print(drug,disease)
+    # print(drug,disease)
     result = Q2_query(drug, disease)
     # if type(result) is not str:
     #     print(result)
