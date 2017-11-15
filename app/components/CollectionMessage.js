@@ -18,7 +18,7 @@ class CollectionMessage extends Component {
     let containsText = false;
     return (<div className = {this.props.origin === 'iris' ? 'message left' : 'message right'} style={this.props.hidden === true ? {display: 'none'} : {}}>
         <div className="bubble table">
-        <div className="data_table" style={{width: 80 * (350+10+1)}}>
+        <div className="data_table" style={{width: 20 * (350+10+1)}}>
           <div className="header">
           {this.testColumns.map((column,i) => {
             // define style attributes for the column programmatically, based on data-type

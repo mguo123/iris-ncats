@@ -17,7 +17,7 @@ class DrugDisease(IrisCommand):
     title = "How does {drug} treat {disease}?"
     
     # give an example for iris to recognize the command
-    examples = ["why does {drug} work against {disease}", "why does {drug} treat disease", "what are the targets of {drug} relevant to {disease}", "mechanism of action", "treat disease", "how drug works", "how drug works on disease", "how does drug affect disease", "how does {drug} affect {disease}" "How does {drug} treat {disease}", "What is the mechanism of action for {drug} treating {disease}", "is {disease} treatable by {drug}"]
+    examples = ["why does {drug} work against {disease}", "why does {drug} treat {disease}", "what are the targets of {drug} relevant to {disease}", "mechanism of action", "treat {disease}", "how drug works", "how drug works on disease", "how does {drug} affect {disease}", "how does {drug} affect {disease}" "How does {drug} treat {disease}", "What is the mechanism of action for {drug} treating {disease}", "is {disease} treatable by {drug}"]
     
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"), 
@@ -39,10 +39,13 @@ class DrugDisease(IrisCommand):
     # core logic of the command
     def command(self, drug, disease, bool_image, bool_other_disease, bool_pubmed):
 
-        answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_tissues_image=bool_other_disease, output_full=False)
+        answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_pubmed=bool_pubmed, gen_tissues_image=bool_other_disease, output_full=False)
         print('answer')
         if bool_other_disease:
             answer["other_disease"] = run_main.find_drug_indications(drug)
+
+        answer['drug'] = drug
+        answer['disease'] = disease
         # print (answer)
         # print('!!!!!!!!!')
     
@@ -53,36 +56,69 @@ class DrugDisease(IrisCommand):
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
 
-        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "image_file": image_path
+        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "image_file": image_path, "other_disease": jenn's result, "pubmed": PMIDs
         result_array = []
         # print(result)
         # if "GOENRICH" in result:
-        result_array.append('Genes found to be targetted by given drug are: (will formate as table)')
-        drug_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["drug_genes"]]
-        result_array = result_array + drug_genes_tuples
-        result_array.append('Genes found to be associated with disease are: (will formate as table)')
-        dis_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["disease_genes"]]
-        result_array = result_array + dis_genes_tuples
+        result_array.append('Top Genes found to be targetted by %s are below. Full dataset saved as drug_genes' % result['drug'])
+        drug_gene_term_object = iris_objects.IrisDataframe(data=result['drug_genes'])
+        self.iris.add_to_env('drug_genes', drug_gene_term_object)
+        drug_gene_term_object_short = iris_objects.IrisDataframe(data=result['drug_genes_short'])
+        result_array.append(drug_gene_term_object_short)
+        # result_array.append("Full dataset saved as drug_associated_genes")
 
 
-        result_array.append('Significant GO Terms associated with the drug-disease interaction are shown')
+        # drug_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["drug_genes"]]
+        # result_array = result_array + drug_genes_tuples
+        result_array.append('Top Genes found to be associated with %s are below. Full dataset saved as disease_genes' % result['disease'])        
+        disease_gene_term_object = iris_objects.IrisDataframe(data=result['disease_genes'])
+        self.iris.add_to_env('disease_genes', disease_gene_term_object)
+        disease_gene_term_object_short = iris_objects.IrisDataframe(data=result['disease_genes_short'])
+        result_array.append(disease_gene_term_object_short)
+        # result_array.append("Full dataset saved as disease_associated_genes")
+
+        # dis_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["disease_genes"]]
+        # result_array = result_array + dis_genes_tuples
+
+
+        result_array.append('Top Significant GO Terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms')
         go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
-        self.iris.add_to_env('drug_disease_go_terms', go_term_object)
-        result_array.append(go_term_object)
+        self.iris.add_to_env('go_terms', go_term_object)
+        go_term_object_short = iris_objects.IrisDataframe(data=result['GOENRICH_short'])
+        result_array.append(go_term_object_short)
+        # result_array.append("Full dataset saved as drug_disease_go_terms")
 
         if "image_file" in result:
             os.system("open " + result["image_file"])
 
         if "other_disease" in result:
             ph_genes_str, drug = result["other_disease"]
-            multi_answer_line = ['We queried the gene neighborhood of drug targets and found the following phenotypes to be significant', 'Here we list significant phenotypes in order of probability. Column headings are probability, significance level cutoff, phenotype, and a list of genes associated']
+            multi_answer_line = ['Top hits of diseases potentially impacted by %s. Full dataset saved as drug_indications.' % result['drug'], 'We queried the gene neighborhood of drug targets and found the following phenotypes to be significant. Here we list significant phenotypes in order of probability. Column headings are phenotype, probability, significance level cutoff, and a list of genes that support the relationship']
             result_array = result_array + multi_answer_line
             ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
-            ph_genes_array_grouped = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
-            ph_genes_array_grouped_iris = iris_objects.IrisDataframe(column_names=["probability", "Benjamin Hochberg significance cutoff", "Phenotype", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_grouped)
-            self.iris.add_to_env('drug_indications', ph_genes_array_grouped_iris)
-            result_array.append(ph_genes_array_grouped_iris)  
+            ph_genes_array_all = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
+            ph_genes_array_all_iris = iris_objects.IrisDataframe(column_names=["probability", "Benjamin Hochberg significance cutoff", "Phenotype", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_all)
+            self.iris.add_to_env('drug_indications', ph_genes_array_all_iris)
+            ph_genes_array_short = [ph_genes_arr[x:x+4] for x in range(0, min(5*4,len(ph_genes_arr)),4)]
+            ph_genes_array_short_iris = iris_objects.IrisDataframe(column_names=["Phenotype", "Probability", "Benjamin Hochberg significance cutoff", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_short)
+            result_array.append(ph_genes_array_short_iris)  
+            # result_array.append("Full dataset saved as drug_indications")
 
+
+        if "pubmed" in result:
+            if isinstance(result["pubmed"], str):
+                result_array.append(result["pubmed"])
+            else:
+                result_array.append("Following are PMIDs that support the interaction: Full dataset saved as pmid_ids.")
+                pmid_df_short = iris_objects.IrisDataframe(data=result["pubmed_short"])
+                pmid_df = iris_objects.IrisDataframe(data=result["pubmed"])
+                self.iris.add_to_env('pmid_ids', pmid_df)
+               
+                result_array.append(pmid_df_short)
+                result_array.append("Full dataset saved as pmid_ids")
+
+
+        result_array.append("Full dataframes are available for viewing using the command: print {dataframe_name}")
         return result_array
         ##### JEN'S STUFF ######
         # answer_found_bool, answer_found_exp_str, ph_genes_str, drug = result

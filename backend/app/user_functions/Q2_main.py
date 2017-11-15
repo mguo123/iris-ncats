@@ -48,7 +48,7 @@ N'
 
 """
 
-def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=False, output_full=False):
+def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_interaction_image=False, output_full=False):
     #
     # Pre-process query
     drug = QDrug.strip().lower()
@@ -104,12 +104,13 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
     else:
 
         PMIDs = EBC_api.query_chemical_disease(drug, disease, get_PMIDs=True)
-        print(PMIDs)
-
+        PMID_df = pd.DataFrame([[x, ""] for x in PMIDs], columns = ["PMIDS", "Title"])
+        PMID_df_short = PMID_df[:min(5, len(PMID_df))]
         # Select the top 25 genes from the disease gene list for GO enrichment
         dis_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x),x] for x in dis_gene_list]
 
         dis_genes = pd.DataFrame(dis_genes, columns=["Gene", "Entrez ID"])
+        dis_genes_short = dis_genes[:min(len(dis_genes), 5)]
         dis_gene_list = list(map(int, dis_gene_list))
 
         # dis_gene_names = EBC_api.get_disease_gene_list(disease, freq_correct=True, gene_names=True)
@@ -126,6 +127,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
 
         drug_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
+        drug_genes_short = drug_genes[:min(5, len(drug_genes))]
         
         # Get the GO terms for the drug targets
         drug_gene_list = list(map(int,drug_gene_list))
@@ -135,10 +137,13 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
 #        Get GO Enrichment statistics
         go_result = GO_API.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets)
         if output_full is False:
-            go_result = go_result.loc[go_result['rejected'] == 1.0, ['namespace', 'name', 'p', 'q']]
+            go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'namespace', 'p', 'q', "term"]]
             go_result = go_result.sort(['q'])
+        go_result_short = go_result[:min(5, len(go_result))]
 
-        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes}
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes,
+                  "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
+                  }
 
         if gen_interaction_image:
             subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name)+ '.dot', '-o', os.path.join(results_dir, out_name) + '.png'])
@@ -146,6 +151,12 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_interaction_image=Fal
         if gen_tissues_image:
             pass
 
+        if gen_pubmed:
+            if len(PMIDs) > 0:
+                result["pubmed"] = PMID_df
+                result["pubmed_short"] = PMID_df_short
+            else:
+                result["pubmed"] = 'no PMIDs found'
 
 
     # return(drug_tissues)

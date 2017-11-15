@@ -6,7 +6,7 @@ from app.user_functions.Q1_main import Q1_query
 class GeneticConditionDisease(IrisCommand):
     # what iris will call the command + how it will appear in a hint
     # title = "how does {condition} protects against {condition}?"
-    title = "what protects against {condition}"
+    title = "What genetic disease protects against {condition}?"
     # give an example for iris to recognize the command
     examples = ["what protects against {condition}", "what genetic conditions might offer protection against {condition} and why", "protective mechanism of condition against disease", "protective condition", "protection against disease"]
     # type annotations for each command argument, to help Iris collect missing values from a user
@@ -23,7 +23,7 @@ class GeneticConditionDisease(IrisCommand):
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
 
-        return ["Enter the Department of Mysteries to find the answer. Address: Fishbowl, first desk on the right. Here are your magic numbers", result]
+        return result
 
 
 _GeneticConditionDisease = GeneticConditionDisease()

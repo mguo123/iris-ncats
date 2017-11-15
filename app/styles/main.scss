@@ -189,7 +189,7 @@ body{
   margin:2px 0px;
 }
 .message.left{
-  width:50%;
+  width:80%;
   margin-right:50%;
   text-align:left;
 }
@@ -254,14 +254,14 @@ body{
 		}
 		span.data_column{
 			display:inline-block;
-			width:120px;
+			width:180px;
+			overflow: scroll;
 			height:1.4em;
-			overflow: hidden;
 			padding:.2em 0px 0em 10px;
 			border-left:1px solid #efefef;
 		}
 		.data_row{
-			height:1.4em;
+			/*height:1.4em;*/
 			border-bottom:1px solid #efefef;
 		}
 	}

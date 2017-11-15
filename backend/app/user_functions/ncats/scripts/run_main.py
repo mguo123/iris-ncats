@@ -209,7 +209,7 @@ def interpret_results(sum_asscs, disease=None, mapping_dict = None):
             BH = '%.3g' % float(BH)
             prb = '%.3g' % float(prb)
             ph_to_sig_genes_dict[ph.lower().strip()] = ','.join(sig_genes)
-            all_possible_diseases.append('\t'.join([prb, BH, ph,', '.join(sig_genes)]))
+            all_possible_diseases.append('\t'.join([ph, prb, BH ,', '.join(sig_genes)]))
 
     all_possible_diseases_string = '\t'.join(all_possible_diseases)
     if disease is None:

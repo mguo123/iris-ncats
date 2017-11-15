@@ -9,3 +9,12 @@ backend/app/user_functions/ncats/GO_api/GO_DB/*
 backend/app/user_functions/ncats/EBC_api/*.gz
 backend/app/user_functions/ncats/GO_api/*.gz
 backend/app/user_functions/ncats/results
+
+.DS_Store
+backend/.DS_Store
+backend/app/.DS_Store
+backend/app/user_functions/ncats/.DS_Store
+backend/app/user_functions/ncats/EBC_api/.DS_Store
+backend/app/user_functions/ncats/GO_api/.DS_Store
+backend/app/user_functions/.DS_Store
+
