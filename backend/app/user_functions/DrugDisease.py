@@ -38,16 +38,14 @@ class DrugDisease(IrisCommand):
     
     # core logic of the command
     def command(self, drug, disease, bool_image, bool_other_disease, bool_pubmed):
-
+        print('BEFORE QUERY!!!')
         answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_pubmed=bool_pubmed, gen_tissues_image=bool_other_disease, output_full=False)
-        print('answer')
+        print('answered Q2 query!!!')
         if bool_other_disease:
             answer["other_disease"] = run_main.find_drug_indications(drug)
 
         answer['drug'] = drug
         answer['disease'] = disease
-        # print (answer)
-        # print('!!!!!!!!!')
     
         return answer
         
@@ -55,12 +53,10 @@ class DrugDisease(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-
+        # Components of result are in dictionary form:
         # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "image_file": image_path, "other_disease": jenn's result, "pubmed": PMIDs
         result_array = []
-        # print(result)
-        # if "GOENRICH" in result:
-        result_array.append('Top Genes found to be targetted by %s are below. Full dataset saved as drug_genes' % result['drug'])
+        result_array.append('Top genes found to be targetted by %s are below. Full dataset saved as drug_genes' % result['drug'])
         drug_gene_term_object = iris_objects.IrisDataframe(data=result['drug_genes'])
         self.iris.add_to_env('drug_genes', drug_gene_term_object)
         drug_gene_term_object_short = iris_objects.IrisDataframe(data=result['drug_genes_short'])
@@ -70,7 +66,7 @@ class DrugDisease(IrisCommand):
 
         # drug_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["drug_genes"]]
         # result_array = result_array + drug_genes_tuples
-        result_array.append('Top Genes found to be associated with %s are below. Full dataset saved as disease_genes' % result['disease'])        
+        result_array.append('Top genes found to be associated with %s are below. Full dataset saved as disease_genes' % result['disease'])        
         disease_gene_term_object = iris_objects.IrisDataframe(data=result['disease_genes'])
         self.iris.add_to_env('disease_genes', disease_gene_term_object)
         disease_gene_term_object_short = iris_objects.IrisDataframe(data=result['disease_genes_short'])
@@ -81,7 +77,7 @@ class DrugDisease(IrisCommand):
         # result_array = result_array + dis_genes_tuples
 
 
-        result_array.append('Top Significant GO Terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms')
+        result_array.append('Top significant GO terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms')
         go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
         self.iris.add_to_env('go_terms', go_term_object)
         go_term_object_short = iris_objects.IrisDataframe(data=result['GOENRICH_short'])
@@ -110,12 +106,18 @@ class DrugDisease(IrisCommand):
                 result_array.append(result["pubmed"])
             else:
                 result_array.append("Following are PMIDs that support the interaction: Full dataset saved as pmid_ids.")
+                # hard_coded_result_titles = ["Treatment satisfaction, functional status, and health-related quality of life of migraine patients treated with almotriptan or sumatriptan.",
+                #                             "Value of postmarketing surveillance studies in achieving a complete picture of antimigraine agents: using almotriptan as an example.",
+                #                             "Early intervention with almotriptan: results of the AEGIS trial (AXERT Early Migraine Intervention Study).",
+                #                             "Crossover, double-blind clinical trial comparing almotriptan and ergotamine plus caffeine for acute migraine therapy.",
+                #                             "Effect of early intervention with almotriptan vs placebo on migraine-associated functional disability: results from the AEGIS Trial."]
+                # result["pubmed_short"]["Title"] = hard_coded_result_titles         
                 pmid_df_short = iris_objects.IrisDataframe(data=result["pubmed_short"])
                 pmid_df = iris_objects.IrisDataframe(data=result["pubmed"])
                 self.iris.add_to_env('pmid_ids', pmid_df)
                
                 result_array.append(pmid_df_short)
-                result_array.append("Full dataset saved as pmid_ids")
+                # result_array.append("Full dataset saved as pmid_ids")
 
 
         result_array.append("Full dataframes are available for viewing using the command: print {dataframe_name}")

@@ -52,7 +52,7 @@ class EventLoop:
             self.machine.reset()
             # "state":"Start" means the current interaction is over
             # TODO: change this protocol, left over from forever ago
-            return True, {"state":"START", "text": ["Okay, what would you like do do?"], "history": self.iris.history["history"]}
+            return True, {"state":"START", "text": ["Okay, what would you like to do?"], "history": self.iris.history["history"]}
         return False, None
     # TODO: change name
     # this wraps the main logic layer between user input and automata state

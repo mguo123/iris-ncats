@@ -23,7 +23,7 @@ class GotermEnrichment(IrisCommand):
         "Gene Ontology (GO) Consortium contains functional and structure annotations for genes. Given a set of genes that are up-regulated under certain conditions, an enrichment analysis will find which GO terms are over-represented using annotations for a list of genes. \nCurrenlty, Iris takes in Gene Symbols (e.g. CTSK) and corrects p-values with FDR"
     ]
     argument_types = {
-        "gene_list": t.Array("What is the list of gene symbols (e.g. CTSK) you want to analyze?"),
+        "gene_list": t.List("What is the list of gene symbols (e.g. CTSK) you want to analyze?"),
         "n_top": t.Int("How many top results you want to see?")
     }
     argument_help = {

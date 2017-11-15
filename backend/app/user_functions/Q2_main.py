@@ -16,6 +16,7 @@ if not os.path.exists(results_dir):
 from app.user_functions.ncats.EBC_api import EBC_api
 from app.user_functions.ncats.Pharos_api import pharos_api
 from app.user_functions.ncats.GO_api import go_api
+GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
 
 # from ncats.EBC_api import EBC_api
 # from ncats.Pharos_api import pharos_api
@@ -137,7 +138,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         go_result['gene_target'] = go_result['term'].isin(drug_targets)
 
         if output_full is False:
-            go_result = go_result.loc[go_result['rejected'] == 1.0, ['namespace', 'term', 'p', 'q', 'gene_target']]
+            go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'term', 'p', 'q', 'gene_target']]
             go_result = go_result.sort_values(by=['q'])
             #
 
