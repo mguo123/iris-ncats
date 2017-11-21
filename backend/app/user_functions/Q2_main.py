@@ -4,6 +4,7 @@ import subprocess
 import os
 
 import pandas as pd
+from pubmed_lookup import PubMedLookup, Publication
 
 # sys.path.insert(0, os.path.abspath(os.path.dirname(__file__))) # points to E DIR
 
@@ -21,6 +22,7 @@ from ncats.EBC_api import EBC_api
 from ncats.Pharos_api import pharos_api
 from ncats.GO_api import go_api
 from ncats.TiGER_api import TiGER_api
+
 
 GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
 
@@ -48,6 +50,13 @@ N'
 'x'
 
 """
+def get_PMID(PMID):
+    email = ''
+    url = 'http://www.ncbi.nlm.nih.gov/pubmed/' + PMID
+    lookup = PubMedLookup(url, email)
+    publication = Publication(lookup)
+    return(publication.title)
+
 
 def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_interaction_image=False, output_full=False):
 
@@ -84,6 +93,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         # Search EBC for a drug target, via binding annotations
         drug_gene_list = EBC_api.query_drug_target(drug)
 
+
     else:
         # If targets are from Pharos, map them to their Uniprot IDs
         drug_gene_list = []
@@ -103,18 +113,15 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         return "Drug not recognized"
     # If we have targets
     else:
-        PMIDs = EBC_api.query_chemical_disease(drug, disease, get_PMIDs=True)
-        PMID_df = pd.DataFrame([[x, ""] for x in PMIDs], columns = ["PMIDS", "Title"])
-        PMID_df_short = PMID_df[:min(5, len(PMID_df))]
-        # Select the top 25 genes from the disease gene list for GO enrichment
-        dis_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x),x] for x in dis_gene_list]
 
-        dis_genes_df = pd.DataFrame(dis_genes, columns=["Gene", "Entrez ID"])
+        # Select the top 25 genes from the disease gene list for GO enrichment
+
+        dis_genes = pd.DataFrame([[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)),x] for x in dis_gene_list], columns=["Gene", "Entrez ID"])
         dis_genes_short = dis_genes[:min(len(dis_genes), 5)]
         dis_gene_list = list(map(int, dis_gene_list))
 
         # Get tissue information
-        tissue_df = TiGER_api.get_tissue_counts(dis_genes)
+        tissue_df = TiGER_api.get_tissue_counts([EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in dis_gene_list])
 
         drug_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
@@ -137,7 +144,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
-        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes_df, "dis_tissue_data":tissue_df,
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "dis_tissue_data":tissue_df,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
 
@@ -151,27 +158,33 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
         # Get Pubmed id
         if gen_pubmed:
+            PMIDs = EBC_api.query_chemical_disease(drug, disease, get_PMIDs=True)
+
             if len(PMIDs) > 0:
+                ################### THIS IS JUST TOP 5 FOR NOW, SEEMS LIKE THE API CALLS TAKE SOME TIME
+                PMID_df = pd.DataFrame([[x, get_PMID(x)] for x in PMIDs[:5]], columns=["PMIDS", "Title"])
+
+                PMID_df_short = PMID_df[:5]
                 result["pubmed"] = PMID_df
                 result["pubmed_short"] = PMID_df_short
+
             else:
                 result["pubmed"] = 'no PMIDs found'
-
 
     # return(drug_tissues)
     return(result)
 
 # unit testing
 if __name__ == "__main__":
-    drug="lisinopril"
+    drug="paclitaxel"
 
-    disease="hypertension"
+    disease="depression"
 
     # GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
 
     # print(drug,disease)
-    result = Q2_query(drug, disease)
-    print(result["dis_tissue_data"])
+    result = Q2_query(drug, disease, gen_interaction_image=True)
+
     # drug="lisinopril"
 
     # disease="hypertension"

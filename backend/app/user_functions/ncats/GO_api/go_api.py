@@ -103,11 +103,23 @@ class GO_api:
                 top = int(show.replace('top', ''))
                 sig = df.sort_values('q').head(top)['term']
                 temp = sig.tolist() + target_list
-                print(target_list)
             else:
                 raise NotImplementedError(show)
-            # G = goenrich.enrich.induced_subgraph(O, sig)
-            G = goenrich.enrich.induced_subgraph(O, temp)
+            # All
+            # G = goenrich.enrich.induced_subgraph(O, temp)
+
+            # Drug targets
+            # G = goenrich.enrich.induced_subgraph(O, target_list)
+
+            # Drug and disease tight overlap
+            # overlap = set(sig.tolist()).intersection(set(target_list))
+            # G = goenrich.enrich.induced_subgraph(O, overlap)
+
+            # all_sig overlap
+            sig = df.query('q<0.05')['term']
+            overlap = set(sig.tolist()).intersection(set(target_list))
+            G = goenrich.enrich.induced_subgraph(O, overlap)
+
             for term, node, q, x, n, rej in zip(terms, nodes, qs, xs, ns, rejs):
                 if term in G:
                     G.node[term].update({'name' : node['name'], 'x' : x,
@@ -143,7 +155,6 @@ class GO_api:
                 elif node['isTarget']:
                     attr['fillcolor'] = 'green'
                     attr['style'] = 'filled'
-                    attr['label'] = """{name}""".format(name=node['name'])
                     attr['label'] = "{name}\\n(drug target)".format(name=node['name'])
                 else:
                     attr['fillcolor'] = 'red'
@@ -151,13 +162,18 @@ class GO_api:
                     attr['label'] = "{name}\\n{x} / {n} genes\\nq = {q:E}".format(name=node['name'],
                                                                               q=node['q'], x=node['x'], n=node['n'])
             else:
-                attr['color'] = 'black'
-                attr['fillcolor'] = 'black'
-                attr['height'] = 0.25
-                attr['fixedsize'] = 'true'
-                attr['style'] = 'filled'
-                attr['shape'] = 'circle'
-                attr['label'] = ""
+                if node['isTarget']:
+                    attr['fillcolor'] = 'green'
+                    attr['style'] = 'filled'
+                    attr['label'] = "{name}\\n(drug target)".format(name=node['name'])
+                else:
+                    attr['color'] = 'black'
+                    attr['fillcolor'] = 'black'
+                    attr['height'] = 0.25
+                    attr['fixedsize'] = 'true'
+                    attr['style'] = 'filled'
+                    attr['shape'] = 'circle'
+                    attr['label'] = ""
 
             G.node[n].clear()
             G.node[n].update(attr)
