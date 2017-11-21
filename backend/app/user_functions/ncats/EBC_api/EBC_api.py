@@ -265,42 +265,14 @@ def query_term_for_matches(queryTerm, searchSet = disease_matching_dict, numMatc
 
 
 if __name__ == "__main__":
-    pkl_file = open('./chem_GNDT_dict.pkl', 'rb')
-    chem_dict = pickle.load(pkl_file)
-    pkl_file.close()
+    # genes = ["ACE", "AGT", "REN"]
+    genes = ["1636", "183", "5972"]
+    test = query_gene(genes[0], relationship="Q")
+    print(test)
 
-    pkl_file = open('./disease_GNDT_dict.pkl', 'rb')
-    disease_dict = pickle.load(pkl_file)
-    pkl_file.close()
 
-    pkl_file = open('./disease_matching_dict.pkl', 'rb')
-    disease_matching_dict = pickle.load(pkl_file)
-    pkl_file.close()
 
-    pkl_file = open('./gene_GNDT_dict.pkl', 'rb')
-    gene_dict = pickle.load(pkl_file)
-    pkl_file.close()
-    with open("../disease_failues_matched.txt", "w+") as outFile:
-        with open("../disease_failures.txt", "r") as inFile:
-            for disease in inFile.readlines():
-                disease = disease.strip().lower()
-                print(disease)
-                matches, method = query_term_for_matches(disease, disease_matching_dict)
-                if method == 0:
-                    match = matches
-                    new_key = disease_dict.get(matches)
-                elif method == -1:
-                    new_key = "-"
-                    match = "-"
-                else:
-                    match = matches[0][0]
-                    new_key = disease_dict.get(matches[0][0])
 
-                print(disease + "\t" + match + "\t" + new_key + "\t" + str(method) + "\n")
-                outFile.write(disease + "\t" + match + "\t" + new_key + "\t" + str(method) + "\n")
 
-if __name__ == "__main__":
 
-    # INSERT UNIT TEST HERE
-    exit()
 

@@ -13,14 +13,16 @@ results_dir = os.path.join(overall_path, "ncats/results/Q2/")
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-from app.user_functions.ncats.EBC_api import EBC_api
-from app.user_functions.ncats.Pharos_api import pharos_api
-from app.user_functions.ncats.GO_api import go_api
-GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
+# from app.user_functions.ncats.EBC_api import EBC_api
+# from app.user_functions.ncats.Pharos_api import pharos_api
+# from app.user_functions.ncats.GO_api import go_api
 
-# from ncats.EBC_api import EBC_api
-# from ncats.Pharos_api import pharos_api
-# from ncats.GO_api import go_api
+from ncats.EBC_api import EBC_api
+from ncats.Pharos_api import pharos_api
+from ncats.GO_api import go_api
+from ncats.TiGER_api import TiGER_api
+
+GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
 
 """
 Q2_query
@@ -79,7 +81,6 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
     # If Pharos did not return targets, pull them from the literature
     if drug_genes is None:
-
         # Search EBC for a drug target, via binding annotations
         drug_gene_list = EBC_api.query_drug_target(drug)
 
@@ -91,9 +92,6 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
     # If either disease or drug list comes up empty
     # the query has failed and we return a statement to that effect
-    # print('dis_gene_list', dis_gene_list)
-    # print('drug_gene_list', drug_gene_list)
-    # remove None from drug_gene_list and dis_gene_list
     drug_gene_list = [x for x in drug_gene_list if x is not None]
     dis_gene_list = [x for x in dis_gene_list if x is not None]
 
@@ -111,19 +109,12 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         # Select the top 25 genes from the disease gene list for GO enrichment
         dis_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x),x] for x in dis_gene_list]
 
-        dis_genes = pd.DataFrame(dis_genes, columns=["Gene", "Entrez ID"])
+        dis_genes_df = pd.DataFrame(dis_genes, columns=["Gene", "Entrez ID"])
         dis_genes_short = dis_genes[:min(len(dis_genes), 5)]
         dis_gene_list = list(map(int, dis_gene_list))
 
-        # dis_gene_names = EBC_api.get_disease_gene_list(disease, freq_correct=True, gene_names=True)
-        # print(dis_gene_names[:10])
-        # disease_tissues = pharos_api.get_tissues_oi(dis_gene_names[:5])
-        # print(disease_tissues)
-        # print(drug_genes)
-
-        # Get drug tissues
-        # drug_tissues = pharos_api.get_tissues_oi(drug_genes)
-        # print(drug_tissues)
+        # Get tissue information
+        tissue_df = TiGER_api.get_tissue_counts(dis_genes)
 
         drug_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
@@ -140,13 +131,13 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
         if output_full is False:
             go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'term', 'p', 'q', 'gene_target']]
-            go_result = go_result.sort_values(by=['q'])
+            go_result = go_result.sort_values(by=['gene_target', 'q'], ascending=[False, True])
             #
 
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
-        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes,
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes_df, "dis_tissue_data":tissue_df,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
 
@@ -172,15 +163,15 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
 # unit testing
 if __name__ == "__main__":
-    drug="metformin"
+    drug="lisinopril"
 
-    disease="depression"
+    disease="hypertension"
 
-    GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
+    # GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
 
     # print(drug,disease)
     result = Q2_query(drug, disease)
-    # print(result)
+    print(result["dis_tissue_data"])
     # drug="lisinopril"
 
     # disease="hypertension"
