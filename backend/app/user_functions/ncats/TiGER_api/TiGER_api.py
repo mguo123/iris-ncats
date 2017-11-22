@@ -5,7 +5,7 @@ import pandas as pd
 
 TiGER_path = os.path.abspath(os.path.dirname(__file__))
 
-TiGeR_reference_dir = os.path.join(TiGER_path, "TiGER_DB")
+TiGeR_reference_dir = os.path.join(TiGER_path, "../DB_data/TiGER_DB")
 
 pkl_file = open(os.path.join(TiGeR_reference_dir, 'gene2Tissue_dict.pkl'), 'rb')
 tissue_dict = pickle.load(pkl_file)

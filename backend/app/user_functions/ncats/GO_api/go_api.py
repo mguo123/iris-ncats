@@ -14,7 +14,7 @@ import goenrich.export
 
 GO_path = os.path.abspath(os.path.dirname(__file__))
 
-DB_path = os.path.join(GO_path,"GO_DB")
+DB_path = os.path.join(GO_path,"../DB_data/GO_DB")
 
 """
 GO_api
@@ -71,8 +71,6 @@ class GO_api:
             temp = self.gene2go.loc[self.gene2go['GeneID'] == g]
             [terms.add(x) for x in temp['GO_ID'].values.tolist()]
         return(list(terms))
-
-
 
     def analyze(self, O, query, background_attribute, target_list, **kwargs):
         """ run enrichment analysis for query

@@ -20,7 +20,11 @@ def query(data_type, uid):
     JSON containing the query results
     """
     url = "https://pharos.nih.gov/idg/api/v1/{}({})?view=full".format(data_type, uid)
-    return requests.get(url).json()
+    try:
+        resp = requests.get(url).json()
+    except:
+        resp = None
+    return resp
 
 
 ####################################################################################################
@@ -101,12 +105,15 @@ def get_ligand_targets(ligand):
     """
     qID = get_ligand_id(ligand)
     resp = query("ligands", qID)
-    putative_targets = []
-    for link in resp["links"]:
-        if link["kind"] == "ix.idg.models.Target":
-            for prop in link["properties"]:
-                if prop["label"] == 'IDG Target':
-                    putative_targets.append(prop['term'])
+    if resp is None:
+        return resp
+    else:
+        putative_targets = []
+        for link in resp["links"]:
+            if link["kind"] == "ix.idg.models.Target":
+                for prop in link["properties"]:
+                    if prop["label"] == 'IDG Target':
+                        putative_targets.append(prop['term'])
 
     return putative_targets
 
