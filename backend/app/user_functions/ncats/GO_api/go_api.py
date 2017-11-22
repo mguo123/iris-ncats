@@ -72,8 +72,6 @@ class GO_api:
             [terms.add(x) for x in temp['GO_ID'].values.tolist()]
         return(list(terms))
 
-
-
     def analyze(self, O, query, background_attribute, target_list, **kwargs):
         """ run enrichment analysis for query
 
