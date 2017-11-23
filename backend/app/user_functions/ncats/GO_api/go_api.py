@@ -6,6 +6,7 @@ import os
 from copy import deepcopy
 from scipy.stats import hypergeom
 from statsmodels.stats.multitest import fdrcorrection
+import matplotlib.pyplot as plt
 
 import pickle
 
@@ -13,7 +14,7 @@ import goenrich.export
 
 GO_path = os.path.abspath(os.path.dirname(__file__))
 
-DB_path = os.path.join(GO_path,"GO_DB")
+DB_path = os.path.join(GO_path,"../DB_data/GO_DB")
 
 """
 GO_api
@@ -71,8 +72,6 @@ class GO_api:
             [terms.add(x) for x in temp['GO_ID'].values.tolist()]
         return(list(terms))
 
-
-
     def analyze(self, O, query, background_attribute, target_list, **kwargs):
         """ run enrichment analysis for query
 
@@ -101,9 +100,24 @@ class GO_api:
             if show.startswith('top'):
                 top = int(show.replace('top', ''))
                 sig = df.sort_values('q').head(top)['term']
+                temp = sig.tolist() + target_list
             else:
                 raise NotImplementedError(show)
-            G = goenrich.enrich.induced_subgraph(O, sig)
+            # All
+            # G = goenrich.enrich.induced_subgraph(O, temp)
+
+            # Drug targets
+            # G = goenrich.enrich.induced_subgraph(O, target_list)
+
+            # Drug and disease tight overlap
+            # overlap = set(sig.tolist()).intersection(set(target_list))
+            # G = goenrich.enrich.induced_subgraph(O, overlap)
+
+            # all_sig overlap
+            sig = df.query('q<0.05')['term']
+            overlap = set(sig.tolist()).intersection(set(target_list))
+            G = goenrich.enrich.induced_subgraph(O, overlap)
+
             for term, node, q, x, n, rej in zip(terms, nodes, qs, xs, ns, rejs):
                 if term in G:
                     G.node[term].update({'name' : node['name'], 'x' : x,
@@ -128,24 +142,37 @@ class GO_api:
                 node['isTarget'] = False
             attr = {}
             attr['shape'] = 'record'
+
             if not np.isnan(node.get('q', float('NaN'))):
 
                 if node['isTarget'] and node['significant']:
-                    attr['color'] = 'yellow'
+                    attr['fillcolor'] = 'yellow'
+                    attr['style'] = 'filled'
+                    attr['label'] = "{name}\\n{x} / {n} genes\\nq = {q:E}".format(name=node['name'],
+                                                                                  q=node['q'], x=node['x'], n=node['n'])
                 elif node['isTarget']:
-                    attr['color'] = 'green'
-                elif node['significant']:
-                    attr['color'] = 'red'
+                    attr['fillcolor'] = 'green'
+                    attr['style'] = 'filled'
+                    attr['label'] = "{name}\\n(drug target)".format(name=node['name'])
                 else:
-                    attr['color'] = 'black'
-                attr['label'] = "{name}\\n{x} / {n} genes\\nq = {q:E}".format(name=node['name'],
+                    attr['fillcolor'] = 'red'
+                    attr['style'] = 'filled'
+                    attr['label'] = "{name}\\n{x} / {n} genes\\nq = {q:E}".format(name=node['name'],
                                                                               q=node['q'], x=node['x'], n=node['n'])
             else:
                 if node['isTarget']:
-                    attr['color'] = 'green'
+                    attr['fillcolor'] = 'green'
+                    attr['style'] = 'filled'
+                    attr['label'] = "{name}\\n(drug target)".format(name=node['name'])
                 else:
                     attr['color'] = 'black'
-                attr['label'] = """{name}""".format(name=node['name'])
+                    attr['fillcolor'] = 'black'
+                    attr['height'] = 0.25
+                    attr['fixedsize'] = 'true'
+                    attr['style'] = 'filled'
+                    attr['shape'] = 'circle'
+                    attr['label'] = ""
+
             G.node[n].clear()
             G.node[n].update(attr)
 
@@ -159,10 +186,9 @@ class GO_api:
             with open(gvfile, 'w+') as f:
                 A.write(f)
 
-
 # Paths for unit testing
 if __name__ == "__main__":
-    GO_test = GO_api("./EBC_DB")
+    GO_test = GO_api(DB_path)
 
     disease_gene_list = {7555, 22796, 7182, 3990, 80150, 1071, 4023, 185, 6462, 319, 27202, 5444, 1482, 336, 6352, 338,
                      3156, 344, 348, 7138, 4323, 4837, 3949, 3952, 2169}
