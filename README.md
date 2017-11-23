@@ -1,4 +1,4 @@
-# iris-ncats: A Conversational Agent for Biological Data Science based on Iris
+# iris-ncats: A Conversational Agent for Biological Data Science 
 
 This repository contains the prototype for our Stanford Effort Biomedical Data Translater that is able to answer the following questions:
 
@@ -64,7 +64,7 @@ In order to run Iris in development mode.
     cd iris-agent/backend/app # enter backend path
 
     python app.py
-    ```
+```
 3. Wait until your backend has finished booting up (should take between 30-40 seconds)
 4. In the other window, type:
 ```
@@ -75,7 +75,7 @@ In order to run Iris in development mode.
 
     # start electron (this will open the application automatically)
     npm start
-    ```
+```
 
 ## Developing in Iris
 
