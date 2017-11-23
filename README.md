@@ -28,6 +28,7 @@ The backend of Iris is written in Python while the front end is written in Javas
     * run `ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
     * `brew install node` (if you hit errors: go [here](http://blog.teamtreehouse.com/install-node-js-npm-mac))
 
+### DATA (INSERT STUFF HERE!!!)
 
 ### Install and run the Python components:
 ```
@@ -68,10 +69,8 @@ In order to run Iris in development mode.
 3. Wait until your backend has finished booting up (should take between 30-40 seconds)
 4. In the other window, type:
 ```
-    source activate iris
 
-    cd iris-agent
-    cd backend
+    cd iris-agent/backend
 
     # start electron (this will open the application automatically)
     npm start
@@ -114,4 +113,11 @@ class TreatDisease(IrisCommand):
     def explanation(self, result):
         return ["Here is the answer", result]
 ```
+
+## Known Issues
+
+The following issues are recognized and are being resolved
+* OSX display issues - if you have a mouse USB plugged in while running `npm start`, display proportions will be slighlty misconfigured. Try unpluggin the mouse USB then restarting Iris.
+* Windows display issues - The display characteristics if using Windows platform is off, we recognize this problem and are working to fix it
+
 
