@@ -4,8 +4,9 @@ import pandas as pd
 
 
 TiGER_path = os.path.abspath(os.path.dirname(__file__))
+NCATS_path = os.path.abspath(os.path.dirname(TiGER_path))
 
-TiGeR_reference_dir = os.path.join(TiGER_path, "../DB_data/TiGER_DB")
+TiGeR_reference_dir = os.path.join(NCATS_path, "DB_data/TiGER_DB")
 
 pkl_file = open(os.path.join(TiGeR_reference_dir, 'gene2Tissue_dict.pkl'), 'rb')
 tissue_dict = pickle.load(pkl_file)
@@ -26,8 +27,11 @@ def get_tissue_counts(geneList):
             else:
                 results["all"] = 1
     out = pd.DataFrame.from_dict(results, orient="index")
-    out.columns = ["count"]
-    out.sort_values(by = "count", inplace=True, ascending=False)
+    out.columns = ["Count"]
+    out.index.name = 'Tissue'
+    out.reset_index(inplace=True)
+
+    out.sort_values(by = "Count", inplace=True, ascending=False)
     return(out)
 
 

@@ -1,9 +1,0 @@
-drug	Condition
-BUTYLSCOPOLAMINE	Abdominal Pain
-ADAPALENE	Acne Vulgaris
-CEFEPIME	"Skin Diseases, Bacterial"
-SPIRAPRIL	Hypertension
-CHLORCYCLIZINE	Asthma
-ISONIAZID	Tuberculosis
-PYRIMETHAMINE	Toxoplasmosis
-ECONAZOLE	Tinea Pedis

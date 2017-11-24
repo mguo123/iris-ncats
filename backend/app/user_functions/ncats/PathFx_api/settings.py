@@ -26,20 +26,21 @@ from collections import defaultdict
 
 
 # IMPORT USER_FUNCTIONS
+from app.user_functions.ncats.Pharos_api import pharos_api
+
 from get_results import get_results
 from get_output_data import get_output_data
 import find_neighborhood_beta
 from find_neighborhood_beta import find_neighborhood as fgn
 import run_analysis as ann
 from get_associations_deprecated import get_associations
-import pharos_api
 # import association file data
 # Define variables with paths
 global PARENT_DIR
 global RSCS_DIR
 global RESULTS_DIR
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
-RSCS_DIR = os.path.join(PARENT_DIR, 'shared_data')
+RSCS_DIR = os.path.join(PARENT_DIR, 'DB_data/shared_data')
 RESULTS_DIR = os.path.join(PARENT_DIR, 'results')
 
 

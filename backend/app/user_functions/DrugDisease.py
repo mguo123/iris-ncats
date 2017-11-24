@@ -6,7 +6,7 @@ from iris import state_machine as sm
 from iris import util as util
 from iris import iris_objects
 
-from app.user_functions.ncats.scripts import run_main
+from app.user_functions.ncats.PathFx_api import run_main
 from app.user_functions.Q2_main import Q2_query
 import numpy as np
 import os
@@ -22,19 +22,14 @@ class DrugDisease(IrisCommand):
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"), 
                         "disease":t.String("What is the disease you want to analyze?"),
-                        # "bool_all":t.YesNo("Would you like to customize your output? If you select No, we will provide you with all the information we think might be useful.",
-                        #     yes=#customize output
                         "bool_image":t.YesNo("Would you like to visual the results as a diagram?",
                                     yes=True, no=False),
-                        # "bool_full_GO":t.YesNo("Would you like to only significant GO enrichment results (Yes-signficant; No-all)?",
-                        #             yes=True, no=False),
                         "bool_other_disease":t.YesNo("Would you like to know other diseases that can be treated by this drug?",
                                     yes=True, no=False),
                         "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
                                     yes=True, no=False)
                             
                         }
-                            # no=False)} #use defaults
     
     # core logic of the command
     def command(self, drug, disease, bool_image, bool_other_disease, bool_pubmed):
@@ -54,7 +49,9 @@ class DrugDisease(IrisCommand):
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
         # Components of result are in dictionary form:
-        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "image_file": image_path, "other_disease": jenn's result, "pubmed": PMIDs
+        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "dis_tissue_data":tissue_df, "dis_tissue_data_short":tissue_df_short, "image_file": image_path, "other_disease": jenn's result, "pubmed": PMIDs
+        
+        # Print out genes associated with drug
         result_array = []
         result_array.append('Top genes found to be targetted by %s are below. Full dataset saved as drug_genes' % result['drug'])
         drug_gene_term_object = iris_objects.IrisDataframe(data=result['drug_genes'])
@@ -64,19 +61,15 @@ class DrugDisease(IrisCommand):
         # result_array.append("Full dataset saved as drug_associated_genes")
 
 
-        # drug_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["drug_genes"]]
-        # result_array = result_array + drug_genes_tuples
+        # Print out genes associated with disease
         result_array.append('Top genes found to be associated with %s are below. Full dataset saved as disease_genes' % result['disease'])        
         disease_gene_term_object = iris_objects.IrisDataframe(data=result['disease_genes'])
         self.iris.add_to_env('disease_genes', disease_gene_term_object)
         disease_gene_term_object_short = iris_objects.IrisDataframe(data=result['disease_genes_short'])
         result_array.append(disease_gene_term_object_short)
-        # result_array.append("Full dataset saved as disease_associated_genes")
-
-        # dis_genes_tuples = [ ' '.join(gene_id_tuple) for gene_id_tuple in result["disease_genes"]]
-        # result_array = result_array + dis_genes_tuples
 
 
+        # Print out signficant go terms
         result_array.append('Top significant GO terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms')
         go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
         self.iris.add_to_env('go_terms', go_term_object)
@@ -84,9 +77,19 @@ class DrugDisease(IrisCommand):
         result_array.append(go_term_object_short)
         # result_array.append("Full dataset saved as drug_disease_go_terms")
 
+
+        # get tissue
+        result_array.append('Top tissues that this drug-disease interaction takes place are shown. Full dataset saved as tissues ')
+        tissue_object = iris_objects.IrisDataframe(data=result['dis_tissue_data'])
+        tissue_object_short = iris_objects.IrisDataframe(data=result['dis_tissue_data_short'])
+        self.iris.add_to_env('tissues', tissue_object)
+        result_array.append(tissue_object_short)
+        
+        # display image
         if "image_file" in result:
             os.system("open " + result["image_file"])
 
+        # get other possible disease 
         if "other_disease" in result:
             ph_genes_str, drug = result["other_disease"]
             multi_answer_line = ['Top hits of diseases potentially impacted by %s. Full dataset saved as drug_indications.' % result['drug'], 'We queried the gene neighborhood of drug targets and found the following phenotypes to be significant. Here we list significant phenotypes in order of probability. Column headings are phenotype, probability, significance level cutoff, and a list of genes that support the relationship']

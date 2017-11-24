@@ -14,14 +14,15 @@ results_dir = os.path.join(overall_path, "ncats/results/Q2/")
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-# from app.user_functions.ncats.EBC_api import EBC_api
-# from app.user_functions.ncats.Pharos_api import pharos_api
-# from app.user_functions.ncats.GO_api import go_api
+from app.user_functions.ncats.EBC_api import EBC_api
+from app.user_functions.ncats.Pharos_api import pharos_api
+from app.user_functions.ncats.GO_api import go_api
+from app.user_functions.ncats.TiGER_api import TiGER_api
 
-from ncats.EBC_api import EBC_api
-from ncats.Pharos_api import pharos_api
-from ncats.GO_api import go_api
-from ncats.TiGER_api import TiGER_api
+# from ncats.EBC_api import EBC_api
+# from ncats.Pharos_api import pharos_api
+# from ncats.GO_api import go_api
+# from ncats.TiGER_api import TiGER_api
 
 
 GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
@@ -122,6 +123,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
         # Get tissue information
         tissue_df = TiGER_api.get_tissue_counts([EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in dis_gene_list])
+        tissue_df_short = tissue_df[:min(5, len(tissue_df))]
 
         drug_genes = [[EBC_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
@@ -144,7 +146,8 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
-        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "dis_tissue_data":tissue_df,
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, 
+                    "dis_tissue_data":tissue_df, "dis_tissue_data_short":tissue_df_short,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
 
@@ -164,7 +167,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
                 ################### THIS IS JUST TOP 5 FOR NOW, SEEMS LIKE THE API CALLS TAKE SOME TIME
                 PMID_df = pd.DataFrame([[x, get_PMID(x)] for x in PMIDs[:5]], columns=["PMIDS", "Title"])
 
-                PMID_df_short = PMID_df[:5]
+                PMID_df_short = PMID_df[:min(5, len(PMID_df))]
                 result["pubmed"] = PMID_df
                 result["pubmed_short"] = PMID_df_short
 
@@ -183,8 +186,13 @@ if __name__ == "__main__":
     # GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
 
     # print(drug,disease)
-    result = Q2_query(drug, disease, gen_interaction_image=True)
 
+    import time
+    start = time.time()
+    result = Q2_query(drug, disease, gen_interaction_image=True)
+    print(result)
+    end = time.time()
+    print('duration', end-start)
     # drug="lisinopril"
 
     # disease="hypertension"

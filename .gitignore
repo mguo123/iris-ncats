@@ -9,6 +9,7 @@ backend/app/user_functions/ncats/GO_api/GO_DB/*
 backend/app/user_functions/ncats/EBC_api/*.gz
 backend/app/user_functions/ncats/GO_api/*.gz
 backend/app/user_functions/ncats/results
+backend/app/user_functions/ncats/DB_data
 
 .DS_Store
 backend/.DS_Store
