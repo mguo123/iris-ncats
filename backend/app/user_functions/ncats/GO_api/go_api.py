@@ -4,9 +4,6 @@ import pandas as pd
 import goenrich
 import os
 from copy import deepcopy
-from scipy.stats import hypergeom
-from statsmodels.stats.multitest import fdrcorrection
-import matplotlib.pyplot as plt
 
 import pickle
 
@@ -146,22 +143,22 @@ class GO_api:
             if not np.isnan(node.get('q', float('NaN'))):
 
                 if node['isTarget'] and node['significant']:
-                    attr['fillcolor'] = 'yellow'
+                    attr['fillcolor'] = 'darkolivegreen2'
                     attr['style'] = 'filled'
                     attr['label'] = "{name}\\n{x} / {n} genes\\nq = {q:E}".format(name=node['name'],
                                                                                   q=node['q'], x=node['x'], n=node['n'])
                 elif node['isTarget']:
-                    attr['fillcolor'] = 'green'
+                    attr['fillcolor'] = 'goldenrod1'
                     attr['style'] = 'filled'
                     attr['label'] = "{name}\\n(drug target)".format(name=node['name'])
                 else:
-                    attr['fillcolor'] = 'red'
+                    attr['fillcolor'] = 'cadetblue1'
                     attr['style'] = 'filled'
                     attr['label'] = "{name}\\n{x} / {n} genes\\nq = {q:E}".format(name=node['name'],
                                                                               q=node['q'], x=node['x'], n=node['n'])
             else:
                 if node['isTarget']:
-                    attr['fillcolor'] = 'green'
+                    attr['fillcolor'] = 'goldenrod1'
                     attr['style'] = 'filled'
                     attr['label'] = "{name}\\n(drug target)".format(name=node['name'])
                 else:
