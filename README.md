@@ -66,7 +66,12 @@ In order to run Iris in development mode.
 
     python app.py
 ```
-3. Wait until your backend has finished booting up (should take between 30-40 seconds)
+3. Wait until your backend has finished booting up (should take between 30-40 seconds) you should see in your terminal
+```
+======== Running on http://0.0.0.0:8000 ========
+(Press CTRL+C to quit)
+```
+
 4. In the other window, type:
 ```
 

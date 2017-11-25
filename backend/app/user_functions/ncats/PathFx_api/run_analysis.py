@@ -14,8 +14,7 @@ import pandas as pd
 from textwrap import wrap
 from collections import defaultdict
 from find_neighborhood_beta import find_neighborhood as fgn
-# # import get_associations
-import get_associations_deprecated # import get_associations
+import get_associations
 
 def write_neighborhood_to_file(pth_dic,outf):
     for (pth,pscore) in pth_dic.items():

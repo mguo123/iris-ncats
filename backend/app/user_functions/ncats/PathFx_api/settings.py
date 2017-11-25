@@ -33,14 +33,14 @@ from get_output_data import get_output_data
 import find_neighborhood_beta
 from find_neighborhood_beta import find_neighborhood as fgn
 import run_analysis as ann
-from get_associations_deprecated import get_associations
+from get_associations import get_associations
 # import association file data
 # Define variables with paths
 global PARENT_DIR
 global RSCS_DIR
 global RESULTS_DIR
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # should yield the same as .. (with subfolders rcsc, scripts, and results)
-RSCS_DIR = os.path.join(PARENT_DIR, 'DB_data/shared_data')
+RSCS_DIR = os.path.join(PARENT_DIR, 'DB_data/PathFx_DB')
 RESULTS_DIR = os.path.join(PARENT_DIR, 'results')
 
 
@@ -53,7 +53,7 @@ find_neighborhood_beta.GENE_GRAPH = pickle.load(open(NETWORKF,'rb'))
 # print(GENE_GRAPH.nodes())
 
 # loading random data: 
-ann.RAND_DIR = os.path.join(RESULTS_DIR, 'rand_iRefplus_intome/summary/')
+ann.RAND_DIR = os.path.join(RSCS_DIR, 'rand_iRefplus_intome/summary/')
 
 # load drug targets, then format
 DTF = os.path.join(RSCS_DIR, 'drug_intome_targets.pkl')
