@@ -27,8 +27,14 @@ The backend of Iris is written in Python while the front end is written in Javas
 * node.js: 
     * run `ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
     * `brew install node` (if you hit errors: go [here](http://blog.teamtreehouse.com/install-node-js-npm-mac))
+* graphvix - to install you need homobrew, then run the following lines 
+```
+brew install graphviz
+pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
+```
 
-### DATA (INSERT STUFF HERE!!!)
+### DATA 
+Data files needed to run biomedical modules must be obtained by containing the repository owner. 
 
 ### Install and run the Python components:
 ```

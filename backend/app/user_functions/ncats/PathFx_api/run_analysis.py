@@ -145,7 +145,7 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
         spnn = merge_networks(allf,res_dir,drug)
         # print('merged networks')
         aname = 'merged'
-        sig_assoc = get_associations_deprecated.get_associations(spnn, aname, res_dir)
+        sig_assoc = get_associations.get_associations(spnn, aname, res_dir)
 
         all_merge_files.append(res_dir+spnn)
 

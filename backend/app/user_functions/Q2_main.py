@@ -14,15 +14,15 @@ results_dir = os.path.join(overall_path, "ncats/results/Q2/")
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-from app.user_functions.ncats.EBC_api import EBC_api
-from app.user_functions.ncats.Pharos_api import pharos_api
-from app.user_functions.ncats.GO_api import go_api
-from app.user_functions.ncats.TiGER_api import TiGER_api
+# from app.user_functions.ncats.EBC_api import EBC_api
+# from app.user_functions.ncats.Pharos_api import pharos_api
+# from app.user_functions.ncats.GO_api import go_api
+# from app.user_functions.ncats.TiGER_api import TiGER_api
 
-# from ncats.EBC_api import EBC_api
-# from ncats.Pharos_api import pharos_api
-# from ncats.GO_api import go_api
-# from ncats.TiGER_api import TiGER_api
+from ncats.EBC_api import EBC_api
+from ncats.Pharos_api import pharos_api
+from ncats.GO_api import go_api
+from ncats.TiGER_api import TiGER_api
 
 
 GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/DB_data/GO_DB"))
@@ -101,10 +101,7 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         for gene in drug_genes:
             drug_gene_list.append(EBC_api.resolve_gene_to_EntrezGeneID(gene))
 
-    # If either disease or drug list comes up empty
-    # the query has failed and we return a statement to that effect
-    drug_gene_list = [x for x in drug_gene_list if x is not None]
-    dis_gene_list = [x for x in dis_gene_list if x is not None]
+
 
     if dis_gene_list is None and drug_gene_list is None:
         return "Drug and disease not recognized, better luck next time..."
@@ -114,6 +111,11 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
         return "Drug not recognized"
     # If we have targets
     else:
+
+        # If either disease or drug list comes up empty
+        # the query has failed and we return a statement to that effect
+        drug_gene_list = [x for x in drug_gene_list if x is not None]
+        dis_gene_list = [x for x in dis_gene_list if x is not None]
 
         # Select the top 25 genes from the disease gene list for GO enrichment
 
@@ -179,9 +181,13 @@ def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_int
 
 # unit testing
 if __name__ == "__main__":
-    drug="paclitaxel"
+    # drug="paclitaxel"
 
-    disease="depression"
+    # disease="depression"
+
+    drug = "Butylscopolamine"
+
+    disease = "abdominal pain"
 
     # GO_API = go_api.GO_api("./ncats/GO_api/GO_DB")
 
