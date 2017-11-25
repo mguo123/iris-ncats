@@ -35,7 +35,12 @@ class DrugDisease(IrisCommand):
     def command(self, drug, disease, bool_image, bool_other_disease, bool_pubmed):
         print('BEFORE QUERY!!!')
         answer = Q2_query(drug, disease, gen_interaction_image=bool_image, gen_pubmed=bool_pubmed, gen_tissues_image=bool_other_disease, output_full=False)
+        
         print('answered Q2 query!!!')
+        
+        if isinstance(answer, str):
+            return answer
+
         if bool_other_disease:
             answer["other_disease"] = run_main.find_drug_indications(drug)
 
@@ -51,6 +56,8 @@ class DrugDisease(IrisCommand):
         # Components of result are in dictionary form:
         # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "dis_tissue_data":tissue_df, "dis_tissue_data_short":tissue_df_short, "image_file": image_path, "other_disease": jenn's result, "pubmed": PMIDs
         
+        if isinstance(result, str):
+            return result
         # Print out genes associated with drug
         result_array = []
         result_array.append('Top genes found to be targetted by %s are below. Full dataset saved as drug_genes' % result['drug'])

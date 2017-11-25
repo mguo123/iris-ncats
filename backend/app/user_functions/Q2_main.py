@@ -14,15 +14,15 @@ results_dir = os.path.join(overall_path, "ncats/results/Q2/")
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-# from app.user_functions.ncats.EBC_api import EBC_api
-# from app.user_functions.ncats.Pharos_api import pharos_api
-# from app.user_functions.ncats.GO_api import go_api
-# from app.user_functions.ncats.TiGER_api import TiGER_api
+from app.user_functions.ncats.EBC_api import EBC_api
+from app.user_functions.ncats.Pharos_api import pharos_api
+from app.user_functions.ncats.GO_api import go_api
+from app.user_functions.ncats.TiGER_api import TiGER_api
 
-from ncats.EBC_api import EBC_api
-from ncats.Pharos_api import pharos_api
-from ncats.GO_api import go_api
-from ncats.TiGER_api import TiGER_api
+# from ncats.EBC_api import EBC_api
+# from ncats.Pharos_api import pharos_api
+# from ncats.GO_api import go_api
+# from ncats.TiGER_api import TiGER_api
 
 
 GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/DB_data/GO_DB"))
