@@ -25,7 +25,7 @@ from app.user_functions.ncats.TiGER_api import TiGER_api
 # from ncats.TiGER_api import TiGER_api
 
 
-GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/GO_api/GO_DB"))
+GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/DB_data/GO_DB"))
 
 """
 Q2_query
