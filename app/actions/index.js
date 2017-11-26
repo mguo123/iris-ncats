@@ -206,7 +206,18 @@ export function moveInputHistory(message) {
 
 // -----------------------------------------------
 
-// the predictions reducer governs the hints that appear above the main user input
+// TOGGLE WAITING INPUT
+
+// update with new set of hints
+export function waitingToggle() {
+    return {
+        type: types.WAITING_TOGGLE,
+    };
+}
+
+// -----------------------------------------------
+
+ // the predictions reducer governs the hints that appear above the main user input
 
 // update with new set of hints
 export function updatePredictions(predictions) {
