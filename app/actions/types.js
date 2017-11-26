@@ -45,3 +45,5 @@ export const TOGGLE_VARIABLE_ATTRIBUTES = 'TOGGLE_VARIABLE_ATTRIBUTES';
 // which means they don't have corresponding actions, should probably make this explicit
 export const ADD_SERVER_MESSAGE = 'ADD_SERVER_MESSAGE';
 export const UPDATE_HISTORY = 'UPDATE_HISTORY'; // convo history
+//type to toggle between waiting and not waiting
+export const WAITING_TOGGLE = 'WAITING_TOGGLE';
