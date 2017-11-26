@@ -5,7 +5,7 @@ import { updateCodeEditor, updatePredictions, updateVariables, waitingToggle } f
 // This is the primary interface through which the client interacts with the state machine
 // TODO: rename, remove dispatch directly on server JSON
 export const postMessages = (messages, state, conversation) => {
-    fetch('http://localhost:8000/new_loop', {
+    fetch('http://0.0.0.0:8000/new_loop', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -25,7 +25,7 @@ export const postMessages = (messages, state, conversation) => {
 
 // This API supports hint updates given current user input text
 export const updateHint = (text) => {
-    fetch('http://localhost:8000/hint', {
+    fetch('http://0.0.0.0:8000/hint', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -43,7 +43,7 @@ export const updateHint = (text) => {
 // TODO: use action from actions/index
 // TODO: what is in json.doc?
 export const updateDocs = (id) => {
-    fetch('http://localhost:8000/docs', {
+    fetch('http://0.0.0.0:8000/docs', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ export const updateDocs = (id) => {
 // This API supports command search in the documentation pane
 // TODO: use action from actions/index
 export const doSearch = (text) => {
-    fetch('http://localhost:8000/function_list', {
+    fetch('http://0.0.0.0:8000/function_list', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -79,7 +79,7 @@ export const doSearch = (text) => {
 // This API loads command data into the command edit pane
 // TODO: use action from actions/index
 export const updateCommandAPI = (id) => {
-    fetch('http://localhost:8000/command', {
+    fetch('http://0.0.0.0:8000/command', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -96,7 +96,7 @@ export const updateCommandAPI = (id) => {
 // This API supports user command compilation on the backend
 export const testFunction = (text) => {
     console.log(text);
-    fetch('http://localhost:8000/function_test', {
+    fetch('http://0.0.0.0:8000/function_test', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -113,7 +113,7 @@ export const testFunction = (text) => {
 
 // TODO: what is this API for?
 export const setHistory = (messages, state, conversation) => {
-    fetch('http://localhost:8000/set_history', {
+    fetch('http://0.0.0.0:8000/set_history', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -125,7 +125,7 @@ export const setHistory = (messages, state, conversation) => {
 // This API retrieves environment variables from the backend server
 // TODO: replace raw dispatch on json
 export const getVariables = () => {
-    fetch('http://localhost:8000/variables', {
+    fetch('http://0.0.0.0:8000/variables', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -138,7 +138,7 @@ export const getVariables = () => {
 // This API gets the full conversation history from the backend server
 // TODO: replace raw dispatch on json
 export const getHistory = () => {
-    fetch('http://localhost:8000/history', {
+    fetch('http://0.0.0.0:8000/history', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
