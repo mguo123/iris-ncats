@@ -57,6 +57,7 @@ def find_drug_indications(drug, storage_dir = 'Q2'):
 
     drug = preprocess_names(drug)
 
+    answer='None'
     if drug in DTD:
         dts = [(drug.replace(' ',''), DTD[drug])] # remove white spaces for later analysis
 
@@ -127,7 +128,8 @@ def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False
             answer_found, answer = interpret_results(sum_asscs, disease)
             if  answer_found == 'found':
                 print(answer, 'thres', threshold)
-                ' '.join((str(threshold), answer))
+                # 
+                # ' '.join((str(threshold), answer))
                 #'phenotype','rank','BHcorrPval', 'Pval', 'assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen', 'threshold'
                 return True, answer_found, answer, drug
             else:
@@ -146,6 +148,44 @@ def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False
     else:
         print('Drug', drug, 'not in database')
         return False, ' '.join(['Drug', drug, 'not in database']), 'None', drug
+
+def run_drug_indications_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 'results_drug_disease_matching.txt'):
+    print('running drug_indications_multi from', input_file )
+    # get in input_file of two columns of drugs and diseases, that shouldbe paired together
+    if input_file.endswith('.txt'):
+        with open(input_file, 'r') as f:
+            x= f.readlines()
+            x = np.array([line.strip().split('\t') for line in x][1:])
+            drug_arr = x[:,0]
+            disease_arr = x[:,1]
+    elif input_file.endswith('.csv'):
+        data = pd.read_csv(input_file, sep=',')
+        drug_arr = np.array(data[list(data)[0]])
+        disease_arr = np.array(data[list(data)[1]])
+
+    #iterate through list
+    answer_arr = []
+    duration_arr = []
+    for drug, disease in zip(drug_arr, disease_arr):
+        start = time.time()
+        answer, drug = find_drug_indications(drug, storage_dir)
+        stop = time.time()
+        duration = '%.2f' % (stop - start)
+        answer_arr.append(answer)
+        duration_arr.append(duration)
+        print('>', drug, duration, answer)
+
+    #get output as txt
+    output_filename = os.path.join(RESULTS_DIR, storage_dir, save_file)
+    with open(output_filename, 'w')  as f:
+        f.write('\t'.join(('drug', 'time_of_run(s)', 'answer\n')))
+
+        for i in range(len(drug_arr)):
+            line = '\t'.join((drug_arr[i], duration_arr[i], answer_arr[i]))
+            f.write(''.join((line, '\n')))
+
+    print('written output to', output_filename)
+
 
 
 def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False):
@@ -171,12 +211,12 @@ def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 
         start = time.time()
         answer_found_bool, answer_found, answer, drug = run_drug_single(drug, disease, storage_dir, iterate_until_found)
         stop = time.time()
-        duration = '%.1f' % (stop - start)
-        answer_found_bool_arr.append(answer_found_bool)
+        duration = '%.2f' % (stop - start)
+        answer_found_bool_arr.append(str(answer_found_bool))
         answer_found_arr.append(answer_found)
         answer_arr.append(answer)
         duration_arr.append(duration)
-
+        print('>', drug, disease, duration, answer_found_bool, answer_found, answer)
 
     #get output as txt
     output_filename = os.path.join(RESULTS_DIR, storage_dir, save_file)
@@ -184,7 +224,7 @@ def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 
         f.write('\t'.join(('drug', 'condition', 'time_of_run(s)', 'answer_found_bool', 'answer_found', 'answer\n')))
 
         for i in range(len(drug_arr)):
-            line = '\t'.join((drug_arr[i], disease_arr[i], duration[i], answer_found_bool_arr[i], answer_found_arr[i], answer_arr[i]))
+            line = '\t'.join((drug_arr[i], disease_arr[i], duration_arr[i], answer_found_bool_arr[i], answer_found_arr[i], answer_arr[i]))
             f.write(''.join((line, '\n')))
 
     print('written output to', output_filename)
@@ -320,8 +360,9 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
 
 ##### STUFF I'm RUNNING
 # retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = True)
-# run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_multi2', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False)
-
+#run_drug_single('Latamoxef', 'Bacterial Infections', storage_dir = "../results/results_test")
+# run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_multi_time2', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False)
+# run_drug_indications_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_indications_multi_time', save_file = 'results_drug_disease_matching.txt')
 # analysis_name = 'ncats_test_intome_6_remove24_min_networkassoc' 
 # rdir = '../results/'+analysis_name+'/'
 # if not os.path.exists(rdir):

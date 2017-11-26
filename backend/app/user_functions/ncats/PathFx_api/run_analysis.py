@@ -108,6 +108,7 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
     for (drug,target_list) in dts:
         print(drug, target_list)
         # print(netxobj.__dict__.keys())
+        res_dir=None
         for drug_target in target_list:
             # if drug_target not in netxobj.nodes_iter():
             if drug_target not in netxobj:
@@ -140,14 +141,15 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
         
         # merge files, do phenotype enrichment
         # print('here')
-        allf = [f for f in os.listdir(res_dir)]
-        # print(allf)
-        spnn = merge_networks(allf,res_dir,drug)
-        # print('merged networks')
-        aname = 'merged'
-        sig_assoc = get_associations.get_associations(spnn, aname, res_dir)
+        if res_dir is not None:
+            allf = [f for f in os.listdir(res_dir)]
+            # print(allf)
+            spnn = merge_networks(allf,res_dir,drug)
+            # print('merged networks')
+            aname = 'merged'
+            sig_assoc = get_associations.get_associations(spnn, aname, res_dir)
 
-        all_merge_files.append(res_dir+spnn)
+            all_merge_files.append(res_dir+spnn)
 
     return all_merge_files
 

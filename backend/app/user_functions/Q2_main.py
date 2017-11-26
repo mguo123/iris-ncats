@@ -1,5 +1,17 @@
+"""
+Title: Q2_main.py
+Stanford NCATs Prototype
+
+Description: 
+Runs the main files of the second task of the NCATs query. Mainly the goal is to:
+- take the inputted disease and drug and output relevant information regarding the mechanism of action of how the drug treats the given disease
 
 
+
+"""
+
+
+################################################ IMPORT MODULES ##################################################
 import subprocess
 import os
 
@@ -8,11 +20,6 @@ from pubmed_lookup import PubMedLookup, Publication
 
 # sys.path.insert(0, os.path.abspath(os.path.dirname(__file__))) # points to E DIR
 
-overall_path = os.path.abspath(os.path.dirname(__file__))
-results_dir = os.path.join(overall_path, "ncats/results/Q2/")
-
-if not os.path.exists(results_dir):
-    os.makedirs(results_dir)
 
 from app.user_functions.ncats.EBC_api import EBC_api
 from app.user_functions.ncats.Pharos_api import pharos_api
@@ -25,33 +32,28 @@ from app.user_functions.ncats.TiGER_api import TiGER_api
 # from ncats.TiGER_api import TiGER_api
 
 
+############################################# DEFINE PATHS ##############################################################
+
+
+overall_path = os.path.abspath(os.path.dirname(__file__))
+results_dir = os.path.join(overall_path, "ncats/results/Q2/")
+
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+
 GO_API = go_api.GO_api(os.path.join(overall_path, "ncats/DB_data/GO_DB"))
 
-"""
-Q2_query
 
-Runs the Q2 pipeline with the given drug and disease
+############################################# Functions ##############################################################
 
-Input:
-QDrug - String of the drug common name
-QDisease - String of the disease common name
-gen_image - Whether you would like the script to render a network graphic
 
-Output:
-results - Pandas dataframe of GO Enrichment for the drug-disease combo with the following columns:
-'M'
-N' 
-'n' 
-'name' 
-'namespace'
-'p'
-'q'
-'rejected'
-'term'
-'x'
-
-"""
 def get_PMID(PMID):
+    """
+    Gets the title of an article given the PMID
+    Input: <str> PMID
+    Output: <str> Title of publication
+    """
     email = ''
     url = 'http://www.ncbi.nlm.nih.gov/pubmed/' + PMID
     lookup = PubMedLookup(url, email)
@@ -60,7 +62,32 @@ def get_PMID(PMID):
 
 
 def Q2_query(QDrug, QDisease, gen_tissues_image=False, gen_pubmed=False, gen_interaction_image=False, output_full=False):
+    """
+    Q2_query
 
+    Runs the Q2 pipeline with the given drug and disease
+
+    Input:
+    QDrug - String of the drug common name
+    QDisease - String of the disease common name
+    gen_image - Whether you would like the script to render a network graphic
+
+    Output:
+    results - a dictionary of results that include Go term enrichment terms, the path to an image of the diagram,  
+
+    Pandas dataframe of GO Enrichment for the drug-disease combo with the following columns:
+    'M'
+    N' 
+    'n' 
+    'name' 
+    'namespace'
+    'p'
+    'q'
+    'rejected'
+    'term'
+    'x'
+
+    """
     # Pre-process query
     drug = QDrug.strip().lower()
 

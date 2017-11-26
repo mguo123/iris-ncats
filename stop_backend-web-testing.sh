@@ -1,0 +1,2 @@
+killall app
+killall node

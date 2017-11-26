@@ -96,7 +96,7 @@ def get_results(storage_dir, drug, disease=None, old_format = False, save_file =
         return sum_asscs
 
     else:
-        return None
+        return []
 
 
 # if __name__ == "__main__":
