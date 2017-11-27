@@ -152,11 +152,12 @@ class DrugDisease(IrisCommand):
             result_array = result_array + multi_answer_line
             ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
             ph_genes_array_all = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
-            ph_genes_array_all_iris = iris_objects.IrisDataframe(column_names=[ "Phenotype", "probability", "Benjamin Hochberg significance cutoff","list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_all)
-            self.iris.add_to_env('drug_indications' + query_name, ph_genes_array_all_iris)
-            ph_genes_array_short = [ph_genes_arr[x:x+4] for x in range(0, min(5*4,len(ph_genes_arr)),4)]
-            ph_genes_array_short_iris = iris_objects.IrisDataframe(column_names=["Phenotype", "Probability", "Benjamin Hochberg significance cutoff", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_short)
-            result_array.append(ph_genes_array_short_iris)  
+            if len(ph_genes_arr) >=4:
+                ph_genes_array_all_iris = iris_objects.IrisDataframe(column_names=[ "Phenotype", "probability", "Benjamin Hochberg significance cutoff","list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_all)
+                self.iris.add_to_env('drug_indications' + query_name, ph_genes_array_all_iris)
+                ph_genes_array_short = [ph_genes_arr[x:x+4] for x in range(0, min(5*4,len(ph_genes_arr)),4)]
+                ph_genes_array_short_iris = iris_objects.IrisDataframe(column_names=["Phenotype", "Probability", "Benjamin Hochberg significance cutoff", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_short)
+                result_array.append(ph_genes_array_short_iris)  
             # result_array.append("Full dataset saved as drug_indications")
 
         result_array.append("Full dataframes are available for viewing using the command: print {dataframe_name}. See right side panel for more information.")
