@@ -8,11 +8,10 @@ backend/app/large_files/*
 */*/*/*.pyc
 data/*
 envs/*
-backend/app/user_functions/ncats/EBC_api/EBC_DB/*
-backend/app/user_functions/ncats/GO_api/GO_DB/*
-backend/app/user_functions/ncats/EBC_api/*.gz
-backend/app/user_functions/ncats/GO_api/*.gz
+
+backend/app/user_functions/ncats/PubMed
 backend/app/user_functions/ncats/results
+backend/app/user_functions/ncats/Q2/results
 backend/app/user_functions/ncats/DB_data
 
 .DS_Store
