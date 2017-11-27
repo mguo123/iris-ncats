@@ -21,22 +21,62 @@ def Q1_query(condition):
         ss_object.similarities = results
 
         # Get word cloud paths
-        commonality, comparison = batch_word_clouds(condition, ss_object.top_disease_matches())
-        ss_object.commonality_clouds = commonality
-        ss_object.comparison_clouds = comparison
+        #commonality, comparison = batch_word_clouds(condition, ss_object.top_disease_matches(3))
+        #ss_object.commonality_clouds = commonality
+        #ss_object.comparison_clouds = comparison
 
 
     except Exception as e:
         ss_object.error = e
 
-    if ss_object.error is None:
-        print("FINAL RESULTS")
-        print(ss_object.top_similarities())
-        print(ss_object.commonality_clouds)
-        print(ss_object.comparison_clouds)
-    else:
-        print(ss_object.error)
+    #if ss_object.error is None:
+        #print("FINAL RESULTS")
+        #print(ss_object.top_similarities())
+        #print(ss_object.commonality_clouds)
+        #print(ss_object.comparison_clouds)
+    #else:
+    #    print(ss_object.error)
     return ss_object
+
+def investigate_similarity(disease_a, disease_b, word_cloud=None):
+    # 1. Cooccurrence search
+    similarity = cooccurence_seach(disease_a, disease_b)
+    # 2. Commonality word cloud
+
+    if word_cloud == "commonality":
+        commonality, comparison = semantic_similarity_word_clouds(disease_a, disease_b)
+        similarity.word_cloud = commonality
+    elif word_cloud == "comparison":
+        commonality, comparison = semantic_similarity_word_clouds(disease_a, disease_b)
+        similarity.word_cloud = comparison
+    elif word_cloud == "cooccurrence":
+        similarity.word_cloud = similarity.frequency_word_cloud
+    else:
+        similarity.word_cloud = None
+
+    return similarity
+
+
+def cooccurence_seach(disease_a, disease_b):
+    # Check if the results already exist
+    sentences_file = os.path.join(pubmed_data_path, "cooccurence.%s.%s.cooccurence_sentences.txt" % (clean_query(disease_a), clean_query(disease_b)))
+    freq_word_cloud_file = os.path.join(pubmed_data_path, "cooccurence.%s.%s.cooccurence_frequency.png" % (
+    clean_query(disease_a), clean_query(disease_b)))
+    tfidf_word_cloud_file = os.path.join(pubmed_data_path, "cooccurence.%s.%s.cooccurence_tfidf.png" % (
+    clean_query(disease_a), clean_query(disease_b)))
+
+    if os.path.isfile(sentences_file) & os.path.isfile(freq_word_cloud_file) & os.path.isfile(tfidf_word_cloud_file):
+
+        return Cooccurence(disease_a, disease_b, sentences_file, freq_word_cloud_file, tfidf_word_cloud_file)
+
+    # Run the script
+    script = os.path.join(scripts_dir, "search_cooccurence.R")
+    cmd = "Rscript %s -a \"%s\" -b \"%s\" --data_dir %s -p %s" % (script, disease_a, disease_b, pubmed_data_path, pubmed_data_path + "/cooccurence")
+    call(cmd, shell=True)
+
+    # Collect the results
+    if os.path.isfile(sentences_file) & os.path.isfile(freq_word_cloud_file) & os.path.isfile(tfidf_word_cloud_file):
+        return Cooccurence(disease_a, disease_b, sentences_file, freq_word_cloud_file, tfidf_word_cloud_file)
 
 
 # Run semantic similarity
@@ -175,9 +215,47 @@ class SemanticSimilarityResults(object):
                 return c
         return None
 
+    def print_summary(self):
+        print(self.top_disease_matches())
+        print(self.commonality_clouds)
+
+class Cooccurence(object):
+    def __init__(self, a, b, sentence_file, frequency_word_cloud, tfidf_word_cloud):
+        self.disease_a = a
+        self.disease_b = b
+        self.frequency_word_cloud = frequency_word_cloud
+        self.tfidf_word_cloud = tfidf_word_cloud
+        self.sentence_file = sentence_file
+        self.sentences = []
+        self.fetch_sentences()
+        self.commonality_word_cloud = None
+        self.comparison_word_cloud = None
+        self.sentence_df = None
+        self.word_cloud = None
+        self.error = None
+
+    def fetch_sentences(self):
+        data = pandas.read_csv(self.sentence_file, sep="\t")
+        self.sentence_df = data
+        self.sentences = data['word'].tolist()
+
+    def top_sentence_df(self, n=10):
+        try:
+            sentences = [('Sentences', self.sentences[0:n])]
+            print(sentences)
+            return pandas.DataFrame.from_items(sentences)
+        except Exception as e:
+            return None
+
+    def print_summary(self):
+        print(self.sentences)
+
 if __name__ == "__main__":
     condition="osteoporosis"
     Q1_query(condition)
 
     #condition="rabies"
     #Q1_query(condition)
+    c = cooccurence_seach("malaria", "sickle cell trait")
+    for s in c.sentences[1:10]:
+        print(s)
