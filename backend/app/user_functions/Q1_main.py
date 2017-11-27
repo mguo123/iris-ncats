@@ -44,12 +44,15 @@ def investigate_similarity(disease_a, disease_b, word_cloud=None):
     # 2. Commonality word cloud
 
     if word_cloud == "commonality":
+        print("Creating commonality wordcloud")
         commonality, comparison = semantic_similarity_word_clouds(disease_a, disease_b)
         similarity.word_cloud = commonality
     elif word_cloud == "comparison":
+        print("Creating comparison wordcloud")
         commonality, comparison = semantic_similarity_word_clouds(disease_a, disease_b)
         similarity.word_cloud = comparison
     elif word_cloud == "cooccurrence":
+        print("Creating cooccurrence wordcloud")
         similarity.word_cloud = similarity.frequency_word_cloud
     else:
         similarity.word_cloud = None
@@ -72,6 +75,7 @@ def cooccurence_seach(disease_a, disease_b):
     # Run the script
     script = os.path.join(scripts_dir, "search_cooccurence.R")
     cmd = "Rscript %s -a \"%s\" -b \"%s\" --data_dir %s -p %s" % (script, disease_a, disease_b, pubmed_data_path, pubmed_data_path + "/cooccurence")
+    print(cmd)
     call(cmd, shell=True)
 
     # Collect the results
@@ -125,11 +129,15 @@ def batch_word_clouds(disease_a, diseases):
 def semantic_similarity_word_clouds(disease_a, disease_b):
     print("Generating word clouds")
     # Check for the existence of the pngs
-    commonality_file = "word_cloud.%s.%s.commonality.png" % (disease_a, disease_b)
+    commonality_file = "word_cloud.%s.%s.commonality.png" % (clean_query(disease_a), clean_query(disease_b))
     commonality_path = os.path.join(pubmed_data_path, commonality_file)
 
-    comparison_file = "word_cloud.%s.%s.comparison.png" % (disease_a, disease_b)
+    comparison_file = "word_cloud.%s.%s.comparison.png" % (clean_query(disease_a), clean_query(disease_b))
     comparison_path = os.path.join(pubmed_data_path, comparison_file)
+
+    print(commonality_path)
+    print(comparison_path)
+
 
     if os.path.isfile(commonality_path) and os.path.isfile(comparison_path):
         return commonality_path, comparison_path
@@ -146,14 +154,14 @@ def semantic_similarity_word_clouds(disease_a, disease_b):
     # Run the R script
     wc_script = os.path.join(scripts_dir, "comparison_clouds.R")
     prefix = pubmed_data_path + "/word_cloud"
-    cmd = 'Rscript %s -f %s -a %s -b %s -p %s' % (wc_script, rds_path, disease_a, disease_b, prefix)
+    cmd = 'Rscript %s -f %s -a \"%s\" -b \"%s\" -p %s' % (wc_script, rds_path, disease_a, disease_b, prefix)
     call(cmd, shell=True)
 
     # Check for the existence of the pngs
     # Return the pngs
     if os.path.isfile(commonality_path) and os.path.isfile(comparison_path):
         return commonality_path, comparison_path
-
+    print("not found!")
     return None, None
 
 def clean_query(query):
@@ -248,7 +256,8 @@ class Cooccurence(object):
             return None
 
     def print_summary(self):
-        print(self.sentences)
+        print(self.word_cloud)
+        print(self.top_sentence_df())
 
 if __name__ == "__main__":
     condition="osteoporosis"
@@ -256,6 +265,10 @@ if __name__ == "__main__":
 
     #condition="rabies"
     #Q1_query(condition)
-    c = cooccurence_seach("malaria", "sickle cell trait")
-    for s in c.sentences[1:10]:
-        print(s)
+    c = investigate_similarity("malaria", "sickle cell trait", word_cloud="commonality")
+
+    c.print_summary()
+
+
+    #for s in c.sentences[1:10]:
+    #    print(s)
