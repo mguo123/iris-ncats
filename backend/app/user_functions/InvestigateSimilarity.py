@@ -60,7 +60,7 @@ class InvestigateSimilarity(IrisCommand):
 
         #sentences = [('Sentences', result.sentences)]
         result.print_summary()
-        sentence_df = iris_objects.IrisDataframe(data=result.top_sentence_df)
+        sentence_df = iris_objects.IrisDataframe(data=result.top_sentence_df())
 
 
         self.iris.add_to_env('sentences', sentence_df)
