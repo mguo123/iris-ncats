@@ -20,7 +20,7 @@ class FunctionInfo extends Component {
         return (<div className="func_info">
           <div className="func_title">Iris Help Center</div>
            <div className="func_description">
-            Welcome to Iris! Type in a command within the message window to continue. Or type &quot;stop&quot; to exit task.
+            Welcome to Iris! Type in a command within the message window to continue. Or type &quot;quit&quot; to exit task.
           </div>
           </div>
               )

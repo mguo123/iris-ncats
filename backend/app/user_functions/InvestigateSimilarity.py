@@ -12,7 +12,7 @@ class InvestigateSimilarity(IrisCommand):
     title = "How are {disease_a} and {disease_b} semantically related?"
     # give an example for iris to recognize the command
     examples = ["How are {disease_a} and {disease_b} semantically related?",
-                "What is the relationship between {disease_a} and {disease_b}?",
+                "What is the relationship between {disease_a} and {disease_b}?", "semantic relationship", "semantic relationship of diseases",
                 "Do {disease_a} and {disease_b} appear together in PubMed?"]
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"disease_a": t.String("What is the first disease?"),

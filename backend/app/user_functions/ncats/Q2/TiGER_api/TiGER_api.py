@@ -9,39 +9,37 @@ ncats_path = os.path.dirname(os.path.dirname(TiGER_path))
 
 TiGeR_reference_dir = os.path.join(ncats_path, "DB_data/TiGER_DB")
 
-pkl_file = open(os.path.join(TiGeR_reference_dir, 'gene2Tissue_dict.pkl'), 'rb')
-# print('TIGER!!!!!')
-# print(ncats_path)
-# print(pkl_file)
+with open(os.path.join(TiGeR_reference_dir, 'gene2Tissue_dict.pkl'), 'rb') as f:
+    tissue_dict = pickle.load(f)
 
-tissue_dict = pickle.load(pkl_file)
-pkl_file.close()
+with open(os.path.join(TiGeR_reference_dir, 'tissue_freq.pkl'), 'rb') as g:
+    tissue_freq = pickle.load(g)
+tissue_freq_values_avg = sum(tissue_freq.values()) / len(tissue_freq.values())
+
 
 def get_tissue_counts(geneList):
     results = dict()
-    total_genes = 0
-    all_genes = 0
+    total_genes = 0 # a sum of weighted gene numbers, genes are normalized based on frequency a tissue appears in the database
     for gene in geneList:
         if gene in tissue_dict:
             for tissue in tissue_dict.get(gene):
                 if tissue in results:
-                    results[tissue] += 1
-                    total_genes+=1
+                    results[tissue] += 1 / tissue_freq[tissue]
+                    total_genes += 1 / tissue_freq[tissue]
                 else:
-                    results[tissue] = 1
-                    total_genes+=1
+                    results[tissue] = 1 / tissue_freq[tissue]
+                    total_genes+=1 / tissue_freq[tissue]
         else:
             if "all" in results:
-                results["all"] += 1
-                total_genes+=1
-                all_genes+=1
+                results["all"] += 1 / tissue_freq_values_avg
+                total_genes+=1 /tissue_freq_values_avg
             else:
-                results["all"] = 1
-                total_genes+=1
-                all_genes+=1
+                results["all"] = 1 /tissue_freq_values_avg
+                total_genes+=1 /tissue_freq_values_avg
 
     # num_tissue_spec_genes = total_genes - all_genes
 
+    # normalize tissue counts to the total of the tissue count then save the result as a string
     for tissue in results:
         results[tissue] =  "%.4f" % (results[tissue]/(float(total_genes) + 1e-10))
     

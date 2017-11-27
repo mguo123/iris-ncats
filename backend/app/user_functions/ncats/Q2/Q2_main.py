@@ -8,10 +8,10 @@ from optparse import OptionParser
 import pandas as pd
 from pubmed_lookup import PubMedLookup, Publication
 
+from app.user_functions.ncats.Q2.TiGER_api import TiGER_api
 from app.user_functions.ncats.Q2.GNBR_api import GNBR_api
 from app.user_functions.ncats.Q2.Pharos_api import pharos_api
 from app.user_functions.ncats.Q2.GO_api import go_api
-from app.user_functions.ncats.Q2.TiGER_api import TiGER_api
 
 # from GNBR_api import GNBR_api
 # from Pharos_api import pharos_api
@@ -115,19 +115,19 @@ def Q2_query(QDrug, QDisease, options):
 
     if dis_gene_list is None and drug_gene_list is None:
         print("ERROR: Drug and disease not recognized")
-        exit()
+        return "ERROR: Drug and disease not recognized"
 
     elif dis_gene_list is None:
         print("ERROR: Disease not recognized")
-        exit()
+        return "ERROR: Disease not recognized"
 
     elif drug_gene_list is None:
         print("ERROR: No drug targets found")
-        exit()
+        return "ERROR: No drug targets found"
 
     # If we have targets
     else:
-        print("Drug and disease found. Processing...")
+        print("drug (%s) and disease (%s) found. Processing..." % (drug, disease) )
         # Generate output directory
         overall_path = os.path.abspath(os.path.dirname(__file__))
         results_dir = os.path.join(*[overall_path, options.outPath, out_name])
@@ -204,6 +204,7 @@ def Q2_query(QDrug, QDisease, options):
             # print('Saving pubmed PMIDs to ', results_dir, out_name,"_PMIDs.csv")
             # PMID_df.to_csv(os.path.join(results_dir, out_name + "_PMIDs.csv"), mode="w+",
             #                      index_label=False, index=False, header=False)
+            print("Getting Pubmed Titles")
             if len(PMIDs) > 0:
                 ################### THIS IS JUST TOP 10 FOR NOW, SEEMS LIKE THE API CALLS TAKE SOME TIME
                 PMID_df = pd.DataFrame([[x, get_PMID(x)] for x in PMIDs[:min(10, len(PMIDs))]], columns=["PMIDS", "Title"])
