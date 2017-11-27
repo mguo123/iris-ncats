@@ -41,6 +41,7 @@ def Q1_query(condition):
 def investigate_similarity(disease_a, disease_b, word_cloud=None):
     # 1. Cooccurrence search
     similarity = cooccurence_seach(disease_a, disease_b)
+
     # 2. Commonality word cloud
 
     if word_cloud == "commonality":
@@ -81,6 +82,9 @@ def cooccurence_seach(disease_a, disease_b):
     # Collect the results
     if os.path.isfile(sentences_file) & os.path.isfile(freq_word_cloud_file) & os.path.isfile(tfidf_word_cloud_file):
         return Cooccurence(disease_a, disease_b, sentences_file, freq_word_cloud_file, tfidf_word_cloud_file)
+    print(sentences_file)
+    print(freq_word_cloud_file)
+    print(tfidf_word_cloud_file)
 
 
 # Run semantic similarity
@@ -136,14 +140,14 @@ def semantic_similarity_word_clouds(disease_a, disease_b):
     comparison_path = os.path.join(pubmed_data_path, comparison_file)
 
     print(commonality_path)
-    print(comparison_path)
+    #print(comparison_path)
 
 
     if os.path.isfile(commonality_path) and os.path.isfile(comparison_path):
         return commonality_path, comparison_path
 
     # Check that there is an RDS file for a run of disease_a,
-    rds_file = "tfidf.%s.rds" % disease_a
+    rds_file = "tfidf.%s.rds" % clean_query(disease_a)
     rds_path = os.path.join(pubmed_data_path, rds_file)
     if not os.path.isfile(rds_path):
         semantic_similarity(disease_a)
@@ -155,6 +159,7 @@ def semantic_similarity_word_clouds(disease_a, disease_b):
     wc_script = os.path.join(scripts_dir, "comparison_clouds.R")
     prefix = pubmed_data_path + "/word_cloud"
     cmd = 'Rscript %s -f %s -a \"%s\" -b \"%s\" -p %s' % (wc_script, rds_path, disease_a, disease_b, prefix)
+    print(cmd)
     call(cmd, shell=True)
 
     # Check for the existence of the pngs
@@ -265,7 +270,7 @@ if __name__ == "__main__":
 
     #condition="rabies"
     #Q1_query(condition)
-    c = investigate_similarity("malaria", "sickle cell trait", word_cloud="commonality")
+    c = investigate_similarity("rubella", "grant syndrome", word_cloud="commonality")
 
     c.print_summary()
 

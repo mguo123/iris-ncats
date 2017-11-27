@@ -9,7 +9,12 @@ class GeneticConditionDisease(IrisCommand):
     # title = "how does {condition} protects against {condition}?"
     title = "What genetic disease protects against {condition}?"
     # give an example for iris to recognize the command
-    examples = ["what protects against {condition}", "what genetic conditions might offer protection against {condition} and why", "protective mechanism of condition against disease", "protective condition", "protection against disease"]
+    examples = ["what protects against {condition}",
+                "what genetic conditions might offer protection against {condition} and why",
+                "protective mechanism of condition against disease",
+                "protective condition",
+                "protection against disease",
+                "do any genetic diseases protect against {condition}"]
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"condition":t.String("Just for confirmation: What is the condition do you want to analyze?")} 
                         # ,"genetic_disease":t.String("What is the genetic disease do you think it might link to? If unknown, type none")}

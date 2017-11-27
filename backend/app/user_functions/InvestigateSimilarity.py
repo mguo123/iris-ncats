@@ -11,11 +11,12 @@ class InvestigateSimilarity(IrisCommand):
     # title = "how does {condition} protects against {condition}?"
     title = "How are {disease_a} and {disease_b} semantically related?"
     # give an example for iris to recognize the command
-    examples = ["How are {disease_a} and {disease_b} semantically related?"]
+    examples = ["How are {disease_a} and {disease_b} semantically related?",
+                "What is the relationship between {disease_a} and {disease_b}?",
+                "Do {disease_a} and {disease_b} appear together in PubMed?"]
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"disease_a": t.String("What is the first disease?"),
-                      "disease_b": t.String("What is the second disease?"),
-                      "word_cloud": t.String("What type of word cloud do you want")}
+                      "disease_b": t.String("What is the second disease?")}
 
     #     # type annotations for each command argument, to help Iris collect missing values from a user
     #     argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"),
@@ -32,9 +33,9 @@ class InvestigateSimilarity(IrisCommand):
     # ,"genetic_disease":t.String("What is the genetic disease do you think it might link to? If unknown, type none")}
 
     # core logic of the command
-    def command(self, disease_a, disease_b, word_cloud):
+    def command(self, disease_a, disease_b):
         # Run the query
-        results = investigate_similarity(disease_a, disease_b, word_cloud)
+        results = investigate_similarity(disease_a, disease_b, word_cloud='commonality')
 
         return results
 
@@ -48,6 +49,11 @@ class InvestigateSimilarity(IrisCommand):
         self.commonality_clouds = []
         """
         result_array = []
+
+        if result is None:
+            result_array.append('There was an error processing your request')
+            return result_array
+
 
         if result.error is not None:
             result_array.append('There was an error processing your request')

@@ -90,11 +90,13 @@ if (!query %in% disease_names) {
   query_abstract_filename <- paste("abstracts", clean_q, "txt", sep=".")
   query_abstract_file_path <- paste(data_dir, query_abstract_filename, sep="/")
   query_abstracts = NA
+  
   if (file.exists(query_abstract_file_path)) {
     # Read in the abstracts
     print("Found abstracts locally")
     #print(query_abstract_file_path)
     query_abstracts <- read.table(query_abstract_file_path, header=T, stringsAsFactors=F, sep="\t", quote=NULL)
+    
     #print(head(query_abstracts))
     query_abstracts <- query_abstracts[['ABSTRACT']]
     #print(head(query_abstracts))
@@ -102,7 +104,7 @@ if (!query %in% disease_names) {
     # 3b. If not, download them from PubChem  
     print("Downloading abstracts")
     query_abstracts <- getAbstracts(getPMIDsByKeyWords(keys = query, dFrom = 2000, dTo = 2016)[1:1000])
-    
+    query_abstracts <- unlist(query_abstracts)
     # 3ba. Save the abstracts to the data directory
     abstracts_df <- data.frame(query_abstracts)
     names(abstracts_df) <- "ABSTRACT"
@@ -112,13 +114,16 @@ if (!query %in% disease_names) {
     write.table(abstracts_df, file=query_abstract_file_path, quote=F, row.names = F) 
   }
   # Check if there are no abstracts or if there are too few
-  if (length(query_abstracts) < 10) {
+  if (length(query_abstracts) < 5) {
     # Should do something to tell python that it broke.  Maybe save a run diagnostics object and load it with ryp2. 
-    exit()
+    print("Not enough abstracts")
+    print(query_abstracts)
+    quit()
   }
   
   # 3c. Process the abstracts and append them to the genetic disease terms
   query_disease_terms <- format_abstracts(query_abstracts, clean_q)
+  print(head(query_disease_terms))
   disease_terms <- rbind(query_disease_terms, disease_terms)
 }
 
