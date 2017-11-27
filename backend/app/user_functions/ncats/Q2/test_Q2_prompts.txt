@@ -1,0 +1,8 @@
+NADIFLOXACIN	Acne Vulgaris
+TAZAROTENE	Acne Vulgaris
+TICAGRELOR	Acute Coronary Syndrome
+TIROFIBAN	Acute Coronary Syndrome
+MERCAPTOPURINE	Precursor Cell Lymphoblastic Leukemia-Lymphoma
+PACLITAXEL	Breast Cancer
+NIMESULIDE	Acute Pain
+TAMIBAROTENE	Leukemia, Promyelocytic, Acute
