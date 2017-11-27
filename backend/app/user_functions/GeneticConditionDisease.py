@@ -24,7 +24,7 @@ class GeneticConditionDisease(IrisCommand):
         # Run the query
         results = Q1_query(condition)
 
-        return results
+        return condition, results
 
     # wrap the output of a command to display to user
     # by default this will be an identity function
@@ -35,20 +35,28 @@ class GeneticConditionDisease(IrisCommand):
         # List of paths to word clouds
         self.commonality_clouds = []
         """
+        condition, results = result
+
+        # make the df_name:
+        df_name = 'similarities_' + condition[:min(len(condition), 5)]
+        # remove spaces and make lowercase
+        df_name = df_name.replace(" ", "")
+        df_name = df_name.lower()
+
         result_array = []
-        if result.error is not None:
-            result_array.append('There was an error processing your request')
+        if results.error is not None:
+            result_array.append('There was an error processing your request for %s' % condition)
             return result_array
 
-        result_array.append('The following genetic diseases are the most semantically similar to your query')
+        result_array.append('The following genetic diseases are the most semantically similar to your query. Results are stored as dataframe: %s' % df_name)
         # adds the table to results
-        similarities_df = iris_objects.IrisDataframe(data=result.top_similarities())
-        self.iris.add_to_env('similarities', similarities_df)
+        similarities_df = iris_objects.IrisDataframe(data=results.top_similarities())
+        self.iris.add_to_env(df_name, similarities_df)
         result_array.append(similarities_df)
 
         # display image (first one)
-        #if len(result.commonality_clouds > 0):
-        #    os.system("open " + result.commonality_clouds[0])
+        #if len(results.commonality_clouds > 0):
+        #    os.system("open " + results.commonality_clouds[0])
 
 
         return result_array

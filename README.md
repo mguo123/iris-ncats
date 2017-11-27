@@ -83,7 +83,7 @@ In order to run Iris in development mode.
 4. In the other window, type:
 ```
 
-    cd [PATH_TO_IRIS]/backend
+    cd [PATH_TO_IRIS]
 
     # start electron (this will open the application automatically)
     npm start

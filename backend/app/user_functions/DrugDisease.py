@@ -128,11 +128,6 @@ class DrugDisease(IrisCommand):
         result_array.append(tissue_object_drug_short)
 
 
-        # display image
-        if "image_file" in result:
-            os.system("open " + result["image_file"])
-
-
         if "pubmed" in result:
             if isinstance(result["pubmed"], str):
                 result_array.append(result["pubmed"])
@@ -160,6 +155,13 @@ class DrugDisease(IrisCommand):
                 result_array.append(ph_genes_array_short_iris)  
             # result_array.append("Full dataset saved as drug_indications")
 
+
+        # display image
+        if "image_file" in result:
+            result_array.append('Diagram stored in: %s' % result["image_file"])
+            os.system("open " + result["image_file"])
+
+            
         result_array.append("Full dataframes are available for viewing using the command: print {dataframe_name}. See right side panel for more information.")
         result_array.append("The suffix for the drug-disease interaction pair is: %s" % query_name)
         result_array.append("Results are also stored in: %s" % results_dir)

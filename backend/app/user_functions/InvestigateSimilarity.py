@@ -37,7 +37,7 @@ class InvestigateSimilarity(IrisCommand):
         # Run the query
         results = investigate_similarity(disease_a, disease_b, word_cloud='commonality')
 
-        return results
+        return results, disease_a, disease_b
 
     # wrap the output of a command to display to user
     # by default this will be an identity function
@@ -48,33 +48,40 @@ class InvestigateSimilarity(IrisCommand):
         # List of paths to word clouds
         self.commonality_clouds = []
         """
+        results, disease_a, disease_b = result
+
+        # create name df
+        df_name = 'sentences_' + disease_a[:min(len(disease_a), 3)] + '_' + disease_b[:min(len(disease_b), 3)]
+        df_name = df_name.replace(" ", "")
+        df_name = df_name.lower()
+
         result_array = []
 
-        if result is None:
+        if results is None:
             result_array.append('There was an error processing your request')
             return result_array
 
 
-        if result.error is not None:
+        if results.error is not None:
             result_array.append('There was an error processing your request')
             return result_array
 
 
-        result_array.append('Here are some examples of the two diseases appearing in the same sentence in PubMed')
+        result_array.append('Here are some examples of the two diseases appearing in the same sentence in PubMed. Results are stored as dataframe: %s' % df_name)
         # adds the table to results
-        #sentence_df = iris_objects.IrisDataframe(data=result.sentence_df)
+        #sentence_df = iris_objects.IrisDataframe(data=results.sentence_df)
 
-        #sentences = [('Sentences', result.sentences)]
-        result.print_summary()
-        sentence_df = iris_objects.IrisDataframe(data=result.top_sentence_df())
+        #sentences = [('Sentences', results.sentences)]
+        results.print_summary()
+        sentence_df = iris_objects.IrisDataframe(data=results.top_sentence_df())
 
 
-        self.iris.add_to_env('sentences', sentence_df)
+        self.iris.add_to_env(df_name, sentence_df)
         result_array.append(sentence_df)
 
-        if result.word_cloud is not None:
+        if results.word_cloud is not None:
             # display image (first one)
-            os.system("open " + result.word_cloud)
+            os.system("open " + results.word_cloud)
 
         return result_array
 
