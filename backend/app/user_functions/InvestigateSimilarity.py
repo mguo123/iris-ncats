@@ -35,7 +35,7 @@ class InvestigateSimilarity(IrisCommand):
     # core logic of the command
     def command(self, disease_a, disease_b):
         # Run the query
-        results = investigate_similarity(disease_a, disease_b, word_cloud='commonality')
+        results = investigate_similarity(disease_a, disease_b)
 
         return results
 
@@ -59,22 +59,37 @@ class InvestigateSimilarity(IrisCommand):
             result_array.append('There was an error processing your request')
             return result_array
 
+        sentence_df = result.top_sentence_df()
+        if sentence_df is None:
+            result_array.append('The two conditions entered do not appear together in the same sentence in PubMed')
+        else:
+            result_array.append('Here are some examples of the two diseases appearing in the same sentence in PubMed')
+            result_array.append(sentence_df)
+            sentence_df = iris_objects.IrisDataframe(data=result.top_sentence_df())
+            self.iris.add_to_env('sentences', sentence_df)
 
-        result_array.append('Here are some examples of the two diseases appearing in the same sentence in PubMed')
-        # adds the table to results
-        #sentence_df = iris_objects.IrisDataframe(data=result.sentence_df)
-
-        #sentences = [('Sentences', result.sentences)]
-        result.print_summary()
-        sentence_df = iris_objects.IrisDataframe(data=result.top_sentence_df())
 
 
-        self.iris.add_to_env('sentences', sentence_df)
-        result_array.append(sentence_df)
-
-        if result.word_cloud is not None:
+        if result.commonality_word_cloud is not None:
             # display image (first one)
-            os.system("open " + result.word_cloud)
+            result_array.append('Generated a commonality word cloud. This shows terms enriched between the two diseases '
+                                'in PubMed')
+            os.system("open " + result.commonality_word_cloud)
+
+        if result.comparison_word_cloud is not None:
+            # display image (first one)
+            result_array.append('Generated a comparison word cloud. This shows terms enriched in each disease separately '
+                                'in PubMed.')
+            os.system("open " + result.comparison_word_cloud)
+
+        if result.frequency_word_cloud is not None:
+            # display image (first one)
+            result_array.append('Generated a cooccurrence word cloud. This shows terms enriched in PubMed where the two '
+                                'conditions appear together in the same abstract.')
+            os.system("open " + result.frequency_word_cloud)
+
+        if len(result_array) < 1:
+            result_array.append("No similarity metrics available")
 
         return result_array
 
