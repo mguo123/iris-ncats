@@ -120,7 +120,7 @@ class Function(Scope, AssignableMachine):
         self.query = text
     # we want to set initial output after title is defined
     def set_output(self):
-        self.output = [{"type":"title", "text": "Sure, I can answer: " + self.title.lower(), "title":self.title.lower()}]
+        self.output = [{"type":"title", "text": "You chose this query: " + self.title.lower(), "title":self.title.lower()}]
     # helper to get training examples for this function
     def training_examples(self):
         # TODO: probably just factor this out to IrisCommand (Function objects don't have a class index)

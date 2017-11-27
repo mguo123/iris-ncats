@@ -38,7 +38,7 @@ Data files needed to run biomedical modules must be obtained by containing the r
 
 ### Install and run the Python components:
 ```
-    cd iris-agent/backend
+    cd [PATH_TO_IRIS]/backend
     # create new conda env called iris with necessary packages
     conda create --name iris --file packages.txt
     # enter the conda env
@@ -49,7 +49,7 @@ Data files needed to run biomedical modules must be obtained by containing the r
 
 ### Install and run the Javascript components:
 ```
-    cd iris-agent
+    cd [PATH_TO_IRIS]
     # If you do not already have webpack
     npm install webpack -g
     # Now installing iris javascript components
@@ -58,7 +58,9 @@ Data files needed to run biomedical modules must be obtained by containing the r
     webpack
 ```
 
-## Using Iris (dev mode)
+
+
+## Using Iris (desktop dev mode)
 In order to run Iris in development mode. 
 
 1. Open two terminals, one that runs frontend launcher commands, the other your Python-based backend.
@@ -68,7 +70,7 @@ In order to run Iris in development mode.
 
 
     # run the backend application
-    cd iris-agent/backend/app # enter backend path
+    cd [PATH_TO_IRIS]/backend/app # enter backend path
 
     python app.py
 ```
@@ -81,17 +83,39 @@ In order to run Iris in development mode.
 4. In the other window, type:
 ```
 
-    cd iris-agent/backend
+    cd [PATH_TO_IRIS]/backend
 
     # start electron (this will open the application automatically)
     npm start
+```
+
+## Using Iris (on the web)
+Iris can run within a desktop electron app (currently in dev mode only, but will become a standalone app) and as a web application.
+
+To run as a web application follow steps 1-3 for the local version. Then for the web version enter in:
+```
+    cd [PATH_TO_IRIS]
+
+    http-server . [PORT_NUM] # default is 8080
+
+
+```
+
+Open a webbrowser to the indicated url and iris should be displayed. If you are developping on AWS or a remote server, you need to forward both the port number entered for you http-server as well as port 8000. This can be done via the ssh command.
+```
+ssh -N -f -L localhost:8080:localhost:8080  -i [private_key] user@server.com
+ssh -N -f -L localhost:8000:localhost:8000 -i [private_key] user@server.com
+
+```
+To kill a port type in the command 
+``` lsof -ti:PORT_NUM | xargs kill -9
 ```
 
 ## Developing in Iris
 
 Python and Javascript edits can be made in any text editor. Note any Javascript/HTML/CSS edits must be recompiled by:
 ```
-cd iris-agent/app
+cd [PATH_TO_IRIS]/app
 webpack
 ```
 You must restart Electron GUI interface for changes to take effect.

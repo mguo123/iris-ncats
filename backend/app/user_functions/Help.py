@@ -10,7 +10,7 @@ class Help(IrisCommand):
     title = "help"
     examples = ["help", "Help"]
     def command(self):
-        return ['Do you have a question you want to ask?', ' Type your question in the input box below', 'If you want to exit a task, type \"quit\"']
+        return ['Do you have a question you want to ask?', ' Type your question in the input box below', 'If you want to exit a task, type \"stop\"']
     def explanation(self, result):
         return result
 _Help = Help()

@@ -27,9 +27,9 @@ class EventLoop:
             self.machine.go_back()
             outputs = self.machine.current_output()
             return True, {"state": "RECURSE", "text": outputs}
-        elif "quit" in text:
+        elif "stop" in text:
             self.machine.reset()
-            return True, {"state":"START", "text": ["Okay, what would you like do do?"], "history": self.iris.history["history"]}
+            return True, {"state":"START", "text": ["Okay, stopped current task. What would you like do do?"], "history": self.iris.history["history"]}
         return False, None
     def state_machine(self, data):
         outputs = []
