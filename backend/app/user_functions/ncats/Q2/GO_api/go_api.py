@@ -27,7 +27,13 @@ class GO_api:
 
 
     def __init__(self, DB_path):
+        """
+        GO_api
 
+        Initializes the GO api object, this primarily consists of loading the ontology data.
+
+        :param DB_path: Path to the GO api background data.
+        """
         # Code to regenerate pkl files from original ontology data
         # self.O = goenrich.obo.ontology(os.path.join(DB_path, 'go.obo'))
         # self.gene2go = goenrich.read.gene2go(os.path.join(DB_path, 'gene2go.gz'))
@@ -48,6 +54,15 @@ class GO_api:
 
 
     def calc_GO_enrichment(self, query, plotFile, target_list=[], gen_image=False):
+        """
+        :param query: list of Entrez Gene IDs for the starting set
+        :param plotFile: path to file where image should be output
+        :param target_list: list of Entrez Gene IDs for the drug targets
+        :param gen_image:  If True, a png image is produced using Graphviz
+        :return: df - a pandas dataframe containing GO terms that are significantly enriched for the query genes,
+        also contains indications of whether a GO pathway contains the indicated targets, the p-value of the Enrichment,
+        and the q-value (Benjamin-Hochberg) of the enrichment.
+        """
         tempO = deepcopy(self.O)
         tempVals = deepcopy(self.values)
         background_attribute = 'gene2go'
@@ -59,6 +74,10 @@ class GO_api:
         return(df)
 
     def get_GO_terms(self, gene):
+        """
+        :param gene: Entrez gene ID
+        :return: list of GO terms that contain that gene
+        """
         terms = set()
         for g in gene:
             temp = self.gene2go.loc[self.gene2go['GeneID'] == g]
@@ -66,11 +85,16 @@ class GO_api:
         return(list(terms))
 
     def analyze(self, O, query, background_attribute, target_list, gen_image, **kwargs):
-        """ run enrichment analysis for query
-
-        :param O: Ontology graph after backgroud was set
-        :param query: array like of ids
-        :returns: pandas.DataFrame with results
+        """
+        :param O: Ontology graph after background was set
+        :param query: list of Entrez Gene IDs for the starting set
+        :param background_attribute:
+        :param target_list: list of Entrez Gene IDs for the drug targets
+        :param gen_image: If True, a png image is produced using Graphviz
+        :param kwargs: pass through list of arguments from calc_GO_enrichment
+        :return: df - a pandas dataframe containing GO terms that are significantly enriched for the query genes,
+        also contains indications of whether a GO pathway contains the indicated targets, the p-value of the Enrichment,
+        and the q-value (Benjamin-Hochberg) of the enrichment.
         """
         options = {
                 'show' : 'top20'
@@ -96,15 +120,6 @@ class GO_api:
                 temp = sig.tolist() + target_list
             else:
                 raise NotImplementedError(show)
-            # All
-            # G = goenrich.enrich.induced_subgraph(O, temp)
-
-            # Drug targets
-            # G = goenrich.enrich.induced_subgraph(O, target_list)
-
-            # Drug and disease tight overlap
-            # overlap = set(sig.tolist()).intersection(set(target_list))
-            # G = goenrich.enrich.induced_subgraph(O, overlap)
 
             # all_sig overlap
             sig = df.query('q<0.05')['term']
@@ -124,12 +139,13 @@ class GO_api:
 
 
     def to_graphviz(self, G, target_list, gvfile, graph_label='', **kwargs):
-        """ export graph of signifcant findings to dot file.
-        A png can be generated from the commandline using graphviz
-
+        """
         :param G: the graph to be exported
-        :param gvfile: file or filepath
-        :param graph_label: For empty label pass graph_label=''.
+        :param target_list: list of Entrez Gene IDs for the drug targets
+        :param gvfile: output name for dot file from which the graph is generated
+        :param graph_label: Name for the graph
+        :param kwargs: pass through arguments
+        :return: None, writes dot file for Graphviz rendering
         """
         for n in G:
             node = G.node[n]

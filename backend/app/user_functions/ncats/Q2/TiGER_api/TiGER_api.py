@@ -19,6 +19,10 @@ tissue_freq_values_avg = sum(tissue_freq.values()) / len(tissue_freq.values())
 
 
 def get_tissue_counts(geneList):
+    """
+    :param geneList: List of NCBI gene names
+    :return: Count the number of query genes that differentially expressed in each tissue.
+    """
     results = dict()
     total_genes = 0 # a sum of weighted gene numbers, genes are normalized based on frequency a tissue appears in the database
     for gene in geneList:
@@ -30,13 +34,6 @@ def get_tissue_counts(geneList):
                 else:
                     results[tissue] = 1 / tissue_freq[tissue]
                     total_genes+=1 / tissue_freq[tissue]
-        # else:
-        #     if "all" in results:
-        #         results["all"] += 1 / tissue_freq_values_avg
-        #         total_genes+=1 /tissue_freq_values_avg
-        #     else:
-        #         results["all"] = 1 /tissue_freq_values_avg
-        #         total_genes+=1 /tissue_freq_values_avg
 
     # num_tissue_spec_genes = total_genes - all_genes
     if len(results.keys()) > 0:
