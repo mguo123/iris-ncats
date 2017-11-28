@@ -1,14 +1,17 @@
-# Question 1 genetic disease search
+# Compute semantic similarity between a provided term and genetic diseases downloaded from PubMed
+# Altman Lab
+
+.libPaths(c(.libPaths(), '/home/admin/anaconda3/envs/iris/lib/R/library/', '/home/admin/R/x86_64-pc-linux-gnu-library/3.3',
+            '/usr/local/lib/R/site-library', '/usr/lib/R/site-library', '/usr/lib/R/library'))
+
 library(PubMedWordcloud)
 library(optparse)
 library(lsa)
 library(dplyr)
 library(tidytext)
+library(doParallel)
 
-#
-#setwd('/Users/gmcinnes/src/ncats/bin')
-
-# From the command line let the user specify a disease to query
+# Set command line options
 option_list = list(
   make_option(c("-q", "--query"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
@@ -17,18 +20,18 @@ option_list = list(
               help="output file name [default= %default]", metavar="character")
 ); 
 
+# Parse options
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
 query = opt$query
-#query = "malaria"
 
-
-print(paste("Computing semantic similarity for: ", query))
+write(paste("Computing semantic similarity for: ", query), stderr())
 
 data_dir = opt$data_dir
-#data_dir = '/Users/gmcinnes/src/ncats/data/mesh_genetic/pubmed'
 
+# Functions
+######################################################
 # Function to format abstracts downloaded from pubmed
 format_abstracts <- function(abstracts, disease) {
   query_terms <- tidy_up_text(abstracts)
@@ -72,13 +75,13 @@ tidy_up_text <- function(a) {
   
   return(tidy_terms)
 }
+######################################################
 
+# Get a clean version of the query for saving files
 clean_q <- clean_query(query)
 
 # 1. Load the genetic disease term frequencies
 genetic_disease_rds <- paste(data_dir, "genetic_disease_tibble.rds", sep="/")
-#genetic_disease_rds <- paste(data_dir, "genetic_disease_tibble.20.rds", sep="/")
-#disease_terms <- readRDS("/Users/gmcinnes/src/ncats/data/mesh_genetic/genetic_disease_tibble.rds")
 disease_terms <- readRDS(genetic_disease_rds)
 
 # 2. Check if the query is in the genetic disease list
@@ -86,26 +89,21 @@ disease_names <- unique(disease_terms$disease)
 if (!query %in% disease_names) {
   # 3. If not, get abstracts for the query term?
   # 3a. Check if abstracts are downloaded and in the data directory
-  
   query_abstract_filename <- paste("abstracts", clean_q, "txt", sep=".")
   query_abstract_file_path <- paste(data_dir, query_abstract_filename, sep="/")
   query_abstracts = NA
   
   if (file.exists(query_abstract_file_path)) {
     # Read in the abstracts
-    print("Found abstracts locally")
-    #print(query_abstract_file_path)
+    write("Found abstracts locally", stderr())
     query_abstracts <- read.table(query_abstract_file_path, header=T, stringsAsFactors=F, sep="\t", quote=NULL)
-    
-    #print(head(query_abstracts))
     query_abstracts <- query_abstracts[['ABSTRACT']]
-    #print(head(query_abstracts))
   } else {
-    # 3b. If not, download them from PubChem  
-    print("Downloading abstracts")
+    # 3b. If not, download them from PubMed  
+    write("Downloading abstracts from PubMed", stderr())
     query_abstracts <- getAbstracts(getPMIDsByKeyWords(keys = query, dFrom = 2000, dTo = 2016)[1:1000])
     query_abstracts <- unlist(query_abstracts)
-    # 3ba. Save the abstracts to the data directory
+    # 3ba. Save the abstracts to the data directory for future use
     abstracts_df <- data.frame(query_abstracts)
     names(abstracts_df) <- "ABSTRACT"
     abstracts_df <- data.frame(lapply(abstracts_df, function(x) {
@@ -116,14 +114,12 @@ if (!query %in% disease_names) {
   # Check if there are no abstracts or if there are too few
   if (length(query_abstracts) < 5) {
     # Should do something to tell python that it broke.  Maybe save a run diagnostics object and load it with ryp2. 
-    print("Not enough abstracts")
-    print(query_abstracts)
+    write("Not enough abstracts found.  Exiting.", stderr())
     quit()
   }
   
   # 3c. Process the abstracts and append them to the genetic disease terms
   query_disease_terms <- format_abstracts(query_abstracts, clean_q)
-  print(head(query_disease_terms))
   disease_terms <- rbind(query_disease_terms, disease_terms)
 }
 
@@ -138,8 +134,8 @@ tfidf_filename <- paste("tfidf", clean_q, "rds", sep=".")
 tfidf_file_path <- paste(data_dir, tfidf_filename, sep="/")
 saveRDS(disease_terms, file=tfidf_file_path) 
 
-# 5. Compute cosine similarity for the query term against all genetic diseases
 
+# Extract query terms
 query_df <- disease_terms[disease_terms$disease == clean_q,][c("word", "tf_idf")]
 names(query_df)[2] <- clean_q
 
@@ -148,38 +144,44 @@ names(query_df_all_words) <- "word"
 query_df_all_words <- left_join(query_df_all_words, query_df)
 query_df_all_words[is.na(query_df_all_words)] <- 0
 
-similarities <- data.frame(disease_a=character(),
-                           disease_b=character(), 
-                           cos_sim=numeric(), 
-                           stringsAsFactors=FALSE) 
+# Create cluster
+cl <- makeCluster(4)
+registerDoParallel(cl)
+write("Computing cosine similarities", stderr())
 
-for (i in 1:length(disease_names)) {
+# Compute pairwise similarity for each genetic disease against the query disease
+similarities <- foreach (i=1:length(disease_names),
+              .packages=c('dplyr','lsa'),
+              .combine=rbind) %dopar% {
   # Extract disease df
   t <- disease_names[i]
   if (t==clean_q) {
     next()
   }
   t_disease <- disease_terms[disease_terms$disease == t,]
+  if(nrow(t_disease) == 0) {
+    next()
+  }
   t_words <- t_disease[c('word', 'tf_idf')]
   names(t_words)[2] <- t
-  
+                
   query_disease_df <- left_join(query_df_all_words, t_words)
-  #query_disease_df <- left_join(query_df, t_words)
   query_disease_df[is.na(query_disease_df)] <- 0
-  
-  new_similarities <- data.frame(disease_a=clean_q,
-                                 disease_b=t, 
-                                 cos_sim=cosine(query_disease_df[[clean_q]], query_disease_df[[t]]), 
-                                 stringsAsFactors=FALSE) 
-  
-  similarities <- rbind(similarities, new_similarities)
+                
+  data.frame(disease_a=clean_q,
+    disease_b=t, 
+    cos_sim=cosine(query_disease_df[[clean_q]], query_disease_df[[t]]), 
+    stringsAsFactors=FALSE) 
 }  
 
+# Kill the cluster
+stopCluster(cl)
+
+# Sort the results
 sorted <- similarities %>%
   arrange(desc(cos_sim))
-head(sorted)
 
-# 6. Save the results to a file
+# Save the results to a file
 query_sim_file <- paste("similarities", clean_q, "txt", sep=".")
 query_sim_file_path <- paste(data_dir, query_sim_file, sep="/")
 write.table(sorted, file=query_sim_file_path, quote=F, row.names = F, sep=",") 
