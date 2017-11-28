@@ -22,7 +22,7 @@ The original IRIS system was created by the Bernstein lab at Stanford Computer S
 In terms of software structure, this effort can be thought of in a couple forms:
 1. as a standalone desktop Electron app (for OSX and Linux with future compatibility with Windows)
 2. as a web application that is ported through a basic http-server
-3. as a command-line interface for individuals who want more programmatic control
+3. as a command-line interface for individuals who want more programmatic control (repository can be found [here](https://github.com/alavertu/ncats_altman))
 
 The backend of Iris is written in Python while the front end is written in Javascript/CSS/HTML.  These are instructions to install and run iris-ncats in debugging mode that can be used for developers. We recommend using OSX for running the debugging mode, as the Windows and Linux versions are still in pre-release. A self-contained Electron app for OSX will be available shortly.
 
