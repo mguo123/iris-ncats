@@ -10,10 +10,12 @@ class GeneSimilarity(IrisCommand):
     # title = "how does {condition} protects against {condition}?"
     title = "What genetic diseases are semantically similar to gene {gene}?"
     # give an example for iris to recognize the command
+
     examples = ["What diseases are similar to {gene}?",
                 "What diseases are related to {gene}?",
                 "Is {gene} related to disease?",
                 "How is the {gene} gene related to genetic diseases?"]
+
     # type annotations for each command argument, to help Iris collect missing values from a user
 
     argument_types = {"gene": t.String("What is the gene do you want to analyze?")}
@@ -27,10 +29,12 @@ class GeneSimilarity(IrisCommand):
 
         return [results, gene]
 
+
     # wrap the output of a command to display to user
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
+
         """"# results is an object with       # Pandas data frame with top 10 resutls
         self.similarities = None
         # List of paths to word clouds
@@ -43,12 +47,14 @@ class GeneSimilarity(IrisCommand):
         df_name = df_name.replace(" ", "")
         df_name = df_name.lower()
 
+
         result_array = []
         if result.error is not None:
             result_array.append('There was an error processing your request')
             return result_array
 
         similarities = results.top_similarities()
+
         if similarities is None:
             result_array.append('No similarities could be computed')
         else:

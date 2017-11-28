@@ -3,6 +3,11 @@
 # 2. Compute tf-idf using the individual diseases as background
 # 3. Generate word clouds for the tf-idf weighted terms
 
+
+.libPaths(c(.libPaths(), '/home/admin/anaconda3/envs/iris/lib/R/library/', '/home/admin/R/x86_64-pc-linux-gnu-library/3.3', 
+            '/usr/local/lib/R/site-library', '/usr/lib/R/site-library', '/usr/lib/R/library'))
+
+
 library(PubMedWordcloud)
 library(optparse)
 library(lsa)
@@ -30,6 +35,9 @@ disease_1 = opt$disease_1
 disease_2 = opt$disease_2
 
 
+# Functions
+###################################
+# Function to format the query for file names
 
 clean_query <- function(query) {
   clean_query <- tolower(query)
@@ -42,15 +50,11 @@ clean_query <- function(query) {
 # Convert abstracts into tidy objects
 tidy_up_text <- function(a) {
   text_df <- data_frame(line=1:length(a), text = a)
-  
   tidy_terms<- text_df %>%
     unnest_tokens(word, text)
-  
   data(stop_words)
-  
   tidy_terms <- tidy_terms %>%
     anti_join(stop_words)
-  
   return(tidy_terms)
 }
 
@@ -75,6 +79,8 @@ format_abstracts <- function(abstracts, disease) {
   return(query_disease_terms)
 }
 
+
+# Fetch abstracts from PubMed
 fetch_abstracts <- function(disease_name) {
   query_abstracts = NA
   clean_q <- clean_query(disease_name)
@@ -83,17 +89,15 @@ fetch_abstracts <- function(disease_name) {
   if (file.exists(query_abstract_file_path)) {
     # Read in the abstracts
     print("Found abstracts locally")
-    #print(query_abstract_file_path)
     query_abstracts <- read.table(query_abstract_file_path, header=T, stringsAsFactors=F, sep="\t", quote=NULL)
-    #print(head(query_abstracts))
     query_abstracts <- query_abstracts[['ABSTRACT']]
-    #print(head(query_abstracts))
   } else {
     # 3b. If not, download them from PubChem  
     print("Downloading abstracts")
     query_abstracts <- getAbstracts(getPMIDsByKeyWords(keys = disease_name, dFrom = 2000, dTo = 2016)[1:1000])
     query_abstracts <- unlist(query_abstracts)
-    # 3ba. Save the abstracts to the data directory
+
+    # Save the abstracts to the data directory
     abstracts_df <- data.frame(query_abstracts)
     print(head(abstracts_df))
     names(abstracts_df) <- "ABSTRACT"
@@ -105,6 +109,8 @@ fetch_abstracts <- function(disease_name) {
   return(query_abstracts)
 }
 
+
+# Get a term dataframe for a given disease
 fetch_terms <- function(disease_name) {
   clean_q <- clean_query(disease_name)
   query_abstracts = fetch_abstracts(disease_name)
@@ -114,36 +120,40 @@ fetch_terms <- function(disease_name) {
     print(query_abstracts)
     quit()
   }
-  
-  # 3c. Process the abstracts and append them to the genetic disease terms
+
+  # Process the abstracts and append them to the genetic disease terms
   query_disease_terms <- format_abstracts(query_abstracts, clean_q)
   return(query_disease_terms)
-  #disease_terms <- rbind(query_disease_terms, disease_terms)
 }
+###################################################
 
-
+# Get disease terms for each disease
 disease_1_terms <- fetch_terms(disease_1)
 disease_2_terms <- fetch_terms(disease_2)
+
+# Get disease terms for cooccurence of terms
 both_terms <- fetch_terms(paste(disease_1, disease_2))
 
+# Bind them all together into a single tibble
 disease_terms <- rbind(disease_1_terms, disease_2_terms)
 disease_terms <- rbind(disease_terms, both_terms)
 
-# 4. Calculate tf-idf on the disease terms
+# Calculate tf-idf on the disease terms
 disease_terms <- disease_terms %>%
   bind_tf_idf(word, disease, n)
-disease_terms
 
+# Print some out just to see something on the command line
 disease_terms[with(disease_terms, order(-tf_idf)), ]
 
+# Get a data frame for the cooccurence of the terms
 both_clean <- clean_query(paste(disease_1, disease_2))
 both <- disease_terms[disease_terms$disease == both_clean,]
 
+# Set the output files
 tfidf_output_file <- paste(opt$prefix, clean_query(disease_1), clean_query(disease_2), "cooccurence_tfidf.png", sep=".")
 freq_output_file <- paste(opt$prefix, clean_query(disease_1), clean_query(disease_2), "cooccurence_frequency.png", sep=".")
 
-
-
+# Generate and save the word clouds
 png(tfidf_output_file, width=12, height=8, units="in", res=300)
 layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
 par(mar=rep(0, 4))
@@ -163,16 +173,20 @@ text(x=0.5, y=0.5, title, cex=1.5)
 wordcloud(word=both$word, freq=both$n, max.words = 200, random.order=FALSE, colors='#229c81')
 dev.off()
 
-# Search for word combos
+
+# Part 2 - Search for sentences with both terms
+# Fetch abstracts containing both diseases
 both_abstracts <- fetch_abstracts(paste(disease_1, disease_2))
 text_df <- data_frame(line=1:length(both_abstracts), text = both_abstracts)
+
+# Create a term tibble with sentences
 tidy_abstract_sentences <- text_df %>%
   unnest_tokens(word, text, token="sentences")
 
-
+# Subset the tible for sentences containing both diseases
 d1 <- tidy_abstract_sentences[grepl(disease_1,tidy_abstract_sentences$word, perl=T, ignore.case = T), ]
 d2 <- d1[grepl(disease_2,d1$word, perl=T, ignore.case = T), ]
 
-# Sentences with both -SAVE
+# Write the sentences to a file
 sentence_output_file <- paste(opt$prefix, clean_query(disease_1), clean_query(disease_2), "cooccurence_sentences.txt", sep=".")
 write.table(d2, file=sentence_output_file, sep="\t", row.names = F)

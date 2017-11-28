@@ -3,8 +3,6 @@ from iris import IrisCommand
 from app.user_functions.Q1_main import investigate_similarity
 from iris import iris_objects
 import os
-import pandas
-
 
 class InvestigateSimilarity(IrisCommand):
     # what iris will call the command + how it will appear in a hint
@@ -48,12 +46,12 @@ class InvestigateSimilarity(IrisCommand):
             result_array.append('There was an error processing your request')
             return result_array
 
-
         if results.error is not None:
             result_array.append('There was an error processing your request')
             return result_array
 
         sentence_df = results.top_sentence_df()
+
         if sentence_df is None:
             result_array.append('The two conditions entered do not appear together in the same sentence in PubMed')
         else:
@@ -61,7 +59,6 @@ class InvestigateSimilarity(IrisCommand):
             result_array.append(sentence_df)
             sentence_df = iris_objects.IrisDataframe(data=results.top_sentence_df())
             self.iris.add_to_env(df_name, sentence_df)
-
 
 
         if results.commonality_word_cloud is not None:
@@ -85,7 +82,10 @@ class InvestigateSimilarity(IrisCommand):
         if len(result_array) < 1:
             result_array.append("No similarity metrics available")
 
-        return result_array
 
+        if len(result_array) < 1:
+            result_array.append("No similarity metrics available")
+
+        return result_array
 
 _InvestigateSimilarity = InvestigateSimilarity()
