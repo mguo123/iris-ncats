@@ -11,7 +11,6 @@ from app.user_functions.ncats.Q2.Q2_main import Q2_query
 import numpy as np
 import os
 import datetime
-# run_test.run_drug_single('a', 'b')
 
 overall_path = os.path.abspath(os.path.dirname(__file__))
 results_dir = os.path.join(overall_path, "ncats/results/Q2/")
@@ -115,18 +114,20 @@ class DrugDisease(IrisCommand):
 
 
         # get tissue = disease
-        result_array.append('Top disease-relevant tissues in which this drug-disease interaction takes place are shown. Full dataset saved as tissues_{drug_disease} ')
-        tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
-        tissue_object_dis_short = iris_objects.IrisDataframe(data=result['tissue_df_dis_short'])
-        self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
-        result_array.append(tissue_object_dis_short)
- 
-         # get tissue = drug
-        result_array.append('Top drug-relevant tissues in which this drug-disease interaction takes place are shown. Full dataset saved as tissues_{drug_disease} ')
-        tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
-        tissue_object_drug_short = iris_objects.IrisDataframe(data=result['tissue_df_drug_short'])
-        self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
-        result_array.append(tissue_object_drug_short)
+        if 'tissue_df_dis' in result:
+            result_array.append('Tissues that show the most differential gene expression in the disease state are shown. Full dataset saved as tissues_{drug_disease} ')
+            tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
+            tissue_object_dis_short = iris_objects.IrisDataframe(data=result['tissue_df_dis_short'])
+            self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
+            result_array.append(tissue_object_dis_short)
+        else:
+            result_array.append('No differential tissue expression in disease state detected.')
+        #  # get tissue = drug
+        # result_array.append('Top drug-relevant tissues in which this drug-disease interaction takes place are shown. Full dataset saved as tissues_{drug_disease} ')
+        # tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
+        # tissue_object_drug_short = iris_objects.IrisDataframe(data=result['tissue_df_drug_short'])
+        # self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
+        # result_array.append(tissue_object_drug_short)
 
 
         if "pubmed" in result:
@@ -238,7 +239,7 @@ class DrugDiseaseMulti(IrisCommand):
         suffix_arr = []
         assoc_variables = []
 
-        for result in results:
+        for i, result in enumerate(results):
             print('results', result['drug'], result['disease'])
             drug_arr.append(result['drug'])
             disease_arr.append(result['disease'])
@@ -251,9 +252,9 @@ class DrugDiseaseMulti(IrisCommand):
                 worked_arr.append('SUCCESS')
 
                 # get suffix information
-                query_name = result['drug'][:min(len(result['drug']), 3)] + "_" + result['disease'][:min(len(result['disease']), 3)]
+                query_name = result['drug'][:min(len(result['drug']), 3)] + "_" + result['disease'][:min(len(result['disease']), 3)] 
                 query_name = '_'.join(query_name.split(' '))
-                query_name = "_" + query_name.lower()
+                query_name = "_" + query_name.lower() + "_" + str(i)
                 suffix_arr.append(query_name)
 
                 # get associated drug genes
@@ -269,15 +270,18 @@ class DrugDiseaseMulti(IrisCommand):
                 go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
                 self.iris.add_to_env('go_terms' + query_name, go_term_object)
 
-                # get tissue = disease
-                tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
-                self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
- 
-                # get tissue = drug
-                tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
-                self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
+                variable_info = ['drug_genes' + query_name, 'disease_genes' + query_name, 'go_terms' + query_name]
 
-                variable_info = ['drug_genes' + query_name, 'disease_genes' + query_name, 'go_terms' + query_name, 'tissues_disease' + query_name, 'tissues_drug' + query_name]
+                # get tissue = disease
+                if 'tissue_df_dis' in result:
+                    variable_info.append('tissues_disease' + query_name)
+                    tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
+                    self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
+ 
+                # # get tissue = drug
+                # tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
+                # self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
+
 
                 if "pubmed" in result:
                     if not isinstance(result["pubmed"], str):
@@ -298,8 +302,10 @@ class DrugDiseaseMulti(IrisCommand):
 
                 assoc_variables.append(', '.join(variable_info))   
 
+
         # Save info as an iris dataframe
         info_data = [list(x) for x in zip(drug_arr, disease_arr, worked_arr, suffix_arr, assoc_variables)]
+
         info_df = iris_objects.IrisDataframe(column_names=[ "Drug", "Disease", "Query Status","Suffix", "Associated Variables"], column_types=["Text", "Text", "Text", "Text", "Text"], data=info_data)
         explanation_array.append(info_df)
 
@@ -346,8 +352,6 @@ class DrugDiseaseCSV(IrisCommand):
         drug_list = list(panda_df.ix[:, 0])
         disease_list = list(panda_df.ix[:, 1])
 
-        print(iris_df)
-        print(iris_df.df)
         # store within the directory as a list
         answer_arr = [task_dir]
         for drug, disease in zip(drug_list, disease_list):
@@ -424,15 +428,15 @@ class DrugDiseaseCSV(IrisCommand):
                     go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
                     self.iris.add_to_env('go_terms' + query_name, go_term_object)
 
-                    # get tissue = disease
-                    tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
-                    self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
-     
-                    # get tissue = drug
-                    tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
-                    self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
 
-                    variable_info = ['drug_genes' + query_name, 'disease_genes' + query_name, 'go_terms' + query_name, 'tissues_disease' + query_name, 'tissues_drug' + query_name]
+                    variable_info = ['drug_genes' + query_name, 'disease_genes' + query_name, 'go_terms' + query_name]
+
+                    # get tissue = disease
+                    if 'tissue_df_dis' in result:
+                        variable_info.append('tissues_disease' + query_name)
+                        tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
+                        self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
+     
 
                     if "pubmed" in result:
                         if not isinstance(result["pubmed"], str):

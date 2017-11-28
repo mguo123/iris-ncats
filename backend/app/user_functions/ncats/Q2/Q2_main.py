@@ -147,20 +147,16 @@ def Q2_query(QDrug, QDisease, options):
         dis_genes_short = dis_genes[:min(len(dis_genes), 5)]
         dis_gene_list = list(map(int, dis_gene_list))
 
-        # Get tissue information
-        print("Getting tissue information resolved to disease via: resolve_EntrezGeneID_to_NCBIGeneName")
-        tissue_df_dis = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in dis_gene_list])
-        tissue_df_dis_short = tissue_df_dis[:min(5, len(tissue_df_dis))]
-
+ 
         print("Getting drug genes Calling resolve_EntrezGeneID_to_NCBIGeneName")
         drug_genes = [[GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
         drug_genes_short = drug_genes[:min(5, len(drug_genes))]
 
-        # Get tissue information
-        print("Getting tissue information resolved to drug via: resolve_EntrezGeneID_to_NCBIGeneName")
-        tissue_df_drug = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in drug_gene_list])
-        tissue_df_drug_short = tissue_df_drug[:min(5, len(tissue_df_drug))]
+        # # Get tissue information
+        # print("Getting tissue information resolved to drug via: resolve_EntrezGeneID_to_NCBIGeneName")
+        # tissue_df_drug = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in drug_gene_list])
+        # tissue_df_drug_short = tissue_df_drug[:min(5, len(tissue_df_drug))]
 
         # Get the GO terms for the drug targets
         drug_gene_list = list(map(int,drug_gene_list))
@@ -178,20 +174,25 @@ def Q2_query(QDrug, QDisease, options):
 
         go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'term', 'p', 'q', 'gene_target']]
         go_result = go_result.sort_values(by=['gene_target', 'q'], ascending=[False, True])
+        go_result.to_csv(os.path.join(results_dir, out_name + "_GO_pathway_enrichment.csv"), mode="w+", index_label=False, index=False)
 
 
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
+        # Start saving results
         result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "drug_id": drug_id, "disease_id":disease_id,
-                    "tissue_df_dis":tissue_df_dis, "tissue_df_dis_short": tissue_df_dis_short, "tissue_df_drug": tissue_df_drug, "tissue_df_drug_short": tissue_df_drug_short,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
-        # result = {"GOENRICH": go_result, "drug_genes": drug_genes, "disease_genes": dis_genes,
-        #           "dis_tissue_data": tissue_df
-        #           }
 
-        go_result.to_csv(os.path.join(results_dir, out_name + "_GO_pathway_enrichment.csv"), mode="w+", index_label=False, index=False)
+
+        # Get tissue information
+        print("Getting tissue information resolved to disease via: resolve_EntrezGeneID_to_NCBIGeneName")
+        tissue_df_dis = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in dis_gene_list])
+        if tissue_df_dis is not None:
+            tissue_df_dis_short = tissue_df_dis[:min(5, len(tissue_df_dis))]
+            result["tissue_df_dis"] = tissue_df_dis
+            result["tissue_df_dis_short"] = tissue_df_dis_short
 
         print('Generating Image')
         if options.gen_image:
