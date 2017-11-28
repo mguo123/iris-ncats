@@ -142,7 +142,8 @@ Notes if you are developping on AWS or a remote server:
 ```
 * Navigate to the localhost port chosen
 * To kill a port type in the command 
-``` lsof -ti:PORT_NUM | xargs kill -9
+``` 
+    lsof -ti:PORT_NUM | xargs kill -9
 ```
 
 ## Developing in Iris
