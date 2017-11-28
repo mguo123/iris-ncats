@@ -74,3 +74,18 @@ class RemoveVar(IrisCommand):
         return "I removed {} from the environment.".format(name1)
 
 removeVar = RemoveVar()
+
+
+# DOESN"T WORK!!!
+# class ClearVar(IrisCommand):
+#     title = "clear environment"
+
+#     examples = ["clear variables from environment"]
+#     help_text = [
+#         "This command this command clears the current iris environment."
+#     ]
+#     def command(self):
+#         for name in self.iris.env.keys():
+#             self.iris.remove_from_env(name)
+
+# clearVar = ClearVar()

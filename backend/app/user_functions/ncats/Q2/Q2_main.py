@@ -154,6 +154,10 @@ def Q2_query(QDrug, QDisease, options):
         overall_path = os.path.abspath(os.path.dirname(__file__))
         results_dir = os.path.join(*[overall_path, options.outPath, out_name])
 
+        # filter out None
+        dis_gene_list = [gene for gene in dis_gene_list if gene is not None]
+        drug_gene_list = [gene for gene in drug_gene_list if gene is not None]
+
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
         

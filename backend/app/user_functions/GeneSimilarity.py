@@ -49,7 +49,7 @@ class GeneSimilarity(IrisCommand):
 
 
         result_array = []
-        if result.error is not None:
+        if results.error is not None:
             result_array.append('There was an error processing your request')
             return result_array
 

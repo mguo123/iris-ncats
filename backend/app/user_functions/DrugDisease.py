@@ -77,8 +77,8 @@ class DrugDisease(IrisCommand):
             answer["other_disease"] = run_main.find_drug_indications(drug)
         
 
-        answer['drug'] = drug
-        answer['disease'] = disease
+        answer['drug'] = drug.strip()
+        answer['disease'] = disease.strip()
     
         return answer
         
@@ -219,8 +219,8 @@ class DrugDiseaseMulti(IrisCommand):
                 if bool_other_disease:
                     answer["other_disease"] = run_main.find_drug_indications(drug)
 
-                answer['drug'] = drug
-                answer['disease'] = disease
+                answer['drug'] = drug.strip()
+                answer['disease'] = disease.strip()
 
                 answer_arr.append(answer)
     
@@ -257,7 +257,7 @@ class DrugDiseaseMulti(IrisCommand):
 
                 # get suffix information
                 query_name = result['drug'][:min(len(result['drug']), 3)] + "_" + result['disease'][:min(len(result['disease']), 3)] 
-                query_name = '_'.join(query_name.split(' '))
+                query_name = ''.join(query_name.split(' '))
                 query_name = "_" + query_name.lower() + "_" + str(i)
                 suffix_arr.append(query_name)
 
@@ -365,8 +365,8 @@ class DrugDiseaseCSV(IrisCommand):
             if bool_other_disease:
                 answer["other_disease"] = run_main.find_drug_indications(drug)
 
-            answer['drug'] = drug
-            answer['disease'] = disease
+            answer['drug'] = drug.strip()
+            answer['disease'] = disease.strip()
             answer_arr.append(answer)
 
         if bool_display:
@@ -411,7 +411,7 @@ class DrugDiseaseCSV(IrisCommand):
 
                     # get suffix information
                     query_name = result['drug'][:min(len(result['drug']), 3)] + "_" + result['disease'][:min(len(result['disease']), 3)]
-                    query_name = '_'.join(query_name.split(' '))
+                    query_name = ''.join(query_name.split(' '))
                     query_name = "_" + query_name.lower()
                     suffix_arr.append(query_name)
 
