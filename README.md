@@ -1,11 +1,11 @@
 # iris-ncats: A Conversational Agent for Biological Data Science 
 
-This repository contains the prototype for Stanford Effort for the Biomedical Data Translator that is able to answer the following questions:
+This repository contains the prototype for the Stanford Effort for the Biomedical Data Translator. The system we developed is able to answer the following questions:
 
 * Given a condition, are any genetic conditions potentially protective and why?
 * Given a drug and a condition, construct a pathway description that explains how the drug effects its action. Additionally, generate hypotheses of other therapeutic uses for the given drug.
 
-Without going too much into the weeds, these queries take in relevant arguments, use a combination of semantic similarity comparison methods, genetic network analysis, and/or term enrichment calculations to get information for the desired result.
+These queries take in relevant arguments, use a combination of semantic similarity comparison methods, genetic network analysis, and/or enrichment calculations to generate a plausible hypotheses. These hypotheses are meant to act as a launch point for further research efforts.
 
 This prototype is based on the IRIS, which is an open source conversational agent, originally to facilitate tasks in data science for non-programmers.  We tailored it to a biomedical context, allowing it to recognize key entities (drugs, genes, diseases), pull from various biomedical data sources, construct queries based on free text inputted by the user, and perform various analyses to produce the final answer or dossier.
 
@@ -16,15 +16,15 @@ The original IRIS system was created by the Bernstein lab at Stanford Computer S
 
 ## Getting Starting 
 
-### Note: This is currently a prototype release. Additions and bux fixes are being performed.
+### Note: This is currently an alpha prototype release. Additions and bux fixes are on going.
 
 
 In terms of software structure, this effort can be thought of in a couple forms:
 1. as a standalone desktop Electron app (for OSX and Linux with future compatibility with Windows)
-2. as a web application that is ported through a basic http-server (beta)
+2. as a web application that is ported through a basic http-server
 3. as a command-line interface for individuals who want more programmatic control
 
-The backend of Iris is written in Python while the front end is written in Javascript/CSS/HTML.  These are instructions to install and run iris-ncats in debugging mode that can be used for developers. We recommend using OSX for running the debugging mode. Windows and Linux versions are still in pre-release. A self-contained Electron app for OSX.
+The backend of Iris is written in Python while the front end is written in Javascript/CSS/HTML.  These are instructions to install and run iris-ncats in debugging mode that can be used for developers. We recommend using OSX for running the debugging mode, as the Windows and Linux versions are still in pre-release. A self-contained Electron app for OSX will be available shortly.
 
 ### Prerequisites for Developing
 
