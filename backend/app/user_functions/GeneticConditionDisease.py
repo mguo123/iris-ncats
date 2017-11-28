@@ -15,6 +15,7 @@ class GeneticConditionDisease(IrisCommand):
                 "protective condition",
                 "protection against disease",
                 "do any genetic diseases protect against {condition}"]
+
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"condition":t.String("What is the condition do you want to analyze?")}
 
@@ -29,7 +30,8 @@ class GeneticConditionDisease(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-        """"# results is an object with       # Pandas data frame with top 10 resutls
+        """"
+        results is an object with Pandas data frame with top 10 resutls
         self.similarities = None
         # List of paths to word clouds
         self.commonality_clouds = []
@@ -56,6 +58,7 @@ class GeneticConditionDisease(IrisCommand):
             similarities_df = iris_objects.IrisDataframe(data=similarities)
             # adds the table to results
             self.iris.add_to_env(df_name, similarities_df)
+
             result_array.append(similarities_df)
 
         # display image (first one)

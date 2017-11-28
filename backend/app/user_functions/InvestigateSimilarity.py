@@ -3,8 +3,6 @@ from iris import IrisCommand
 from app.user_functions.Q1_main import investigate_similarity
 from iris import iris_objects
 import os
-import pandas
-
 
 class InvestigateSimilarity(IrisCommand):
     # what iris will call the command + how it will appear in a hint
@@ -18,20 +16,6 @@ class InvestigateSimilarity(IrisCommand):
     argument_types = {"disease_a": t.String("What is the first disease?"),
                       "disease_b": t.String("What is the second disease?")}
 
-    #     # type annotations for each command argument, to help Iris collect missing values from a user
-    #     argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"),
-    #                         "disease":t.String("What is the disease you want to analyze?"),
-    #                         "bool_image":t.YesNo("Would you like to visual the results as a diagram?",
-    #                                     yes=True, no=False),
-    #                         "bool_other_disease":t.YesNo("Would you like to know other diseases that can be treated by this drug?",
-    #                                     yes=True, no=False),
-    #                         "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
-    #                                     yes=True, no=False)
-    #
-    #                         }
-
-    # ,"genetic_disease":t.String("What is the genetic disease do you think it might link to? If unknown, type none")}
-
     # core logic of the command
     def command(self, disease_a, disease_b):
         # Run the query
@@ -43,7 +27,8 @@ class InvestigateSimilarity(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-        """"# results is an object with       # Pandas data frame with top 10 resutls
+        """"
+        results -  an object with Pandas data frame with top 10 resutls that is called with top_sentences_df
         self.similarities = None
         # List of paths to word clouds
         self.commonality_clouds = []
@@ -61,12 +46,12 @@ class InvestigateSimilarity(IrisCommand):
             result_array.append('There was an error processing your request')
             return result_array
 
-
         if results.error is not None:
             result_array.append('There was an error processing your request')
             return result_array
 
         sentence_df = results.top_sentence_df()
+
         if sentence_df is None:
             result_array.append('The two conditions entered do not appear together in the same sentence in PubMed')
         else:
@@ -76,29 +61,31 @@ class InvestigateSimilarity(IrisCommand):
             self.iris.add_to_env(df_name, sentence_df)
 
 
-
         if results.commonality_word_cloud is not None:
             # display image (first one)
             result_array.append('Generated a commonality word cloud. This shows terms enriched between the two diseases '
-                                'in PubMed')
+                                'in PubMed. Stored at %s' % results.commonality_word_cloud)
             os.system("open " + results.commonality_word_cloud)
 
         if results.comparison_word_cloud is not None:
             # display image (first one)
             result_array.append('Generated a comparison word cloud. This shows terms enriched in each disease separately '
-                                'in PubMed.')
+                                'in PubMed. Stored at %s' % results.comparison_word_cloud)
             os.system("open " + results.comparison_word_cloud)
 
         if results.frequency_word_cloud is not None:
             # display image (first one)
             result_array.append('Generated a cooccurrence word cloud. This shows terms enriched in PubMed where the two '
-                                'conditions appear together in the same abstract.')
+                                'conditions appear together in the same abstract. Stored at %s' % results.frequency_word_cloud)
             os.system("open " + results.frequency_word_cloud)
 
         if len(result_array) < 1:
             result_array.append("No similarity metrics available")
 
-        return result_array
 
+        if len(result_array) < 1:
+            result_array.append("No similarity metrics available")
+
+        return result_array
 
 _InvestigateSimilarity = InvestigateSimilarity()

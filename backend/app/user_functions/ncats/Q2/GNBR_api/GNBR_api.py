@@ -50,67 +50,62 @@ gene_gene_dict = pickle.load(pkl_file)
 pkl_file.close()
 
 
-"""
-query_drug_target
-
-Querys a drug for a given relationship with a gene, default is "B", a binding relationships
-
-Input:
-drug - string of the drug common name
-relationship - desired drug-gene relationship
-gene_names - return a list of gene names instead of ENTREZ gene IDs
-n - max number of genes to return
-
-Output:
-ordered_genes - returns a list of the top n genes ordered by the frequency of that genes annotation to the drug
-If no gene targets are known or the drug isn't in our database, it returns None
-"""
 def query_drug_target(drug, relationship="B", gene_names=False, n=25):
-        chem_id = chem_dict.get(drug.lower())
+    """
+    query_drug_target
 
-        count = dict()
-        if chem_id in chem_gene_dict:
-            for entry in chem_gene_dict.get(chem_id):
-                id = entry[0]
-                if id in gene_dict and id in gene_idf:
-                    if entry[1] == relationship:
-                        if id in count:
-                            count[id] += 1
-                        else:
-                            count[id] = 1
+    Querys a drug for a given relationship with a gene, default is "B", a binding relationships
 
-            freq_corrected_genes = dict()
-            if gene_names:
-                for gene in count:
-                    freq_corrected_genes[gene_dict.get(gene)] = np.multiply(float(count.get(gene)), gene_idf.get(gene))
-            else:
-                for gene in count:
-                    freq_corrected_genes[gene] = np.multiply(float(count.get(gene)), gene_idf.get(gene))
-            ordered_genes = sorted(freq_corrected_genes, key=lambda key: freq_corrected_genes[key], reverse=True)
-            if len(ordered_genes) > 0:
-                return(ordered_genes[:n])
-            else:
-                return(None)
+    :param drug: string of the drug common name
+    :param relationship: desired drug-gene relationship
+    :param gene_names: return a list of gene names instead of ENTREZ gene IDs
+    :param n: max number of genes to return
+    :return: returns a list of the top n genes ordered by the frequency of that genes annotation to the drug
+    If no gene targets are known or the drug isn't in our database, it returns None
+    """
+    chem_id = chem_dict.get(drug.lower())
 
+    count = dict()
+    if chem_id in chem_gene_dict:
+        for entry in chem_gene_dict.get(chem_id):
+            id = entry[0]
+            if id in gene_dict and id in gene_idf:
+                if entry[1] == relationship:
+                    if id in count:
+                        count[id] += 1
+                    else:
+                        count[id] = 1
+
+        freq_corrected_genes = dict()
+        if gene_names:
+            for gene in count:
+                freq_corrected_genes[gene_dict.get(gene)] = np.multiply(float(count.get(gene)), gene_idf.get(gene))
+        else:
+            for gene in count:
+                freq_corrected_genes[gene] = np.multiply(float(count.get(gene)), gene_idf.get(gene))
+        ordered_genes = sorted(freq_corrected_genes, key=lambda key: freq_corrected_genes[key], reverse=True)
+        if len(ordered_genes) > 0:
+            return(ordered_genes[:n])
         else:
             return(None)
 
-"""
-query_disease
+    else:
+        return(None)
 
-Querys a disease for a given relationship with a gene, default is "U", a causal mutation relationship
 
-Input:
-disease - string of the common disease name
-relationship - desired disease relationship
-gene_names - return a list of gene names instead of ENTREZ gene IDs
-n - max number of genes to return
-
-Output:
-ordered_genes - returns a list of the top n genes ordered by the frequency of that genes annotation to the drug
-If no gene targets are known or the drug isn't in our database, it returns None
-"""
 def query_disease(disease, relationship="U", gen_counts=False):
+    """
+    query_disease
+
+    Querys a disease for a given relationship with a gene, default is "U", a causal mutation relationship
+
+
+    :param disease: string of the common disease name
+    :param relationship: desired disease relationship
+    :param gen_counts: Whether a dictionary with the counts of each relationship instance should be return or not
+    :return: disease_set - returns a list or dictionary of the genes annotated to the disease with or without counts
+    If no gene interactions are known or the disease isn't in our database, it returns None
+    """
     disease_id = disease_dict.get(disease.lower())
     disease_set = set()
     count = dict()
@@ -137,23 +132,15 @@ def query_disease(disease, relationship="U", gen_counts=False):
     else:
         return(None)
 
-"""
-query_chemical_disease
-
-Querys a chemical for a given relationship with a disease, default is "T", a Therapeutic relationship
-
-Input:
-drug - 
-disease - string of the common disease name
-relationship - desired disease relationship
-gene_names - return a list of gene names instead of ENTREZ gene IDs
-n - max number of genes to return
-
-Output:
-ordered_genes - returns a list of the top n genes ordered by the frequency of that genes annotation to the drug
-If no gene targets are known or the drug isn't in our database, it returns None
-"""
 def query_chemical_disease(drug, disease, relationship="T", gen_counts=False, get_PMIDs=False):
+    """
+    :param drug: string of the common drug name
+    :param disease: string of the common disease name
+    :param relationship: desired disease relationship
+    :param gen_counts: return a dictionary object containing a count of each themes occurrence for the drug and disease
+    :param get_PMIDs: list of PMIDs support the indicated relationship
+    :return:
+    """
     chem_id = chem_dict.get(drug.lower())
     disease_id = disease_dict.get(disease.lower())
     disease_set = set()
@@ -179,27 +166,14 @@ def query_chemical_disease(drug, disease, relationship="T", gen_counts=False, ge
     else:
         return(None)
 
-
-"""
-query_disease
-
-Querys a disease for a given relationship with a gene, default is "U", a causal mutation relationship
-
-Input:
-disease - string of the common disease name
-relationship - desired disease relationship
-gene_names - return a list of gene names instead of ENTREZ gene IDs
-n - max number of genes to return
-
-Output:
-ordered_genes - returns a list of the top n genes ordered by the frequency of that genes annotation to the drug
-If no gene targets are known or the drug isn't in our database, it returns None
-"""
-
-
 def query_gene(gene, relationship="B", gene_name=False, gen_counts=False):
+    """
+    :param gene: the NCBI gene name
+    :param relationship: desired disease relationship
+    :param gene_name: return a list of NCBI gene names instead of ENTREZ gene IDs
+    :return: gene_set - returns a list of with all genes that have the indicated relationship
+    """
     gene_set = set()
-    count = dict()
     for entry in gene_gene_dict.get(gene):
         if entry[1] in relationship:
             if gene_name:
@@ -209,13 +183,36 @@ def query_gene(gene, relationship="B", gene_name=False, gen_counts=False):
     return(list(gene_set))
 
 def resolve_gene_to_EntrezGeneID(geneName):
+    """
+    resolve_gene_to_EntrezGeneID
+
+    Querys an NCBI gene name and returns the Entrez Gene ID
+
+    :param geneName: NCBI gene name
+    :return: Entrez Gene ID (str)
+    """
     return(gene_dict.get(geneName))
 
 def resolve_EntrezGeneID_to_NCBIGeneName(geneName):
+    """
+    resolve_EntrezGeneID_to_NCBIGeneName
+
+    Querys an Entrez Gene ID and returns the NCBI gene name
+
+    :param geneName: Entrez gene ID (str)
+    :return: NCBI gene name (str)
+    """
     return(gene_dict.get(geneName))
 
 def get_disease_gene_list(disease, relationship = "U", gene_names = False, freq_correct = False, return_scores=False):
-
+    """
+    :param disease: common disease name
+    :param relationship: GNBR relationship
+    :param gene_names: return NCBI gene names instead of EntrezIDs
+    :param freq_correct: Correct for the frequency of annotation
+    :param return_scores: Return the score associated with the frequency correction
+    :return: list or dictionary of genes with the desired relationship to the disease
+    """
     disease_id = disease_dict.get(disease.lower())
     if disease_id in dis_gene_dict:
         count = dict()
@@ -249,29 +246,18 @@ def get_disease_gene_list(disease, relationship = "U", gene_names = False, freq_
     else:
         return(None)
 
-
-# Can be generalized to any desired relationship
-def query_for_drug_disease_relationships(filePath, outPath, themes= ['T', 'C', 'Mp', 'J', 'Sa', 'Pr', 'Pa']):
-    drugs = []
-    with open(filePath) as inFile:
-        for line in inFile.readlines():
-            drugs.append(line.strip())
-
-    with open(outPath, "w+") as outFile:
-        outFile.write("drug,disease," + ",".join(themes) + "\n")
-        for drug in drugs:
-            for disease in diseases:
-                outFile.write(",".join([drug, disease]))
-                print(drug, disease)
-                results = query_chemical_disease(drug, disease, gen_counts=True)
-                if results is None:
-                    outFile.write(",-,-,-,-,-,-")
-                else:
-                    for theme in themes:
-                        outFile.write("," + str(results.get(theme)))
-                outFile.write("\n")
-
 def query_term_for_matches(queryTerm, searchSet = disease_matching_dict, numMatches = 5):
+    """
+    query_term_for_matches
+
+    Queries a common name for a disease to identify potential matches that are in the database.
+    Essentially a "Did you mean?" kind of functionality.
+
+    :param queryTerm: common name for partial matching search
+    :param searchSet: Python dictionary containg partial strings and associated search spaces
+    :param numMatches: number of matches to return, sorted by similarity score
+    :return: results, lise of potential matches
+    """
     from fuzzywuzzy import process
 
     if "," in queryTerm:
@@ -295,6 +281,10 @@ def query_term_for_matches(queryTerm, searchSet = disease_matching_dict, numMatc
 
 
 def get_MEDICID(term):
+    """
+    :param term: common name for the term
+    :return: MEDIC ID for that term
+    """
     if term in disease_dict:
         return disease_dict.get(term)
     elif term in chem_dict:

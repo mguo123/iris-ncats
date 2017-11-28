@@ -1,3 +1,17 @@
+'''
+Q2_main.py
+
+11/27/17 
+Runs the query answering the question, how does drug treat disease by 
+1. Finding signifant genes targetted by the drug
+2. Finding significant genes impacted by the disease
+3. Finding go-enrichment scores and terms associated witht eh GNBC query
+4. Finding a list of relevant pubmed abstracts
+5. Finding a list of relevant tissues in which disease genes are differentially expressed
+6. Generating a diagram showing hierachical relationship of significant go term queries
+'''
+
+
 import os
 import pickle
 import sys
@@ -13,48 +27,25 @@ from app.user_functions.ncats.Q2.GNBR_api import GNBR_api
 from app.user_functions.ncats.Q2.Pharos_api import pharos_api
 from app.user_functions.ncats.Q2.GO_api import go_api
 
-# from GNBR_api import GNBR_api
-# from Pharos_api import pharos_api
-# from GO_api import go_api
-# from TiGER_api import TiGER_api
-
-
 ############################################# DEFINE PATHS ##############################################################
 
 
 ncats_path = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 
-
+# set up GO_API
 GO_API = go_api.GO_api(os.path.join(ncats_path, "DB_data/GO_DB"))
 
 
 ############################################# Functions ##############################################################
 
-"""
-Q2_query
 
-Runs the Q2 pipeline with the given drug and disease
-
-Input:
-QDrug - String of the drug common name
-QDisease - String of the disease common name
-gen_image - Whether you would like the script to render a network graphic
-
-Output:
-results - Pandas dataframe of GO Enrichment for the drug-disease combo with the following columns:
-'M'
-N' 
-'n' 
-'name' 
-'namespace'
-'p'
-'q'
-'rejected'
-'term'
-'x'
-
-"""
 def get_PMID(PMID):
+    '''
+    Gets publication title from NIH Pubmed lookup of the PMID
+    Input: <str> PMID
+    Output: <str> piblicatation title
+
+    '''
     email = ''
     url = 'http://www.ncbi.nlm.nih.gov/pubmed/' + PMID
 
@@ -67,6 +58,30 @@ def get_PMID(PMID):
         return "Title not found"
 
 def Q2_query(QDrug, QDisease, options):
+    """
+    Q2_query
+
+    Runs the Q2 pipeline with the given drug and disease
+
+    Input:
+    QDrug - String of the drug common name
+    QDisease - String of the disease common name
+    gen_image - Whether you would like the script to render a network graphic
+
+    Output:
+    results - Pandas dataframe of GO Enrichment for the drug-disease combo with the following columns:
+    'M'
+    N' 
+    'n' 
+    'name' 
+    'namespace'
+    'p'
+    'q'
+    'rejected'
+    'term'
+    'x'
+
+    """
 
     # Pre-process query
     drug = QDrug.strip().lower()
@@ -82,9 +97,10 @@ def Q2_query(QDrug, QDisease, options):
     # Generate prefix for output file, is drug_disease
     out_name = drug + "_" + disease.replace(" ", "-").lower()
 
+
+    # Get list of genes causally annotated to a disease
     if options.verbose and options.batchFile is None:
         print("Querying GNBR for disease genes...")
-    # Get list of genes causally annotated to a disease
     dis_gene_list = GNBR_api.get_disease_gene_list(disease, freq_correct=True)
 
     # If first query did not work, try getting nearest matches for the query and try again
@@ -97,9 +113,9 @@ def Q2_query(QDrug, QDisease, options):
         if match_type == 0:
             dis_gene_list = GNBR_api.get_disease_gene_list(disease2, freq_correct=True)
 
+    # Get list of drug targets from Pharos
     if options.verbose and options.batchFile is None:
         print("Querying Pharos for drug targets...")
-    # Get list of drug targets from Pharos
     drug_genes = pharos_api.get_ligand_targets(drug)
 
     # If Pharos did not return targets, pull them from the literature
@@ -140,34 +156,25 @@ def Q2_query(QDrug, QDisease, options):
 
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
-        # Select the top 25 genes from the disease gene list for GO enrichment
-
+        
+        # Select the top 25 genes from the disease and then drug gene list for GO enrichment
         print("Getting disease genes Calling resolve_EntrezGeneID_to_NCBIGeneName")
         dis_genes = pd.DataFrame([[GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)),x] for x in dis_gene_list], columns=["Gene", "Entrez ID"])
         dis_genes_short = dis_genes[:min(len(dis_genes), 5)]
         dis_gene_list = list(map(int, dis_gene_list))
 
-        # Get tissue information
-        print("Getting tissue information resolved to disease via: resolve_EntrezGeneID_to_NCBIGeneName")
-        tissue_df_dis = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in dis_gene_list])
-        tissue_df_dis_short = tissue_df_dis[:min(5, len(tissue_df_dis))]
-
+ 
         print("Getting drug genes Calling resolve_EntrezGeneID_to_NCBIGeneName")
         drug_genes = [[GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(x), x] for x in drug_gene_list]
         drug_genes = pd.DataFrame(drug_genes, columns=["Gene", "Entrez ID"])
         drug_genes_short = drug_genes[:min(5, len(drug_genes))]
 
-        # Get tissue information
-        print("Getting tissue information resolved to drug via: resolve_EntrezGeneID_to_NCBIGeneName")
-        tissue_df_drug = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in drug_gene_list])
-        tissue_df_drug_short = tissue_df_drug[:min(5, len(tissue_df_drug))]
 
         # Get the GO terms for the drug targets
         drug_gene_list = list(map(int,drug_gene_list))
-
         drug_targets = GO_API.get_GO_terms(drug_gene_list)
 
-#        Get GO Enrichment statistics
+        # Get GO Enrichment statistics then saving those to csv
         print("Getting Go Enrichment statistics")
         if options.gen_image:
             go_result = GO_API.calc_GO_enrichment(dis_gene_list, os.path.join(results_dir, out_name), target_list=drug_targets, gen_image=True)
@@ -178,41 +185,39 @@ def Q2_query(QDrug, QDisease, options):
 
         go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'term', 'p', 'q', 'gene_target']]
         go_result = go_result.sort_values(by=['gene_target', 'q'], ascending=[False, True])
+        go_result.to_csv(os.path.join(results_dir, out_name + "_GO_pathway_enrichment.csv"), mode="w+", index_label=False, index=False)
 
 
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
+        # Start saving results
         result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "drug_id": drug_id, "disease_id":disease_id,
-                    "tissue_df_dis":tissue_df_dis, "tissue_df_dis_short": tissue_df_dis_short, "tissue_df_drug": tissue_df_drug, "tissue_df_drug_short": tissue_df_drug_short,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
-        # result = {"GOENRICH": go_result, "drug_genes": drug_genes, "disease_genes": dis_genes,
-        #           "dis_tissue_data": tissue_df
-        #           }
 
-        go_result.to_csv(os.path.join(results_dir, out_name + "_GO_pathway_enrichment.csv"), mode="w+", index_label=False, index=False)
 
+        # Get tissue information
+        print("Getting tissue information resolved to disease via: resolve_EntrezGeneID_to_NCBIGeneName")
+        tissue_df_dis = TiGER_api.get_tissue_counts([GNBR_api.resolve_EntrezGeneID_to_NCBIGeneName(str(x)) for x in dis_gene_list])
+        if tissue_df_dis is not None:
+            tissue_df_dis_short = tissue_df_dis[:min(5, len(tissue_df_dis))]
+            result["tissue_df_dis"] = tissue_df_dis
+            result["tissue_df_dis_short"] = tissue_df_dis_short
+
+        # Generate image
         print('Generating Image')
         if options.gen_image:
             file_name = os.path.join(results_dir, out_name + '.png')
             if os.path.exists(os.path.join(results_dir, out_name + '.dot')):
                 subprocess.check_call(['dot', '-Tpng', os.path.join(results_dir, out_name + '.dot'), '-o', file_name])
-
             result["image_file"] = file_name
 
-        # Get Pubmed id
-        print("Getting Pubmed IDs")
+        # Get Pubmed id, then get top 10 publication titles 
+        print("Getting Pubmed IDs and Titles")
         if options.gen_pubmed:
             PMIDs = GNBR_api.query_chemical_disease(drug, disease, get_PMIDs=True)
-            len(PMIDs)
-            # print(PMIDs.shape)
-            # print('Saving pubmed PMIDs to ', results_dir, out_name,"_PMIDs.csv")
-            # PMID_df.to_csv(os.path.join(results_dir, out_name + "_PMIDs.csv"), mode="w+",
-            #                      index_label=False, index=False, header=False)
-            print("Getting Pubmed Titles")
             if len(PMIDs) > 0:
-                ################### THIS IS JUST TOP 10 FOR NOW, SEEMS LIKE THE API CALLS TAKE SOME TIME
                 PMID_df = pd.DataFrame([[x, get_PMID(x)] for x in PMIDs[:min(10, len(PMIDs))]], columns=["PMIDS", "Title"])
                 
                 # will show top 5
@@ -228,7 +233,6 @@ def Q2_query(QDrug, QDisease, options):
             else:
                 result["pubmed"] = 'no PMIDs found'
 
-    # return(drug_tissues)
     return(result)
 
 # unit testing

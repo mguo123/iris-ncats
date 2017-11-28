@@ -1,7 +1,7 @@
-# Word Clouds
+# Generate word clouds to compare two diseases
 
-# Given a path to one or two abstract files, generate word clouds
-
+.libPaths(c(.libPaths(), '/home/admin/anaconda3/envs/iris/lib/R/library/', '/home/admin/R/x86_64-pc-linux-gnu-library/3.3',
+            '/usr/local/lib/R/site-library', '/usr/lib/R/site-library', '/usr/lib/R/library'))
 
 library(optparse)
 library(wordcloud)
@@ -26,39 +26,38 @@ clean_query <- function(query) {
   return(clean_query)
 }
 
+# Set the command line options as variables
 disease_1 = clean_query(opt$disease_1)
 disease_2 = clean_query(opt$disease_2)
-
-tfidf = opt$tfidf
-
 prefix = opt$prefix
-
-#disease_1 = 'hiv infections'
-#disease_2 = 'arts_syndrome'
-
 freq_file <- opt$freq_file
-#freq_file <- '/Users/gmcinnes/src/ncats/data/data_dir/tfidf.hiv_infections.rds'
 
+# Read in the frequencies tibble
 frequencies <- readRDS(freq_file)
 
+# Extract word frequencies for the desired diseases
 a_terms <- frequencies[frequencies$disease == disease_1,]
 b_terms <- frequencies[frequencies$disease == disease_2,]
 
+# Merge them together and format as a matrix
 both = merge(x = a_terms[c("word", "tf_idf")], y = b_terms[c("word", "tf_idf")], by = "word", all = TRUE)
 both[is.na(both)] <- 0
 names(both) <- c("word", disease_1, disease_2)
 both_m <- as.matrix(both[c(disease_1, disease_2)])
 rownames(both_m) <- both$word
 
+# Set the output files
 comparison_output_file <- paste(opt$prefix, disease_1, disease_2, "comparison.png", sep=".")
 commonality_output_file <- paste(opt$prefix, disease_1, disease_2, "commonality.png", sep=".")
 
 
+# Create a comparison cloud and save it to a file
 png(comparison_output_file, width=12, height=8, units="in", res=300)
 comparison.cloud(both_m, max.words=300, random.order=FALSE, colors=c('#cc9837', '#81a558'))
 dev.off()
 
 
+# Create a commonality cloud and save it to a file
 png(commonality_output_file, width=12, height=8, units="in", res=300)
 layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
 par(mar=rep(0, 4))

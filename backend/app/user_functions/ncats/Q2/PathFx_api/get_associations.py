@@ -6,9 +6,11 @@
 #### USE settings.py to import all dependancies
 # examples: from settings import *
 import pickle,os
-# # from optparse import OptionParser
 from collections import defaultdict
 from scipy.stats import hypergeom
+
+
+### RELEVANT PATHS ####
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # should get to the ncats directory
 RSCS_DIR = os.path.join(PARENT_DIR, 'DB_data/PathFx_DB')
 G_TO_RSIDS = pickle.load(open(os.path.join(RSCS_DIR,'gene_to_rsid_eQTL.pkl'),'rb'))
@@ -61,19 +63,17 @@ def get_node_list(f):
     return node_list
     
 def get_associations(netf, aname, rdir):
-    # parser=OptionParser()
+    '''
+    Get all signficiant associations based on the hypergeometric probabilty of a path occuring
 
-    # parser.add_option('-f','--file',dest='netf',help='Tab-separated network file of HUGO gene symbols')
-    # parser.add_option('-a','--analysis_name',dest='aname',help='Name of analysis, will be appended to output files; experiment date is suggested')
-    # parser.add_option('-d','--dir',dest='res_dir',help='Results directory. If none provided, a directory will be created matching the analysis name in the ../results/ dir')
+    inputs:
+        <str> netf - path to network file
+        <str> aname - unused
+        <str> rdir - reference directory 
 
-    # (options,args) = parser.parse_args()
-
-    # # check if results directory exists, otherwise assign based on analysis
-    # if options.res_dir is None:
-    #   rdir = '../results/'+options.aname+'/'
-    # else:
-    #   rdir = options.res_dir
+    outputs: none written to file
+    
+    '''
 
     print('gathering network data')
     # Gather network data
@@ -81,7 +81,7 @@ def get_associations(netf, aname, rdir):
     net_int = get_network_interactions(rdir+netf)
     
     print('gathering associations')
-    # pull assocationes
+    # pull assocations
     rsids = get_rsid_list(node_list) #eQTL
     disease_associations = sorted(get_disease_associations(node_list),key = lambda x:x[2],reverse=True)
     phenotypes = get_phenotype_associations(node_list)
@@ -102,6 +102,7 @@ def get_associations(netf, aname, rdir):
         K = len(ALL_ASSOC[a])
         prb = 1 - hypergeom.cdf(k,N,K,n)
         assoc_analy.append([a,k,K,prb])
+    
     # Multiple hypothesis correct
     #Q = 0.05
     Q = 0.001
@@ -122,24 +123,7 @@ def get_associations(netf, aname, rdir):
     sig_assoc[:stop_rank]
 
     print('saving to output')
-    # # format and save interactions
-    # network_name = os.path.basename(options.netf).split('.txt')[0]
-    # outf_name = rdir+'/'+network_name+'_assocations.txt'
-    # outf = open(outf_name,'w')
-    # outf.write('\t'.join(['gene','association','association_type','score','\n']))
-    # for (a,b,s) in net_int:
-    #   outf.write('\t'.join([a,b,'',s,'\n']))
-    # for (g,eq) in rsids:
-    #   outf.write('\t'.join([g,eq,'eQTL','\n']))
-    # for (g,dis,dsc) in disease_associations:
-    #   outf.write('\t'.join([g,dis,'DisGeNet','\n']))
-    # for (g,ph) in phenotypes:
-    #   outf.write('\t'.join([g,ph,'OMIM_disease','\n'])) 
-    # for (g,snp) in pheWAS_snps:
-    #   outf.write('\t'.join([g,snp,'PheWAS_snp','\n']))
-    # for (snp,pheno) in snps_pheno:
-    #   outf.write('\t'.join([snp,pheno,'PheWAS_phenotype','\n']))
-    # outf.close()
+
 
     # hypergeometric analysis
     network_name = os.path.basename(netf).split('.txt')[0]
@@ -150,16 +134,6 @@ def get_associations(netf, aname, rdir):
     print('Neighborhood size: '+str(n))
     outf.write('\t'.join(['rank','phenotype','assoc in neigh','assoc in intom','probability','Benjamini-Hochberg','\n']))
     for [i,a,k,K,prb,BH] in mhc_assoc:
-        # print(str(i))
-        # print(a.encode('utf-8') , 'a')
-        # print(str(k), 'k')
-        # print(str(K), 'K')
-        # print(str(prb), 'prb')
-        # print(str(BH), 'BH')
         new_line = '\t'.join([str(i),a ,str(k),str(K),str(prb),str(BH)+'\n'])
-        # print(new_line)
         outf.write(new_line)   
     outf.close()
-
-# if __name__ == "__main__":
-#     main()

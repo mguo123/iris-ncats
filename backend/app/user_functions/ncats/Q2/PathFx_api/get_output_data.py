@@ -6,8 +6,8 @@
 
 
 import csv, os, pickle
-# from optparse import OptionParser
 from collections import defaultdict
+
 # # resources for pulling associations
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # should get to the ncats directory
 RSCS_DIR = os.path.join(PARENT_DIR, 'DB_data/PathFx_DB')
@@ -46,25 +46,26 @@ def get_snp_pheWAS(snp_list):
     return snp_pheWAS
 
 def get_output_data(storage_dir, drug):
-    # parser=OptionParser()
+    """
+    Get the output dictionary with genes relevant for each phenotype that is drug-relevant
 
-    # parser.add_option('-d','--rdir',dest='rdir',help='The results directory where all drugs are sub-directories')
-    # (options,args) = parser.parse_args()
+    Input:
+        <str> storage_dir: path
+        <str> drug
 
-    # get merged neighborhoods, create associattions -> genes files
-    # rdir = options.rdir
+    Output:
+        <dictionary> assoc_to_genes - key: phenotype: value: list of genes that are associated with phenotype
+
+    """
     drug_dir = os.path.join(storage_dir, drug + "_networks")
-    # print(drug_dir)
+
     drug_file = os.path.join(drug_dir, drug + '_merged_neighborhood.txt')
     print('drug file', drug_file)
     allf = [(d,sd,sf) for (d,sd,sf) in os.walk(storage_dir)] # dir, sub-dirs, dir_files
 
     merfs = [(sf.split('_')[0],d,sf) for (d,sd,sflist) in allf for sf in sflist if 'merged_neighborhood.txt' in sf] # just the merged neighborhood files
     if os.path.isfile(drug_file): 
-    # for (drug,drug_dir,drug_file) in merfs:
-        # print(drug)
         n = get_nodes(drug_file)
-        # copy code from get_neighborhood_associations
         disease_associations = sorted(get_disease_associations(n),key = lambda x:x[2],reverse=True)    
         phenotypes = get_phenotype_associations(n)
         pheWAS_snps = get_pheWAS_SNPs(n)
@@ -81,5 +82,5 @@ def get_output_data(storage_dir, drug):
         print('creating file: ', outf)
         pickle.dump(assoc_to_genes,open(outf,'wb'))
         return assoc_to_genes
-# if __name__ == "__main__":
-#         main()
+
+
