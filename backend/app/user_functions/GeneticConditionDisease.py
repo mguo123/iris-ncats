@@ -29,7 +29,8 @@ class GeneticConditionDisease(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-        """"# results is an object with       # Pandas data frame with top 10 resutls
+        """"
+        results is an object with Pandas data frame with top 10 resutls
         self.similarities = None
         # List of paths to word clouds
         self.commonality_clouds = []

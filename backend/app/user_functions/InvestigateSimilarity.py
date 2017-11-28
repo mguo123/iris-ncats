@@ -18,20 +18,6 @@ class InvestigateSimilarity(IrisCommand):
     argument_types = {"disease_a": t.String("What is the first disease?"),
                       "disease_b": t.String("What is the second disease?")}
 
-    #     # type annotations for each command argument, to help Iris collect missing values from a user
-    #     argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"),
-    #                         "disease":t.String("What is the disease you want to analyze?"),
-    #                         "bool_image":t.YesNo("Would you like to visual the results as a diagram?",
-    #                                     yes=True, no=False),
-    #                         "bool_other_disease":t.YesNo("Would you like to know other diseases that can be treated by this drug?",
-    #                                     yes=True, no=False),
-    #                         "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
-    #                                     yes=True, no=False)
-    #
-    #                         }
-
-    # ,"genetic_disease":t.String("What is the genetic disease do you think it might link to? If unknown, type none")}
-
     # core logic of the command
     def command(self, disease_a, disease_b):
         # Run the query
@@ -43,7 +29,8 @@ class InvestigateSimilarity(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-        """"# results is an object with       # Pandas data frame with top 10 resutls
+        """"
+        results -  an object with Pandas data frame with top 10 resutls that is called with top_sentences_df
         self.similarities = None
         # List of paths to word clouds
         self.commonality_clouds = []

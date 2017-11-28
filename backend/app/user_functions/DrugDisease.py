@@ -1,3 +1,15 @@
+'''
+NCATS - Question 2 Iris Commands
+
+The Iris wrapper function that answers the questions
+How does drug(s) treat disease(s) 
+and
+What other conditions does drug impact?
+
+Note: print states print to console backend logger
+
+'''
+
 from iris import state_types as t
 from iris import IrisCommand
 
@@ -74,8 +86,7 @@ class DrugDisease(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-        # Components of result are in dictionary form:
-        # result = {"GOENRICH":result, "drug_genes":drug_genes, "disease_genes":dis_genes, "dis_tissue_data":tissue_df, "dis_tissue_data_short":tissue_df_short, "image_file": image_path, "other_disease": jenn's result, "pubmed": PMIDs
+        # Components of result are in dictionary form
         
         if "error" in result:
             return result['error']
@@ -115,20 +126,13 @@ class DrugDisease(IrisCommand):
 
         # get tissue = disease
         if 'tissue_df_dis' in result:
-            result_array.append('Tissues that show the most differential gene expression in the disease state are shown. Full dataset saved as tissues_{drug_disease} ')
+            result_array.append('The most relevant tissues, in which disease genes are differentially expressed, are shown. Full dataset saved as tissues_{drug_disease} ')
             tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
             tissue_object_dis_short = iris_objects.IrisDataframe(data=result['tissue_df_dis_short'])
             self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
             result_array.append(tissue_object_dis_short)
         else:
             result_array.append('No differential tissue expression in disease state detected.')
-        #  # get tissue = drug
-        # result_array.append('Top drug-relevant tissues in which this drug-disease interaction takes place are shown. Full dataset saved as tissues_{drug_disease} ')
-        # tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
-        # tissue_object_drug_short = iris_objects.IrisDataframe(data=result['tissue_df_drug_short'])
-        # self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
-        # result_array.append(tissue_object_drug_short)
-
 
         if "pubmed" in result:
             if isinstance(result["pubmed"], str):
@@ -178,7 +182,7 @@ _DrugDisease = DrugDisease()
 
 class DrugDiseaseMulti(IrisCommand):
     # what iris will call the command + how it will appear in a hint
-    title = "Can you find the mechanism of action of this list of drug-disease pairs"
+    title = "Can you find the mechanism of action of this list of drug-disease combinations?"
 
     # give an example for iris to recognize the command
     examples = ["multiple drugs and diseases", "how list of drugs works", "how multiple drug works on disease", "how do these drugs affect these diseases", "how does this list of {drug_list} affect {disease_list}" ]
@@ -277,10 +281,6 @@ class DrugDiseaseMulti(IrisCommand):
                     variable_info.append('tissues_disease' + query_name)
                     tissue_object_dis = iris_objects.IrisDataframe(data=result['tissue_df_dis'])
                     self.iris.add_to_env('tissues_disease' + query_name, tissue_object_dis)
- 
-                # # get tissue = drug
-                # tissue_object_drug = iris_objects.IrisDataframe(data=result['tissue_df_drug'])
-                # self.iris.add_to_env('tissues_drug' + query_name, tissue_object_drug)
 
 
                 if "pubmed" in result:
@@ -320,7 +320,7 @@ class DrugDiseaseCSV(IrisCommand):
     title = "Can you find the mechanism of action of these drug-disease pairs from {file}"
 
     # give an example for iris to recognize the command
-    examples = ["multiple drugs and diseases from csv", "csv of drug disease matches", "loaded drug disease match", "find the mechanism of action of drug-disease pairs from {file} "]
+    examples = ["multiple drugs and diseases from file", "file of drug disease queries", "loaded drug disease match", "find the mechanism of action of drug-disease pairs from {file} "]
 
     # type annotations for each command argument, to help Iris cosllect missing values from a user
     argument_types = {"file":t.File("Enter your tab-delimited file containing drug-disease pairs of connections do you want to analyze. Drugs should be in the first column and conditions in the second column"), 

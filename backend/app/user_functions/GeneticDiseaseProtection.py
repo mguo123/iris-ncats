@@ -10,7 +10,11 @@ class GeneticDiseaseProtection(IrisCommand):
     # title = "how does {condition} protects against {condition}?"
     title = "What genetic diseases might {condition} protect against?"
     # give an example for iris to recognize the command
-    examples = ["What does {condition} protect against"]
+    examples = ["What does {condition} protect against?",
+                "Protection against genetic diseases?", 
+                "What does {condition} compensate for?",
+                "How does {condition} buffer against genetic diseases harmful effects?"]
+
     # type annotations for each command argument, to help Iris collect missing values from a user
 
     argument_types = {"condition": t.String("What is the condition do you want to analyze?")}
@@ -28,11 +32,9 @@ class GeneticDiseaseProtection(IrisCommand):
     # by default this will be an identity function
     # each element of the list defines a separate chat bubble
     def explanation(self, result):
-        """"# results is an object with       # Pandas data frame with top 10 resutls
-        self.similarities = None
-        # List of paths to word clouds
-        self.commonality_clouds = []
-        """
+        """"
+        results is an object with a Pandas data frame 
+        """  
         [results, condition] = result
 
         # make the df_name:

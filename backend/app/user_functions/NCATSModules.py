@@ -2,7 +2,7 @@
 
 Margaret Guo
 11/14/17
-Create potential modules that NCATS may use
+Create potential modules that NCATS may use: 
 
 Examples include;
 How do defects in {xyz pathways} affect {disease phenotype}?
@@ -30,7 +30,7 @@ from iris import util as util
 from iris import iris_objects
 
 class PathwayToPhenotype(IrisCommand):
-    title = "How do defects in {pathway} affect {phenotype}?"
+    title = "How do defects in pathway affect phenotype?"
     examples = ["How do defects in {pathway} affect {phenotype}?", "Why are defs in {pathway} deleterious?", "How is {pathway} involved in the pathogenesis of {phenotype}"]
     argument_types = {"pathway":t.String("What pathway are you interested in?"), "phenotype":t.String("What diseases do you want to analyze?")}
     
@@ -47,7 +47,7 @@ PathwayToPhenotype = PathwayToPhenotype()
 
 
 class RiskFactorsToDisease(IrisCommand):
-    title = "What are the {risks} (environmental, genetic, etc.) that can lead to {disease} and why?"
+    title = "What are the risks (environmental, genetic, etc.) that can lead to disease and why?"
     examples = ["Why is this risk bad for {disease}", "Why are these risks bad for {disease}", "Why should I not do {risks}", "Why should I stopping doing {risks}", "What are the {risks} (environmental, genetic, etc.) that can lead to {disease} and why?"]
     argument_types = {"risks":t.List("What risks do you want to know more about? Enter them in separated by commas"),
                     "disease": t.String("What disease are you analyzing?")}
@@ -61,7 +61,7 @@ class RiskFactorsToDisease(IrisCommand):
 RiskFactorsToDisease = RiskFactorsToDisease()
 
 class ChanceDisease(IrisCommand):
-    title = "What are the chances that a person with {conditions} gets {disease}?"
+    title = "What are the chances that a person with conditions gets disease?"
 
     examples = ["What is the epidemiological risk {conditions} for {disease} and what are their effects on prognosis?", "What is my likelihood of getting {disease}", "How does {conditions} change my chances of getting {disease}?"]
     argument_types = {"conditions":t.List("What conditions (i.e. age, gender, comorbidities, etc.) do you want to factor into this calculation? Please enter them in separated by commas."),

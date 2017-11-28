@@ -1,42 +1,29 @@
-    # written as a template to run a class of drugs and create a heatmap of results
-# writen 7-13-17 JLW
-# Modified margaret, 10/26/17
+'''
+run_main.py
+
+writen 7-13-17 JLW
+Modified margaret, 10/26/17
+
+Contains the relevant files necessary for an addendum function for Q2 --> having the ability to find drug indications (i.e. for drug repuposing),
+
+'''
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 from settings import *
 
-
-
-# import csv, pickle, os, sys
-# sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-# print(sys.path)
-# import networkx as nx
-# import numpy as np
-# from collections import defaultdict
-# import matplotlib
-# # matplotlib.use("AGG")
-# import matplotlib.pyplot as plt
-# import pandas as pd
-# from textwrap import wrap
-
-# # from optparse import OptionParser
-# from collections import defaultdict
-
-# from get_results import get_results
-# from get_output_data import get_output_data
-# import find_neighborhood_beta
-# from find_neighborhood_beta import find_neighborhood as fgn
-# import run_analysis as ann
-
-# # Analysis parameters
-# #### FIX ####
-
-# SCORE_THRESHOLD_START = 0.8
-# SCORE_THRESHOLD_MIN = 0.5
-# SCORE_DELTA = 0.05
+############################################ BASIC/SINGLE QUERIES #############################################
 
 def preprocess_names(drug, disease=None):
+    """
+    does some form of preprocessing on drug and disease names so that they match the database
 
+    inputs:
+        <str> drug
+        <str> disease (optional)
+    outputs: tuple of
+        <str> modified_drug_name
+        <str> modified_disease_name (only if disease is defined)
+    """
     drug = drug.lower()
     first_letter = drug[0].upper()
     modified_drug_name = first_letter + drug[1:]
@@ -48,7 +35,19 @@ def preprocess_names(drug, disease=None):
 
 def find_drug_indications(drug, storage_dir = 'Q2'):
     '''
-    similar to run_drug single except finds the significaent diseases of drug
+    DrugDisease.py calls this function:
+    Given a drug, find all possible phenotypes it affects
+
+        similar to run_drug_single except finds the significaent diseases of drug without referencing the given disease
+
+    Input:
+        <str> drug
+        <str> storage_dir (optional)- where the resulting and intermediary analysis files are being stored
+    Output
+        <tuple> answer containing two strings
+            ph_genes_str - a tab-delimited string with probability, Benjamin Hochberg significance cut off, the phenotype, and significant genes in subsequent separate columns
+            drug - string of drug (return for debugging)
+
     '''
     #create storage directory
     results_storage_dir = os.path.join(RESULTS_DIR, storage_dir)
@@ -85,7 +84,22 @@ def find_drug_indications(drug, storage_dir = 'Q2'):
 def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False):
     '''
     Takes in strings for drug and disease then 
-    outputs the phenotypes found in the network and the genes associated with them
+    outputs whether or not the disease was found in the drug network search 
+    if yes, output signficant genes
+    If no, iterate by lowering the threshold (default 0.8) until low point or found, 
+        if still not found, output significant phenotypes found in the network and the genes associated with them
+
+    Input
+        <str> drug
+        <str> disease
+        <str> storage_dir
+        <bool> iterate_until_found
+
+    Output - a tuple of size 4 with 
+        <bool> if the drug-disease relationship was found
+        <str> explanation of found or not found, if not found a more categorical error msg
+        <str> answer (see above)
+        <str> drug (debug)
     '''
     results_storage_dir = os.path.join(RESULTS_DIR, storage_dir)
     if not os.path.exists(results_storage_dir):
@@ -94,19 +108,6 @@ def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False
 
     drug, disease = preprocess_names(drug, disease)
 
-    ##### ALL OF THESE ARE DEFINED IN settings.py as global vars
-    # # loading data: interactome
-    # NETWORKF = '../rscs/merged_interact_netx.pkl' #non-specific interaction network #### CHANGE LOCATION
-    # print('loading interactome data', NETWORKF)
-    # GENE_GRAPH = pickle.load(open(NETWORKF,'rb'))
-
-    # # loading random data: 
-    # ann.rand_dir = '../results/rand_iRefplus_intome/summary/'
-
-    # # load drug targets, then format
-    # DTF = '../rscs/drug_intome_targets.pkl'
-    # print('loading drug targets', DTF)
-    # DTD = pickle.load(open(DTF,'rb'))
 
     print('running analysis of', drug, 'to treat', disease)
     if drug in DTD:
@@ -122,14 +123,12 @@ def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False
             # get/store output data
             assoc_to_genes = get_output_data(results_storage_dir, drug)
             sum_asscs = get_results(results_storage_dir, drug, disease)
-            # print('here!!!', sum_asscs)
 
-    #             #### POST PROCESSING ####
+            # POST PROCESSING 
             answer_found, answer = interpret_results(sum_asscs, disease)
             if  answer_found == 'found':
                 print(answer, 'thres', threshold)
-                # 
-                # ' '.join((str(threshold), answer))
+
                 #'phenotype','rank','BHcorrPval', 'Pval', 'assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen', 'threshold'
                 return True, answer_found, answer, drug
             else:
@@ -141,15 +140,29 @@ def run_drug_single(drug, disease, storage_dir = 'Q2', iterate_until_found=False
 
         print( disease, 'not found to be treated by', drug, 'but found possible matches')
         return False, str(answer_found), answer, drug
-#     z = pickle.load(open('conds_phen_matches_word_overlap.pkl', 'rb'))
-# for key, value in z.items():
-#     print(key, value)
+
 
     else:
         print('Drug', drug, 'not in database')
         return False, ' '.join(['Drug', drug, 'not in database']), 'None', drug
 
+
+################################### BATCH FUNCTIONS #################################
+
+
 def run_drug_indications_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 'results_drug_disease_matching.txt'):
+    '''
+    Run multi batches of find_drug_indications
+
+    inputs:
+        <str> input_file - path with drug (and disease) list
+        <str>  storage_dir - directory where results are stored to
+        <str>  save_file - the summary file name to be saved
+
+    outputs:
+        None - writes to files
+    '''
+
     print('running drug_indications_multi from', input_file )
     # get in input_file of two columns of drugs and diseases, that shouldbe paired together
     if input_file.endswith('.txt'):
@@ -189,6 +202,19 @@ def run_drug_indications_multi(input_file, storage_dir = 'results_drugs_multi', 
 
 
 def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False):
+    '''
+    Run multi batches of run_drug_single
+
+    inputs:
+        <str> input_file - path with drug (and disease) list
+        <str>  storage_dir - directory where results are stored to
+        <str>  save_file - the summary file name to be saved
+        <bool> iterate_until_found - threshold lowering boolean
+
+    outputs:
+        None - writes to files
+    '''
+
     print('running drug_multi from', input_file )
     # get in input_file of two columns of drugs and diseases, that shouldbe paired together
     if input_file.endswith('.txt'):
@@ -232,10 +258,16 @@ def run_drug_multi(input_file, storage_dir = 'results_drugs_multi', save_file = 
 
 def interpret_results(sum_asscs, disease=None, mapping_dict = None):
     '''
-    sum_accs: list of [ph,rank,BH,prb, asii,asin,pern,sig_genes] for each ph that is found by the algorithm to be significant plus the disease of interest
-    mapping_dict: dictionary of disease (keys) to list of possible phenotypes that the network produces (values)
-    RETURNS!!!
+    Takes in the information from the network analysis, formats the information in a form useful for output
+    and if disease query is inputted, tries to find the phenotype that matches the query disease
+    Input:
+        <list> sum_accs: list of [ph,rank,BH,prb, asii,asin,pern,sig_genes] for each ph that is found by the algorithm to be significant plus the disease of interest
+        <str> disease: being queried (optional), if None then just return all significant phenotypes 
+        <dictionary> mapping_dict: dictionary of disease (keys) to list of possible phenotypes that the network produces (values) otherwise uses default dictionary in PathFx_DB
+    Output:
+        <str> interpretation of results 
     '''
+
     print('interpretting results')
     if mapping_dict is None:
         mapping_pkl = MAPPING_DICT
@@ -257,36 +289,41 @@ def interpret_results(sum_asscs, disease=None, mapping_dict = None):
 
     # check if there is a one-to-one match, returns three columns disease is the match we are looking for possible ph is found from network, the sig genes is list of genes
     # substrings are okay
-    possible_diseases = [dis_key for dis_key in MAPPING_DICT.keys() if disease.lower() in dis_key]
+    possible_diseases = [dis_key for dis_key in mapping_pkl.keys() if disease.lower() in dis_key]
     possible_phenotypes_matched = []
     for poss_dis in possible_diseases:
-        possible_phenotypes_matched = possible_phenotypes_matched + MAPPING_DICT[poss_dis]
+        possible_phenotypes_matched = possible_phenotypes_matched + mapping_pkl[poss_dis]
 
     if len(possible_phenotypes_matched ) > 0: # the disease is in the mapped list 
+        # iterate through all posttibel of
         for possible_ph in possible_phenotypes_matched:
+            # there was a phenotype match
             if possible_ph.lower().strip() in ph_to_sig_genes_dict.keys():
                 sig_genes  = ph_to_sig_genes_dict[possible_ph.lower().strip()]
-                # print(possible_ph, sig_genes, 'FOUND IN possible_phenotypes_matched')
                 print('\t'.join([prb, BH, disease, sig_genes]))
                 return 'found', '\t'.join([prb, BH, disease, sig_genes])
-            # print(possible_ph)
 
         # if no match just return all possible phenotypes that it treats, where the first column is the probability 
-        
         return ' '.join(['could not find disease - phenotype match in results']), all_possible_diseases_string
     else:
         return ' '.join(['could not find disease match in database']), all_possible_diseases_string
 
 
-# def reverse_mapping_dict(mapping_dict):
-#     # turn disease to possible phenotypes dictionary to a phenotype to possible disease
-#     ph_to_disease_dict = defaultdict(list)
-#     for disease, ph_list in mapping_dict.items():
-#         for ph in ph_list:
-#             ph_to_disease_dict[ph].append(disease)
 
-## for getting from an actual folder
+
+####################################### RETRIEVAL FUNCTIONS ##################################################
+
 def retrieve_summary_per_drug_txt(drug, storage_dir):
+    '''
+    Finds information from a previous run in a storage directory
+
+    Inputs:
+        <str> drug
+        <str> storage directory - hwere the relevant drug network query results are located
+    Outputs:
+        <sum_assc> - summary of associations to be fed into intepret_results
+
+    '''
 
     outfname = os.path.join(storage_dir, drug + "_networks",drug+'_merged_assc_full_summary.txt')
     # print(outfname)
@@ -300,18 +337,21 @@ def retrieve_summary_per_drug_txt(drug, storage_dir):
 
         if len(sum_asscs ) > 0:
             sum_asscs.pop(0)
-            # print(line)
-            # sum_asscs.append(line)
 
-        # outf.red('\t'.join(['phenotype','rank','BHcorrPval','assoc_in_intom','assoc_in_neigh','perc_overlap','neigh_genes_in_phen\n']))
-        # for [ph,rank,BH,asii,asin,pern,sig_genes] in sum_asscs:
-        #     sig_gn_str = ','.join(sig_genes)
-        #     outf.write('\t'.join([ph,rank,BH,asii,asin,pern,sig_gn_str,'\n']))        
-        # outf.close()
         return sum_asscs
     return None
 
+
 def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = False):
+    """
+    Reads in information from a run_drug_multi previous run to be interpretted by calling retrieve_summary_per_drug_txt
+
+    Inputs:
+        <str> input_file - query file with tab-delimited list of drug-disease pairs
+        <str> storage_dir - where previous run to search through is 
+        <bool> old_format - based on a version change in the original code
+
+    """
     print('retrieving results from', storage_dir)
     # get in input_file of two columns of drugs and diseases, that shouldbe paired together
     with open(input_file, 'r') as f:
@@ -324,10 +364,7 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
         drug_arr.append(drug)
         disease_arr.append(disease)
     
-    # Get mapping tdict
-    # mapping_pkl = '../rscs/conds_phen_matches_word_overlap.pkl'
-    # mapping_dict = pickle.load(open(mapping_pkl, 'rb'))
-    #iterate through list
+    # iterate through given mapping tdict
     answer_found_arr = []
     answer_arr = []
     for i, (drug, disease) in enumerate(zip(drug_arr, disease_arr)):
@@ -347,7 +384,6 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
         
     #get output as txt
     output_filename = os.path.join(storage_dir, 'results_drug_disease_matching_test2.txt')
-    # output_filename = os.path.join(storage_dir, 'results_drug_disease_matching.txt')
     with open(output_filename, 'w')  as f:
         f.write('\t'.join(('drug', 'condition', 'answer_found', 'answer\n')))
 
@@ -358,70 +394,16 @@ def retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storag
     
     print('written output to', output_filename)
 
-##### STUFF I'm RUNNING
-# retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = True)
-#run_drug_single('Latamoxef', 'Bacterial Infections', storage_dir = "../results/results_test")
-# run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_multi_time2', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False)
-# run_drug_indications_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_indications_multi_time', save_file = 'results_drug_disease_matching.txt')
-# analysis_name = 'ncats_test_intome_6_remove24_min_networkassoc' 
-# rdir = '../results/'+analysis_name+'/'
-# if not os.path.exists(rdir):
-#     os.mkdir(rdir)
 
+# unit testing:
+if __name__ == '__main__':
 
-#### SAVE FOR MULTI_DRUG and disease inputs, right now for interactive purposes should do one by one.
-# ####add or load drug list from NCATs #### 
-# with open('../rscs/q2-drugandcondition-list.txt', 'r') as f:
-#     x= f.readlines()
-# drugs = []
-# diseases = []
-# for i, line in enumerate(x[1:]):
-#     line = line.strip()
-#     drug, disease = line.split('\t')
-#     drug = drug.lower()
-#     first_letter = drug[0].upper()
-#     modified_drug_name = first_letter + drug[1:]
-#     drugs.append(modified_drug_name)
-#     diseases.append(disease)
-
-
-###### ADD in drug names that Jenn hasn't modelled
-#with open('../rscs/drug_list_not_modelled.txt', 'r') as f:
-#    x= f.readlines()
-#drugs = []
-#for i, line in enumerate(x[1:]):
-#    drug = line.strip()
-#    drug = drug.lower()
-#    first_letter = drug[0].upper()
-#    modified_drug_name = first_letter + drug[1:]
-#    drugs.append(modified_drug_name)
-#
-# print(drugs)
-# dtf = '../rscs/drug_intome_targets.pkl'
-# dtd = pickle.load(open(dtf,'rb'))
-# print(dtd)
-# dts = [(d,dtd[d]) for d in drugs if d in dtd]
-# print(dts)
-# dts = [(d.replace(' ',''),tlist) for (d,tlist) in dts] # remove white spaces for later analysis
-
-
-### IGNORE ME #### check to see if all the drugs have targets in the network
-# print(len(dts), 'len dts')
-# ann.check_if_drug_in_network(dts, GENE_GRAPH)
-# raise ValueError("TESTING")
-# create networks, merge, do phenotype enrichment
-# all_merge_files = ann.run_all_drugs(dts,rdir,GENE_GRAPH,SCORE_THRESHOLD)
-
-
-
-### IGNORED
-# call method to plot a heatmap
-# per_cutoff = 0.05 #can change this to include more drugs in the heatmap 
-# ann.make_a_heatmap(drugs,all_merge_files,rdir,analysis_name,per_cutoff)
-
-        
-# #### HACK FOR NCATS
-# os.system(' '.join(('python get_genes_to_phen_dics.py -d', rdir)))
-# os.system(' '.join(('python summarize_network_phenotypes.py -d', rdir)))
-
+    retrieve_results(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/ncats_test_intome_5_rerun_all_with_rand', old_format = True)
+    run_drug_single('Latamoxef', 'Bacterial Infections', storage_dir = "../results/results_test")
+    run_drug_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_multi_time2', save_file = 'results_drug_disease_matching.txt', iterate_until_found=False)
+    run_drug_indications_multi(input_file = '../rscs/q2-drugandcondition-list.txt', storage_dir = '../results/results_drugs_indications_multi_time', save_file = 'results_drug_disease_matching.txt')
+    analysis_name = 'ncats_test_intome_6_remove24_min_networkassoc' 
+    rdir = '../results/'+analysis_name+'/'
+    if not os.path.exists(rdir):
+        os.mkdir(rdir)
 

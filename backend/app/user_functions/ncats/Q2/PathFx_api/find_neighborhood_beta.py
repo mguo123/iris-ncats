@@ -46,19 +46,24 @@ def fast_track(pstack,pth,sterm): # method to fast track some paths that are alt
 	lastn = split_path[-1]
 
 	redun = [p for p in pstack if lastn==p.split('@')[-1]]#remove paths that terminate on an included node
-#	if len(redun) >0:
-#		print('redundant paths found:')
-#		print(redun)
+
 	fast_track = set([p for p in redun if score_path(p)>sterm])
 	new_stack = list(set(pstack).difference(set(redun))) #remove redundant
 	return (new_stack,fast_track) # return trimmed stack, and only the high-scoring redundant paths
 
-def find_neighborhood(gene,sterm): # sterm = termination path score also known as threshold
+
+
+def find_neighborhood(gene,sterm): 
+	"""
+	start with a gene and then get the neighboring genes that are relevant enough by a hopping diffusion walk
+	
+	Input:
+		<str> gene - starting node
+		<float> sterm = termination path score also known as threshold
+	"""
 	stack = [gene]
 	approved = set()
-	#stime = time.time()
 	while stack:
-		#print(sys.getsizeof(stack))
 		lastp = stack[-1]
 		if score_path(lastp)>sterm:
 			approved.add(lastp)
@@ -66,9 +71,9 @@ def find_neighborhood(gene,sterm): # sterm = termination path score also known a
 		stack.remove(lastp)	
 		(stack,fast) = fast_track(stack,lastp,sterm)
 		approved = approved.union(fast) 
-        # reformat dictionary before returning                          
+
+    # reformat dictionary before returning                          
 	ps_d = defaultdict(float)
 	for pth in approved:
 		ps_d[pth] = score_path(pth)
 	return ps_d
-	#print("Time Taken: %.3f sec\n" % (time.time() - stime))

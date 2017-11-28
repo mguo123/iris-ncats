@@ -1,14 +1,15 @@
-# written to contain some of the core
-# methods for analyzing neighborhoords and post-processing
-# written 7-13-17, JLW
-# Modified margaret, 10/26/17
+"""
+written to contain some of the core
+methods for analyzing neighborhoords and post-processing
+written 7-13-17, JLW
+Modified margaret, 10/26/17
 
+"""
 
 import csv, pickle, os, sys, find_neighborhood_beta
 import networkx as nx
 import numpy as np
 import matplotlib
-# matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 import pandas as pd
 from textwrap import wrap
@@ -17,6 +18,14 @@ from find_neighborhood_beta import find_neighborhood as fgn
 import get_associations
 
 def write_neighborhood_to_file(pth_dic,outf):
+    """
+    create file of neighborhood path scores 
+    input - 
+        <dictionary> pth_dic : keys are paths and values are p-value store
+        <str> outf : file to be written to
+    output - none, written to file
+
+    """
     for (pth,pscore) in pth_dic.items():
         if '@' in pth:
             a=pth.split('@')[-2]
@@ -29,6 +38,21 @@ def write_neighborhood_to_file(pth_dic,outf):
 
 # need to set rand_dir 
 def calculate_specificity(pth_dic,outf,outf2,scr_thr):
+    """
+    Calculate the specificity of the genes to see which genes are enriched compared to a random graph walk
+
+    Input
+        <dictionary> pth_dic : keys are paths and values are p-value store
+        <str> outf: outfile name with path information in a tab-delimited format including: 'gene','score list','average','enrichment',
+        <str> outf2 outfile name of the neighborhood information 
+        <list> allf - list of all "specific_neighborhood.txt" summaries there are
+        <float> scr_thr -  minimum cutoff of significant path scores
+
+    Output
+        <str> outfname - name of the file that is outputted
+
+
+    """
     gene_scores = dict([(pth.split('@')[-1],pscore) for (pth,pscore) in pth_dic.items()])
     neigh_genes = [k for k in gene_scores.keys()]
     enriched_genes = []
@@ -65,7 +89,19 @@ def calculate_specificity(pth_dic,outf,outf2,scr_thr):
     return enriched_genes
 
 def merge_networks(allf,rdir,drug):
-    # merge networks
+    """
+    for a list of gene neighboorhoods that are drug targets, merge the information into one file for further analysis
+
+    Input
+        <list> allf - list of all "specific_neighborhood.txt" summaries there are
+        <str> rdir - path to reference directory
+        <str> drug
+
+    Output
+        <str> outfname - name of the file that is outputted
+
+
+    """    
     print('merging protein networks')
     nfs = [f for f in allf if 'specific_neighborhood.txt' in f]
     outfname = drug+'_merged_neighborhood.txt'
@@ -84,6 +120,17 @@ def merge_networks(allf,rdir,drug):
     return outfname
 
 def check_if_drug_in_network(dts, netxobj):
+    """
+    debug function
+    Check if drug in network, if so print
+    Input
+        <list> dts - list of tuples containing (drug, target list of genes (strings))
+        <object> netxobj - networkx object with PPI+ gene-drug edges
+
+    Output
+        None
+    """
+
     print('Checking targets')
     all_drug_targets = np.array([])
     not_found = np.array([])    
@@ -101,13 +148,30 @@ def check_if_drug_in_network(dts, netxobj):
     not_found = np.unique(not_found)
     print(not_found.shape[0], 'not found of ', all_drug_targets.shape[0], 'total targets')
     
+
 def run_all_drugs(dts,rdir,netxobj,scr_thr):
+    """
+    for a list of drugs, run the analysis to find important phenotypes
+
+    Input
+        <list> dts - list of tuples containing (drug, target list of genes (strings))
+        <str> rdir - path to reference directory
+        <object> netxobj - networkx object with PPI+ gene-drug edges
+        <float> scr_thr -  minimum cutoff of significant path scores
+
+
+    Output
+        <list> all_merge_files - list of all strings of paths to stored information
+
+
+
+    """
+    #initializing variables
     GENE_GRAPH = netxobj
     all_merge_files = []
-    # print('dts', dts)
+
     for (drug,target_list) in dts:
         print(drug, target_list)
-        # print(netxobj.__dict__.keys())
         res_dir=None
         for drug_target in target_list:
             # if drug_target not in netxobj.nodes_iter():
@@ -140,12 +204,9 @@ def run_all_drugs(dts,rdir,netxobj,scr_thr):
                     write_neighborhood_to_file(pth_dic,outf2)
         
         # merge files, do phenotype enrichment
-        # print('here')
         if res_dir is not None:
             allf = [f for f in os.listdir(res_dir)]
-            # print(allf)
             spnn = merge_networks(allf,res_dir,drug)
-            # print('merged networks')
             aname = 'merged'
             sig_assoc = get_associations.get_associations(spnn, aname, res_dir)
 
@@ -160,6 +221,18 @@ def msum(l):
 
 # make a heatmap
 def make_a_heatmap(drugs,all_merge_files,rdir,analysis_name,per_cutoff):
+    """
+    Make a heat map of results that is saved to file
+
+    Input - 
+        <list> drugs
+        <list> all_merge_files
+        <rdir> rdir - reference directory path
+        <str> analysis_name
+        <float> per_cutoff: threshold overwhich path is significant
+
+    Output - none
+    """
     data_dic = defaultdict(list)
     ndrugs = len(drugs)
     dind = dict([(d,i) for (i,d) in enumerate(drugs)])
