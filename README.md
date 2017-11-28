@@ -1,9 +1,11 @@
 # iris-ncats: A Conversational Agent for Biological Data Science 
 
-This repository contains the prototype for our Stanford Effort Biomedical Data Translater that is able to answer the following questions:
+This repository contains the prototype for Stanford Effort for the Biomedical Data Translator that is able to answer the following questions:
 
 * Given a condition, are any genetic conditions potentially protective and why?
 * Given a drug and a condition, construct a pathway description that explains how the drug effects its action. Additionally, generate hypotheses of other therapeutic uses for the given drug.
+
+Without going too much into the weeds, these queries take in relevant arguments, use a combination of semantic similarity comparison methods, genetic network analysis, and/or term enrichment calculations to get information for the desired result.
 
 This prototype is based on the IRIS, which is an open source conversational agent, originally to facilitate tasks in data science for non-programmers.  We tailored it to a biomedical context, allowing it to recognize key entities (drugs, genes, diseases), pull from various biomedical data sources, construct queries based on free text inputted by the user, and perform various analyses to produce the final answer or dossier.
 
@@ -16,10 +18,15 @@ The original IRIS system was created by the Bernstein lab at Stanford Computer S
 
 ### Note: This is currently a prototype release. Additions and bux fixes are being performed.
 
-The backend of Iris is written in Python while the front end is written in Javascript/CSS/HTML.  These are instructions to install and run iris-ncats in debugging mode that can be used for developers. We recommend using OSX for running the debugging mode. Windows and Linux versions are still in pre-release. A self-contained Electron app for OSX will be released in the next 10 months.
 
+In terms of software structure, this effort can be thought of in a couple forms:
+1. as a standalone desktop Electron app (for OSX and Linux with future compatibility with Windows)
+2. as a web application that is ported through a basic http-server (beta)
+3. as a command-line interface for individuals who want more programmatic control
 
-### Prerequisites
+The backend of Iris is written in Python while the front end is written in Javascript/CSS/HTML.  These are instructions to install and run iris-ncats in debugging mode that can be used for developers. We recommend using OSX for running the debugging mode. Windows and Linux versions are still in pre-release. A self-contained Electron app for OSX.
+
+### Prerequisites for Developing
 
 * [anaconda 3](https://conda.io/docs/install/quick.html). (Make sure to run `source ~/.bash_profile` after you have installed Anaconda, if it is not appearing in your path.)
 * [python 2.7](https://www.python.org/download/releases/2.7/). This is in order to install the javascript components
@@ -33,8 +40,9 @@ brew install graphviz
 pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
 ```
 
-### DATA 
-Data files needed to run biomedical modules must be obtained by containing the repository owner. 
+### Data  
+Data files can be found on the AWS instance. Contact repository owner for more information. Post-release data files will be make freely available.
+
 
 ### Install and run the Python components:
 ```
@@ -89,10 +97,10 @@ In order to run Iris in development mode.
     npm start
 ```
 
-## Using Iris (on the web)
+## Using Iris on the web
 Iris can run within a desktop electron app (currently in dev mode only, but will become a standalone app) and as a web application.
 
-To run as a web application follow steps 1-3 for the local version. Then for the web version enter in:
+To run as a web application follow steps 1-3 for the local version to start up the Python backend. Then for the web version enter in:
 ```
     cd [PATH_TO_IRIS]
 
@@ -101,13 +109,39 @@ To run as a web application follow steps 1-3 for the local version. Then for the
 
 ```
 
-Open a webbrowser to the indicated url and iris should be displayed. If you are developping on AWS or a remote server, you need to forward both the port number entered for you http-server as well as port 8000. This can be done via the ssh command.
+Open a webbrowser to the indicated url (i.e. `localhost:PORT_NUM`) and Iris should be displayed. 
+
+Notes if you are developping on AWS or a remote server:
+* We recommend creating 2 screens to run the front and backend simultaneously. This can be done as follows
 ```
-ssh -N -f -L localhost:8080:localhost:8080  -i [private_key] user@server.com
-ssh -N -f -L localhost:8000:localhost:8000 -i [private_key] user@server.com
+    # in your AWS instance
+    cd iris_ncats # PATH TO REPOSITORY
+
+    # Start a new screen session
+    screen -S python
+    # in screen
+    source activate iris
+    cd backend/app
+    python app.py
+
+    # Once, backed is loaded, enter Ctrl+A then Ctrl+D to exit screen
+
+    # Start the html screen session
+    screen -S html
+    # in screen 
+    http-server .
+
 
 ```
-To kill a port type in the command 
+* Once your program is up and running, you need to forward both the port number entered for you http-server as well as for the python backend. This can be done via the ssh command.
+```
+    # on your local computer
+    ssh -N -f -L localhost:8080:localhost:8080  -i [private_key] user@server.com
+    ssh -N -f -L localhost:8000:localhost:8000 -i [private_key] user@server.com
+
+```
+* Navigate to the localhost port chosen
+* To kill a port type in the command 
 ``` lsof -ti:PORT_NUM | xargs kill -9
 ```
 
@@ -154,5 +188,7 @@ class TreatDisease(IrisCommand):
 The following issues are recognized and are being resolved
 * OSX display issues - if you have a mouse USB plugged in while running `npm start`, display proportions will be slighlty misconfigured. Try unpluggin the mouse USB then restarting Iris.
 * Windows display issues - The display characteristics if using Windows platform is off, we recognize this problem and are working to fix it
+
+Please contact us if you have any questions or issues you wish to bring to our attention!
 
 
