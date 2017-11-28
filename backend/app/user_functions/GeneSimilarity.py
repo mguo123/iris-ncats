@@ -11,10 +11,10 @@ class GeneSimilarity(IrisCommand):
     title = "What genetic diseases are semantically similar to gene {gene}?"
     # give an example for iris to recognize the command
 
-    examples = ["What diseases are similar to {gene}?",
-                "What diseases are related to {gene}?",
-                "Is {gene} related to disease?",
-                "How is the {gene} gene related to genetic diseases?"]
+    examples = ["What diseases are similar to {gene}",
+                "What diseases are related to {gene}",
+                "Is {gene} related to disease",
+                "How is the {gene} gene related to genetic diseases"]
 
     # type annotations for each command argument, to help Iris collect missing values from a user
 

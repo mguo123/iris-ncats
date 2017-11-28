@@ -8,16 +8,19 @@ import os
 class GeneticDiseaseProtection(IrisCommand):
     # what iris will call the command + how it will appear in a hint
     # title = "how does {condition} protects against {condition}?"
-    title = "What genetic diseases might {condition} protect against?"
+    title = "What genetic diseases might condition protect against?"
     # give an example for iris to recognize the command
 
-    examples = ["What does {condition} protect against?",
-                "Protection against genetic diseases?", 
-                "What does {condition} compensate for?",
-                "How does {condition} buffer against genetic diseases harmful effects?"]
+    examples = ["What does {condition} protect against",
+                "Protection against genetic diseases", 
+                "What does {condition} compensate for",
+                "Protection against genetic diesease",
+                "condition protects",
+                "why does condition protect",
+                "How does {condition} buffer against genetic diseases harmful effects"]
 
 
-    examples = ["What does {condition} protect against"]
+    # examples = ["What does {condition} protect against"]
     # type annotations for each command argument, to help Iris collect missing values from a user
 
     argument_types = {"condition": t.String("What is the condition do you want to analyze?")}

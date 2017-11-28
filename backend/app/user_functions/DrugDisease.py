@@ -149,16 +149,20 @@ class DrugDisease(IrisCommand):
         # get other possible disease 
         if "other_disease" in result:
             ph_genes_str, drug = result["other_disease"]
-            multi_answer_line = ['Top hits of diseases potentially impacted by %s. Full dataset saved as drug_indications_{drug_disease}.' % result['drug'], 'We queried the gene neighborhood of drug targets and found the following phenotypes to be significant. Here we list significant phenotypes in order of probability. Column headings are phenotype, probability, significance level cutoff, and a list of genes that support the relationship']
-            result_array = result_array + multi_answer_line
             ph_genes_arr = ph_genes_str.split('\t') # prb, BH, ph, sig_genes 
             ph_genes_array_all = [ph_genes_arr[x:x+4] for x in range(0, len(ph_genes_arr),4)]
             if len(ph_genes_arr) >=4:
+                # add explanation
+                multi_answer_line = ['Top hits of diseases potentially impacted by %s. Full dataset saved as drug_indications_{drug_disease}.' % result['drug'], 'We queried the gene neighborhood of drug targets and found the following phenotypes to be significant. Here we list significant phenotypes in order of probability. Column headings are phenotype, probability, significance level cutoff, and a list of genes that support the relationship']
+                result_array = result_array + multi_answer_line
+                
                 ph_genes_array_all_iris = iris_objects.IrisDataframe(column_names=[ "Phenotype", "probability", "Benjamin Hochberg significance cutoff","list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_all)
                 self.iris.add_to_env('drug_indications' + query_name, ph_genes_array_all_iris)
                 ph_genes_array_short = [ph_genes_arr[x:x+4] for x in range(0, min(5*4,len(ph_genes_arr)),4)]
                 ph_genes_array_short_iris = iris_objects.IrisDataframe(column_names=["Phenotype", "Probability", "Benjamin Hochberg significance cutoff", "list of genes"], column_types=["Text", "Text", "Text", "Text"], data=ph_genes_array_short)
                 result_array.append(ph_genes_array_short_iris)  
+            else:
+                result_array.append('No other drug indications found')
             # result_array.append("Full dataset saved as drug_indications")
 
 

@@ -7,11 +7,11 @@ import os
 class InvestigateSimilarity(IrisCommand):
     # what iris will call the command + how it will appear in a hint
     # title = "how does {condition} protects against {condition}?"
-    title = "How are {disease_a} and {disease_b} semantically related?"
+    title = "How are disease_a and disease_b semantically related? "
     # give an example for iris to recognize the command
-    examples = ["How are {disease_a} and {disease_b} semantically related?",
+    examples = ["semantically",
                 "What is the relationship between {disease_a} and {disease_b}?", "semantic relationship", "semantic relationship of diseases",
-                "Do {disease_a} and {disease_b} appear together in PubMed?"]
+                "Do {disease_a} and {disease_b} appear together in PubMed"]
     # type annotations for each command argument, to help Iris collect missing values from a user
     argument_types = {"disease_a": t.String("What is the first disease?"),
                       "disease_b": t.String("What is the second disease?")}
