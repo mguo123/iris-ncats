@@ -1,4 +1,9 @@
 # Question 1 genetic disease search
+.libPaths()
+.libPaths(c(.libPaths(),'/home/admin/anaconda3/envs/iris/lib/R/library/'))
+.libPaths(c(.libPaths(), '/home/admin/anaconda3/envs/iris/lib/R/library/', '/home/admin/R/x86_64-pc-linux-gnu-library/3.3', 
+	                '/usr/local/lib/R/site-library', '/usr/lib/R/site-library', '/usr/lib/R/library'))
+.libPaths()
 library(PubMedWordcloud)
 library(optparse)
 library(lsa)
