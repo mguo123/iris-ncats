@@ -2,6 +2,8 @@ altman_keys
 altman_keys.ppk
 altman_keys.pub
 
+.Rhistory
+
 node_modules/*
 backend/app/large_files/*
 *.pyc

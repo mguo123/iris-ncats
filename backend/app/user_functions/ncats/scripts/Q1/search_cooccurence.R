@@ -9,6 +9,7 @@ library(lsa)
 library(dplyr)
 library(tidytext)
 library(wordcloud)
+library(tm)
 
 option_list = list(
   make_option(c("-a", "--disease_1"), type="character", default=NULL, 
@@ -141,14 +142,26 @@ both <- disease_terms[disease_terms$disease == both_clean,]
 tfidf_output_file <- paste(opt$prefix, clean_query(disease_1), clean_query(disease_2), "cooccurence_tfidf.png", sep=".")
 freq_output_file <- paste(opt$prefix, clean_query(disease_1), clean_query(disease_2), "cooccurence_frequency.png", sep=".")
 
+
+
 png(tfidf_output_file, width=12, height=8, units="in", res=300)
-wordcloud(word=both$word, freq=both$tf_idf, max.words = 100, random.order=FALSE, colors=brewer.pal(8, "Dark2"))
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+title = toupper(paste(disease_1, "-", disease_2, "abstract cooccurrence cloud - tf-idf"))
+text(x=0.5, y=0.5, title, cex=1.5)
+wordcloud(word=both$word, freq=both$tf_idf, max.words = 200, random.order=FALSE, colors='#ae8a33')
 dev.off()
+
 
 png(freq_output_file, width=12, height=8, units="in", res=300)
-wordcloud(word=both$word, freq=both$n, max.words = 100, random.order=FALSE, colors=brewer.pal(8, "Dark2"))
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+title = toupper(paste(disease_1, "-", disease_2, "abstract cooccurrence cloud"))
+text(x=0.5, y=0.5, title, cex=1.5)
+wordcloud(word=both$word, freq=both$n, max.words = 200, random.order=FALSE, colors='#229c81')
 dev.off()
-
 
 # Search for word combos
 both_abstracts <- fetch_abstracts(paste(disease_1, disease_2))

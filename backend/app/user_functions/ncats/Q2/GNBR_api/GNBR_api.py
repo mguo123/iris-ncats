@@ -195,6 +195,8 @@ Output:
 ordered_genes - returns a list of the top n genes ordered by the frequency of that genes annotation to the drug
 If no gene targets are known or the drug isn't in our database, it returns None
 """
+
+
 def query_gene(gene, relationship="B", gene_name=False, gen_counts=False):
     gene_set = set()
     count = dict()
@@ -291,6 +293,14 @@ def query_term_for_matches(queryTerm, searchSet = disease_matching_dict, numMatc
     results = process.extract(queryTerm, newSearchSpace, limit=numMatches)
     return(results, 1)
 
+
+def get_MEDICID(term):
+    if term in disease_dict:
+        return disease_dict.get(term)
+    elif term in chem_dict:
+        return chem_dict.get(term)
+    else:
+        return 'ID:Unknown'
 
 if __name__ == "__main__":
 

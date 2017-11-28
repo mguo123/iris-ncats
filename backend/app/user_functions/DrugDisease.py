@@ -87,7 +87,8 @@ class DrugDisease(IrisCommand):
         print(query_name, "== query name")
 
         # Print out genes associated with drug
-        result_array = []
+        query_statement = 'How does ' + result['drug'] + '(' + result['drug_id'] + ') treat ' + result['disease'] + '(' + result['disease_id'] + ').'
+        result_array = ['Here are your results for: %s' % query_statement]
         result_array.append('Top genes found to be targetted by %s are below. Full dataset saved as drug_genes_{drug_disease}' % result['drug'])
         drug_gene_term_object = iris_objects.IrisDataframe(data=result['drug_genes'])
         self.iris.add_to_env('drug_genes' + query_name, drug_gene_term_object) 

@@ -35,9 +35,9 @@ class InvestigateSimilarity(IrisCommand):
     # core logic of the command
     def command(self, disease_a, disease_b):
         # Run the query
-        results = investigate_similarity(disease_a, disease_b, word_cloud='commonality')
+        results = investigate_similarity(disease_a, disease_b)
 
-        return results, disease_a, disease_b
+        return [results, disease_a, disease_b]
 
     # wrap the output of a command to display to user
     # by default this will be an identity function
@@ -48,12 +48,12 @@ class InvestigateSimilarity(IrisCommand):
         # List of paths to word clouds
         self.commonality_clouds = []
         """
-        results, disease_a, disease_b = result
-
+        [results, disease_a, disease_b] = result
         # create name df
         df_name = 'sentences_' + disease_a[:min(len(disease_a), 3)] + '_' + disease_b[:min(len(disease_b), 3)]
         df_name = df_name.replace(" ", "")
         df_name = df_name.lower()
+
 
         result_array = []
 
@@ -66,22 +66,37 @@ class InvestigateSimilarity(IrisCommand):
             result_array.append('There was an error processing your request')
             return result_array
 
+        sentence_df = results.top_sentence_df()
+        if sentence_df is None:
+            result_array.append('The two conditions entered do not appear together in the same sentence in PubMed')
+        else:
+            result_array.append('Here are some examples of the two diseases appearing in the same sentence in PubMed')
+            result_array.append(sentence_df)
+            sentence_df = iris_objects.IrisDataframe(data=results.top_sentence_df())
+            self.iris.add_to_env(df_name, sentence_df)
 
-        result_array.append('Here are some examples of the two diseases appearing in the same sentence in PubMed. Results are stored as dataframe: %s' % df_name)
-        # adds the table to results
-        #sentence_df = iris_objects.IrisDataframe(data=results.sentence_df)
-
-        #sentences = [('Sentences', results.sentences)]
-        results.print_summary()
-        sentence_df = iris_objects.IrisDataframe(data=results.top_sentence_df())
 
 
-        self.iris.add_to_env(df_name, sentence_df)
-        result_array.append(sentence_df)
-
-        if results.word_cloud is not None:
+        if results.commonality_word_cloud is not None:
             # display image (first one)
-            os.system("open " + results.word_cloud)
+            result_array.append('Generated a commonality word cloud. This shows terms enriched between the two diseases '
+                                'in PubMed')
+            os.system("open " + results.commonality_word_cloud)
+
+        if results.comparison_word_cloud is not None:
+            # display image (first one)
+            result_array.append('Generated a comparison word cloud. This shows terms enriched in each disease separately '
+                                'in PubMed.')
+            os.system("open " + results.comparison_word_cloud)
+
+        if results.frequency_word_cloud is not None:
+            # display image (first one)
+            result_array.append('Generated a cooccurrence word cloud. This shows terms enriched in PubMed where the two '
+                                'conditions appear together in the same abstract.')
+            os.system("open " + results.frequency_word_cloud)
+
+        if len(result_array) < 1:
+            result_array.append("No similarity metrics available")
 
         return result_array
 

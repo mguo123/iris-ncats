@@ -73,6 +73,12 @@ def Q2_query(QDrug, QDisease, options):
 
     disease = QDisease.strip().lower()
 
+
+    # get MEDIC ids
+    drug_id = GNBR_api.get_MEDICID(drug)
+    disease_id = GNBR_api.get_MEDICID(disease)
+
+
     # Generate prefix for output file, is drug_disease
     out_name = drug + "_" + disease.replace(" ", "-").lower()
 
@@ -177,7 +183,7 @@ def Q2_query(QDrug, QDisease, options):
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]
 
-        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, 
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "drug_id": drug_id, "disease_id":disease_id,
                     "tissue_df_dis":tissue_df_dis, "tissue_df_dis_short": tissue_df_dis_short, "tissue_df_drug": tissue_df_drug, "tissue_df_drug_short": tissue_df_drug_short,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }

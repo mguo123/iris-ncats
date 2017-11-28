@@ -38,30 +38,32 @@ def Q1_query(condition):
     #    print(ss_object.error)
     return ss_object
 
-def investigate_similarity(disease_a, disease_b, word_cloud=None):
+def investigate_similarity(disease_a, disease_b):
     # 1. Cooccurrence search
-    similarity = cooccurence_seach(disease_a, disease_b)
+    similarity = Cooccurence(disease_a, disease_b)
+    cooccurrence = None
+    try:
+        cooccurrence = cooccurrence_seach(disease_a, disease_b)
+        similarity.frequency_word_cloud = cooccurrence.frequency_word_cloud
+        similarity.tfidf_word_cloud = cooccurrence.tfidf_word_cloud
+        similarity.sentence_file = cooccurrence.sentence_file
+        similarity.fetch_sentences()
+
+    except Exception as e:
+        print("Couldn't determine cooccurrence in pubmed")
 
     # 2. Commonality word cloud
 
-    if word_cloud == "commonality":
-        print("Creating commonality wordcloud")
+    try:
         commonality, comparison = semantic_similarity_word_clouds(disease_a, disease_b)
-        similarity.word_cloud = commonality
-    elif word_cloud == "comparison":
-        print("Creating comparison wordcloud")
-        commonality, comparison = semantic_similarity_word_clouds(disease_a, disease_b)
-        similarity.word_cloud = comparison
-    elif word_cloud == "cooccurrence":
-        print("Creating cooccurrence wordcloud")
-        similarity.word_cloud = similarity.frequency_word_cloud
-    else:
-        similarity.word_cloud = None
-
+        similarity.commonality_word_cloud = commonality
+        similarity.comparison_word_cloud = comparison
+    except Exception as e:
+        print("Could not compute commonality or comparison word clouds")
     return similarity
 
 
-def cooccurence_seach(disease_a, disease_b):
+def cooccurrence_seach(disease_a, disease_b):
     # Check if the results already exist
     sentences_file = os.path.join(pubmed_data_path, "cooccurence.%s.%s.cooccurence_sentences.txt" % (clean_query(disease_a), clean_query(disease_b)))
     freq_word_cloud_file = os.path.join(pubmed_data_path, "cooccurence.%s.%s.cooccurence_frequency.png" % (
@@ -233,14 +235,14 @@ class SemanticSimilarityResults(object):
         print(self.commonality_clouds)
 
 class Cooccurence(object):
-    def __init__(self, a, b, sentence_file, frequency_word_cloud, tfidf_word_cloud):
+    def __init__(self, a, b, sentence_file=None, frequency_word_cloud=None, tfidf_word_cloud=None):
         self.disease_a = a
         self.disease_b = b
         self.frequency_word_cloud = frequency_word_cloud
         self.tfidf_word_cloud = tfidf_word_cloud
         self.sentence_file = sentence_file
         self.sentences = []
-        self.fetch_sentences()
+
         self.commonality_word_cloud = None
         self.comparison_word_cloud = None
         self.sentence_df = None
@@ -255,22 +257,34 @@ class Cooccurence(object):
     def top_sentence_df(self, n=10):
         try:
             sentences = [('Sentences', self.sentences[0:n])]
+            if len(sentences) == 1:
+                return None
             print(sentences)
             return pandas.DataFrame.from_items(sentences)
         except Exception as e:
             return None
 
     def print_summary(self):
-        print(self.word_cloud)
+        print("Sentence file")
+        print(self.sentence_file)
+        print("Sentences containing cooccurring mentions of diseases in PubMed:")
         print(self.top_sentence_df())
+        print("Path to word cloud of abstracts in PubMed with cooccurring terms")
+        print(self.frequency_word_cloud)
+        print("Path to commonality cloud")
+        print(self.commonality_word_cloud)
+        print("Path to comparison cloud")
+        print(self.comparison_word_cloud)
+
+
 
 if __name__ == "__main__":
     condition="osteoporosis"
-    Q1_query(condition)
+    #Q1_query(condition)
 
     #condition="rabies"
     #Q1_query(condition)
-    c = investigate_similarity("rubella", "grant syndrome", word_cloud="commonality")
+    c = investigate_similarity("ebola virus infections", "niemann-pick diseases")
 
     c.print_summary()
 

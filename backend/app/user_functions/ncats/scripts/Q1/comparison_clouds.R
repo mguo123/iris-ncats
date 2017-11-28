@@ -53,13 +53,18 @@ rownames(both_m) <- both$word
 comparison_output_file <- paste(opt$prefix, disease_1, disease_2, "comparison.png", sep=".")
 commonality_output_file <- paste(opt$prefix, disease_1, disease_2, "commonality.png", sep=".")
 
+
 png(comparison_output_file, width=12, height=8, units="in", res=300)
-comparison.cloud(both_m, max.words=200, random.order=FALSE)
+comparison.cloud(both_m, max.words=300, random.order=FALSE, colors=c('#cc9837', '#81a558'))
 dev.off()
+
 
 png(commonality_output_file, width=12, height=8, units="in", res=300)
-commonality.cloud(both_m, random.order=FALSE, max.words=200, colors=brewer.pal(8, "Dark2"))
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 4))
+par(mar=rep(0, 4))
+plot.new()
+title = toupper(paste(disease_1, "-", disease_2, "commonality cloud"))
+text(x=0.5, y=0.5, title, cex=1.5)
+commonality.cloud(both_m, random.order=FALSE, max.words=200, colors='#d45d50')
 dev.off()
-
-
 
