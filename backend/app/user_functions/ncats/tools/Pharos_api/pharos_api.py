@@ -146,6 +146,29 @@ def get_target_interactions(qID):
             url = "https://www.ebi.ac.uk/proteins/api/proteins/interaction/{}".format(uniID)
             return(requests.get(url).json())
 
+def get_target_diseases(target_common_name):
+    qID = get_target_id(target_common_name)
+    if qID is not None:
+        info = target_link_data(qID, 'ix.idg.models.Disease')
+        target_disease_scores = {}
+        for association in info:
+            properties = association['properties']
+            info_dict = {}
+            for prop in properties:
+                if prop['label'] == 'IDG Disease':
+                    info_dict['disease'] = prop['term']
+                elif prop['label'] == 'IDG Confidence':
+                    info_dict['confidence'] = float(prop['numval'])
+                elif prop['label'] == 'IDG Z-score':
+                    info_dict['z_score'] = float(prop['numval'])
+            if 'z_score' in info_dict: # if we have some quantifiable measure for the data
+                target_disease_scores[info_dict['disease']] = info_dict['z_score']
+
+        for key, value in sorted(target_disease_scores.items(), key=lambda x: x[1], reverse=True):
+            print ("%s: %s" % (key, value))
+        return target_disease_scores
+    else:
+        return None
 
 def get_pathways(target_name):
     """
@@ -297,14 +320,17 @@ def get_drug_tissues(drug_name):
 
 
 if __name__ == "__main__":
-    ligand_targets = get_ligand_targets("adapalene")
-    print(ligand_targets)
-    print(get_disease_id("acne vulgaris"))
-    qID = get_target_id(ligand_targets[0])
-    temp = get_target_interactions(qID)
-    print("GENE TARGETS:", ligand_targets)
-    target_tissues = get_tissues_oi(ligand_targets)
-    print("GENE TISSUES:", target_tissues)
-    init_GIANT_queries()
-    GIANT_tiss = get_GIANT_tissues_oi(target_tissues)
-    print("GIANT TISSUES:", GIANT_tiss)
+    print(get_target_id('TP53'))
+    get_target_diseases('TP53')
+    print(get_GO_terms('TP53'))
+    # ligand_targets = get_ligand_targets("adapalene")
+    # print(ligand_targets)
+    # print(get_disease_id("acne vulgaris"))
+    # qID = get_target_id(ligand_targets[0])
+    # temp = get_target_interactions(qID)
+    # print("GENE TARGETS:", ligand_targets)
+    # target_tissues = get_tissues_oi(ligand_targets)
+    # print("GENE TISSUES:", target_tissues)
+    # init_GIANT_queries()
+    # GIANT_tiss = get_GIANT_tissues_oi(target_tissues)
+    # print("GIANT TISSUES:", GIANT_tiss)

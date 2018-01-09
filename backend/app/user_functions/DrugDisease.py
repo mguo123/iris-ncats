@@ -18,8 +18,8 @@ from iris import state_machine as sm
 from iris import util as util
 from iris import iris_objects
 
-from app.user_functions.ncats.Q2.PathFx_api import run_main
-from app.user_functions.ncats.Q2.Q2_main import Q2_query
+from app.user_functions.ncats.tools.PathFx_api import run_main
+from app.user_functions.ncats.tools.Q2_main import Q2_query
 import numpy as np
 import os
 import datetime

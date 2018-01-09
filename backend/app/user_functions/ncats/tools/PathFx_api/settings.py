@@ -15,7 +15,7 @@ from collections import defaultdict
 
 
 # IMPORT USER_FUNCTIONS
-from app.user_functions.ncats.Q2.Pharos_api import pharos_api
+from app.user_functions.ncats.tools.Pharos_api import pharos_api
 
 from get_results import get_results
 from get_output_data import get_output_data

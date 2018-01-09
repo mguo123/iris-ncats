@@ -22,10 +22,10 @@ from optparse import OptionParser
 import pandas as pd
 from pubmed_lookup import PubMedLookup, Publication
 
-from app.user_functions.ncats.Q2.TiGER_api import TiGER_api
-from app.user_functions.ncats.Q2.GNBR_api import GNBR_api
-from app.user_functions.ncats.Q2.Pharos_api import pharos_api
-from app.user_functions.ncats.Q2.GO_api import go_api
+from app.user_functions.ncats.tools.TiGER_api import TiGER_api
+from app.user_functions.ncats.tools.GNBR_api import GNBR_api
+from app.user_functions.ncats.tools.Pharos_api import pharos_api
+from app.user_functions.ncats.tools.GO_api import go_api
 
 ############################################# DEFINE PATHS ##############################################################
 
