@@ -75,6 +75,7 @@ class FunctionSearch(AssignableMachine):
             text = self.text
         if self.class_index:
             command = self.iris.get_command_by_class_index(self.class_index)
+            print(command)
         else:
             # command, score = self.iris.predict_commands(text)[0]
             if self.caller_context == None:
