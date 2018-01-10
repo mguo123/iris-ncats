@@ -205,7 +205,7 @@ def Q2_query(QDrug, QDisease, options):
         go_result = go_result.loc[go_result['rejected'] == 1.0, ['name', 'term', 'p', 'q', 'gene_target']]
         go_result = go_result.sort_values(by=['gene_target', 'q'], ascending=[False, True])
         go_result.to_csv(os.path.join(results_dir, out_name + "_GO_pathway_enrichment.csv"), mode="w+", index_label=False, index=False)
-
+        
 
         # Get GO Enrichment statistics
         go_result_short = go_result[:min(5, len(go_result))]

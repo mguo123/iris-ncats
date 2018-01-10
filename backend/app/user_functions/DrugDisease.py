@@ -97,6 +97,7 @@ class DrugGenes(IrisCommand):
         self.iris.add_to_env('drug_genes' + query_name, drug_gene_term_object) 
         drug_gene_term_object_short = iris_objects.IrisDataframe(data=result['drug_genes_short'])
         result_array.append(drug_gene_term_object_short)
+        print('added genes')
         # result_array.append("Full dataset saved as drug_associated_genes")
 
 
@@ -111,10 +112,13 @@ class DrugGenes(IrisCommand):
         result_array.append('Top significant GO terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms_{drug_disease}')
         go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
         self.iris.add_to_env('go_terms' + query_name, go_term_object)
+        
         go_term_object_short = iris_objects.IrisDataframe(data=result['GOENRICH_short'])
         result_array.append(go_term_object_short)
+        result_array.append('No significant GO terms found')
+        
         # result_array.append("Full dataset saved as drug_disease_go_terms")
-
+        print('added GO terms')
 
         # get tissue = disease
         if 'tissue_df_dis' in result:
@@ -137,6 +141,7 @@ class DrugGenes(IrisCommand):
                
                 result_array.append(pmid_df_short)
                 # result_array.append("Full dataset saved as pmid_ids")
+        print('added Pubmed terms')
 
         # get other possible disease 
         if "other_disease" in result:
@@ -156,12 +161,14 @@ class DrugGenes(IrisCommand):
             else:
                 result_array.append('No other drug indications found')
             # result_array.append("Full dataset saved as drug_indications")
+        print('added other drug indications')
 
 
         # display image
         if "image_file" in result:
             result_array.append('Diagram stored in: %s' % result["image_file"])
             os.system("open " + result["image_file"])
+        print('added image')
 
             
         result_array.append("Full dataframes are available for viewing using the command: print {dataframe_name}. See right side panel for more information.")
@@ -256,11 +263,15 @@ class DrugDisease(IrisCommand):
 
 
         # Print out signficant go terms
-        result_array.append('Top significant GO terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms_{drug_disease}')
-        go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
-        self.iris.add_to_env('go_terms' + query_name, go_term_object)
-        go_term_object_short = iris_objects.IrisDataframe(data=result['GOENRICH_short'])
-        result_array.append(go_term_object_short)
+        try:
+            result_array.append('Top significant GO terms associated with the drug-disease interaction are shown. Full dataset saved as go_terms_{drug_disease}')
+            go_term_object = iris_objects.IrisDataframe(data=result['GOENRICH'])
+            self.iris.add_to_env('go_terms' + query_name, go_term_object)
+            
+            go_term_object_short = iris_objects.IrisDataframe(data=result['GOENRICH_short'])
+            result_array.append(go_term_object_short)
+        except:
+            result_array.append('No significant GO terms found')
         # result_array.append("Full dataset saved as drug_disease_go_terms")
 
 
@@ -274,17 +285,17 @@ class DrugDisease(IrisCommand):
         else:
             result_array.append('No differential tissue expression in disease state detected.')
 
-        # if "pubmed" in result:
-        #     if isinstance(result["pubmed"], str):
-        #         result_array.append(result["pubmed"])
-        #     else:
-        #         result_array.append("Following are PMIDs that support the interaction: Full dataset saved as pmid_{drug_disease}.")        
-        #         pmid_df_short = iris_objects.IrisDataframe(data=result["pubmed_short"])
-        #         pmid_df = iris_objects.IrisDataframe(data=result["pubmed"])
-        #         self.iris.add_to_env('pmid' + query_name, pmid_df)
+        if "pubmed" in result:
+            if isinstance(result["pubmed"], str):
+                result_array.append(result["pubmed"])
+            else:
+                result_array.append("Following are PMIDs that support the interaction: Full dataset saved as pmid_{drug_disease}.")        
+                pmid_df_short = iris_objects.IrisDataframe(data=result["pubmed_short"])
+                pmid_df = iris_objects.IrisDataframe(data=result["pubmed"])
+                self.iris.add_to_env('pmid' + query_name, pmid_df)
                
-        #         result_array.append(pmid_df_short)
-        #         # result_array.append("Full dataset saved as pmid_ids")
+                result_array.append(pmid_df_short)
+                # result_array.append("Full dataset saved as pmid_ids")
 
         # get other possible disease 
         if "other_disease" in result:

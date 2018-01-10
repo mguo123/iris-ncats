@@ -190,8 +190,16 @@ class IrisDataframe:
         for c in self.df.columns:
             print(self.df[c])
         # column data listing columns and types # TODO: key, name currently redundant #self.df[obj][0]
-        column_data = [{"key":obj, "name":obj, "type":self.dtype_name(self.df[obj].tolist()[0])} for obj in self.df.columns]
-        
+        if len(self.df.columns) < 1:
+            return pd.io.json.dumps({"column_data":None, "row_data":None})
+
+        column_data = []
+        for obj in self.df.columns:
+            if len(self.df[obj].tolist()) > 0:
+                column_data.append({"key":obj, "name":obj, "type":self.dtype_name(self.df[obj].tolist()[0])})
+            else:
+                column_data.append({"key":obj, "name":obj})
+
         # column_data = [{"key":name, "name":name, "type":self.column_types[i]} for i,name in enumerate(self.column_names)]
         row_data = self.df.to_dict('records')[:50]
         for row in row_data:
