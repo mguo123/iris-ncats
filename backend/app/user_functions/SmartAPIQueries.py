@@ -34,15 +34,18 @@ class SearchKnowledgeSourceTitles(IrisCommand):
     title = "What knowledge source titles include {query}?"
     examples = ["What knowledge sources titles contain {query}?"]
 
-    argument_types = {"query": t.List("What is the search term?")}
+    argument_types = {"query": t.String("What is the search term?")}
 
     def command(self, query):
         s = SmartAPI.SmartAPI()
         result = s.search_titles(query)
-        return result
+        return result # returns list 
 
     def explanation(self, result):
-        return result
+        if len(result)> 0:
+            return result
+        else:
+            return 'No source titles found'
 
 SearchKnowledgeSourceTitles = SearchKnowledgeSourceTitles()
 
@@ -52,7 +55,7 @@ class SearchKnowledgeSourceFull(IrisCommand):
     examples = ["What knowledge sources discuss {query}?",
                 "What sources in SmartAPI talk about {query}"]
 
-    argument_types = {"query": t.List("What is the search term?")}
+    argument_types = {"query": t.String("What is the search term?")}
 
     def command(self, query):
         s = SmartAPI.SmartAPI()
@@ -60,6 +63,9 @@ class SearchKnowledgeSourceFull(IrisCommand):
         return result
 
     def explanation(self, result):
-        return result
+        if len(result)> 0:
+            return result
+        else:
+            return 'No knowledge sources found'
 
 SearchKnowledgeSourceFull = SearchKnowledgeSourceFull()

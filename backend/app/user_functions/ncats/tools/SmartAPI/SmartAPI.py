@@ -63,7 +63,7 @@ class SmartAPI:
 
 if __name__ == '__main__':
     s = SmartAPI
-    print(s.search_titles('gene'))
+    print(s.search_titles('drug'))
     print(s.search_all('drug'))
     print(s.search_all('*'))
 
