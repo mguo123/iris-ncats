@@ -1,7 +1,10 @@
-from iris import state_types as t
-from iris import IrisCommand
+# identity.py
+# how to identify a function
 
-from iris import iris_objects
+from .. import IrisCommand
+from .. import state_types as t
+from .. import iris_objects
+
 class Identity(IrisCommand):
     title = "identity function {x}"
     examples = []

@@ -2,6 +2,7 @@ from iris import state_types as t
 from iris import IrisCommand
 
 from iris import iris_objects
+
 class Take_A_Break(IrisCommand):
     title = "take {x} second break"
     examples = ["pause for {x} seconds", "rest for {x} seconds", "wait for {x} seconds", "nap for {x} seconds"]

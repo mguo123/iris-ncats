@@ -70,6 +70,17 @@ class TestIf(IrisCommand):
 
 testIf = TestIf()
 
+class TestValidate(IrisCommand):
+    title = "validation mode"
+    examples = ['validation test']
+    argument_types = {
+        "test": sm.ValidateState()
+    }
+    def command(self, test):
+        return test
+
+TestValidate = TestValidate()
+
 class PokeHoles(IrisCommand):
     title = "poke holes"
     argument_types = {

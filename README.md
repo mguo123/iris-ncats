@@ -40,9 +40,6 @@ brew install graphviz
 pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
 ```
 
-### Data  
-Data files can be found on the AWS instance. Contact repository owner for more information. Post-release data files will be make freely available.
-
 
 ### Install and run the Python components:
 ```
@@ -183,6 +180,35 @@ class TreatDisease(IrisCommand):
     def explanation(self, result):
         return ["Here is the answer", result]
 ```
+## NCATS Specific Data and Functions
+
+To setup the data folder: 
+
+1. Get data as below:
+```
+wget 'https://www.dropbox.com/s/p3nrt2rbacl640x/DB_data.tar.gz?dl=1' -O 'DB_data.tar.gz'
+
+if [ $(sha256sum DB_data.tar.gz | cut -d$' ' -f1) == 321ab9a545b92874f6c4dd7a5aaaebf6e200cfabd8542f7d14f50ab5854219fe ]
+then
+   tar -xzvf DB_data.tar.gz
+   rm DB_data.tar.gz
+else
+   echo File downloaded improperly
+fi
+
+```
+Note: Need both `wget` and `sha256sum` for this to work
+
+2. Place `DB_data` folder in the folder `backend\app\user_functions\ncats`
+
+
+NCATS specific functions can be found in `backend\app\user_functions\`
+
+Things we need to do:
+* Documentation of Databases (smartAPI based)
+* Documentation of biomedical algorithms (logic)
+* Connecting Iris to SMART API
+* Streamline directory structure
 
 ## Known Issues
 

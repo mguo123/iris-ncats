@@ -1,6 +1,6 @@
 from iris import state_types as t
 from iris import IrisCommand
-from app.user_functions.Q1_main import Q1_query
+from app.user_functions.ncats.scripts.Q1_main import Q1_query
 from iris import iris_objects
 import os
 

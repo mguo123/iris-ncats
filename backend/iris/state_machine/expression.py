@@ -120,7 +120,8 @@ class Function(Scope, AssignableMachine):
         self.query = text
     # we want to set initial output after title is defined
     def set_output(self):
-        self.output = [{"type":"title", "text": "You chose this query: " + self.title.lower(), "title":self.title.lower()}]
+        self.output = []
+        # self.output = [{"type":"title", "text": "You chose this query: " + self.title.lower(), "title":self.title.lower()}]
     # helper to get training examples for this function
     def training_examples(self):
         # TODO: probably just factor this out to IrisCommand (Function objects don't have a class index)
@@ -451,6 +452,19 @@ class IfState(AssignableMachine):
             return ValueState(FunctionReturn(self.read_variable("true_exp").value, program)).when_done(self.get_when_done_state())
         return ValueState(FunctionReturn(None, program)).when_done(self.get_when_done_state())
 
+
+## a basic assignable machine that is basically will store a validation file 
+class ValidateState(AssignableMachine):
+    def __init__(self):
+        super().__init__()
+        self.accepts_input = False
+    def next_state_base(self, text):
+        if self.read_variable("condition") == None:
+            return Assign("condition", ApplySearch(question = ["You are in validation mode. What question do you want to ask?"])).when_done(self)
+        if self.read_variable("validate") == None:
+            return Assign("validate", ApplySearch(question = None, text = "Is this useful?")).when_done(self)
+        program = While(self.read_variable("condition").program, self.read_variable("validate").program)
+        return ValueState(FunctionReturn(self.read_variable("validate").value, program)).when_done(self.get_when_done_state())
 # TODO: "make holes" is a terrible name
 # The idea here is that we are walking over an AST, looking at var references, and asking whether they
 # should paramaterize the function, or be stored as constants

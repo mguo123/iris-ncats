@@ -6,9 +6,10 @@ import argparse
 from shutil import copy
 
 # Set relative paths for data and scripts
-overall_path = os.path.abspath(os.path.dirname(__file__))
-pubmed_data_path = os.path.join(overall_path, 'ncats/PubMed/')
-scripts_dir = os.path.join(overall_path, 'ncats/scripts/Q1/')
+overall_path = os.path.abspath(os.path.dirname(__file__)) 
+scripts_dir = os.path.join(overall_path, 'Q1/')
+ncats_path = os.path.dirname(overall_path)
+pubmed_data_path = os.path.join(ncats_path, 'DB_data/PubMed/')
 
 # This function attempts to answer the question:
 # Do any genetic diseases protect against this condition

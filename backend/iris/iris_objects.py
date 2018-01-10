@@ -275,7 +275,7 @@ class IrisDataframe:
         with open(file_path, "w") as f:
             f.write(self.df.to_csv())
 
-# a wrapper ior Iris functions
+# a wrapper for Iris functions
 # the reason we need this is that, by defauly, if an iris command returns another iris command
 # this will be interpreted as passing control to that function, e.g., calling it
 class FunctionWrapper:

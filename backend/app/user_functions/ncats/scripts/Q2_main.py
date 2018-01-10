@@ -83,35 +83,40 @@ def Q2_query(QDrug, QDisease, options):
 
     """
 
-    # Pre-process query
+    # Pre-process query (get medic ids)
     drug = QDrug.strip().lower()
-
-    disease = QDisease.strip().lower()
-
-
-    # get MEDIC ids
     drug_id = GNBR_api.get_MEDICID(drug)
-    disease_id = GNBR_api.get_MEDICID(disease)
 
 
     # Generate prefix for output file, is drug_disease
-    out_name = drug + "_" + disease.replace(" ", "-").lower()
+    if QDisease is not None:
+        disease = QDisease.strip().lower()
+        disease_id = GNBR_api.get_MEDICID(disease)
+        out_name = drug + "_" + disease.replace(" ", "-").lower()
 
 
-    # Get list of genes causally annotated to a disease
-    if options.verbose and options.batchFile is None:
-        print("Querying GNBR for disease genes...")
-    dis_gene_list = GNBR_api.get_disease_gene_list(disease, freq_correct=True)
+        # Get list of genes causally annotated to a disease
+        if options.verbose and options.batchFile is None:
+            print("Querying GNBR for disease genes...")
+        dis_gene_list = GNBR_api.get_disease_gene_list(disease, freq_correct=True)
 
-    # If first query did not work, try getting nearest matches for the query and try again
-    if dis_gene_list is None:
+        # If first query did not work, try getting nearest matches for the query and try again
+        if dis_gene_list is None:
 
-        # Get matches
-        disease2, match_type = GNBR_api.query_term_for_matches(disease)
+            # Get matches
+            disease2, match_type = GNBR_api.query_term_for_matches(disease)
 
-        # If not fuzzy matching, but simple order matching, use the new disease query and proceed
-        if match_type == 0:
-            dis_gene_list = GNBR_api.get_disease_gene_list(disease2, freq_correct=True)
+            # If not fuzzy matching, but simple order matching, use the new disease query and proceed
+            if match_type == 0:
+                dis_gene_list = GNBR_api.get_disease_gene_list(disease2, freq_correct=True)
+    # 
+    elif len(options.gene_list) >0:
+        out_name = drug + "__"
+        dis_gene_list = options.gene_list
+
+
+
+
 
     # Get list of drug targets from Pharos
     if options.verbose and options.batchFile is None:
@@ -157,6 +162,14 @@ def Q2_query(QDrug, QDisease, options):
         # filter out None
         dis_gene_list = [gene for gene in dis_gene_list if gene is not None]
         drug_gene_list = [gene for gene in drug_gene_list if gene is not None]
+
+        if len(dis_gene_list) < 1:
+            print("ERROR: No disease targets found")
+            return "ERROR: No disease targets found"
+            
+        if len(drug_gene_list) < 1:
+            print("ERROR: No drug targets found")
+            return "ERROR: No drug targets found"
 
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
