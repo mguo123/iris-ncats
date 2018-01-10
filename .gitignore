@@ -11,10 +11,13 @@ backend/app/large_files/*
 data/*
 envs/*
 
+
+
 backend/app/user_functions/ncats/PubMed
 backend/app/user_functions/ncats/results
 backend/app/user_functions/ncats/Q2/results
 backend/app/user_functions/ncats/DB_data
+backend/app/user_functions/ncats/DB_data.tar.gz
 backend/app/user_functions/ncats/tools/results/
 
 .DS_Store
