@@ -7,7 +7,7 @@ class SayHi(IrisCommand):
     title = "Hi"
 
     # templates of what text can be inputted to call this function
-    examples = ["Hello ", "Bonjour ", "Hola", "Sup"]
+    examples = ["Hello", "Bonjour ", "Hola", "Sup"]
 
     # types of inputs want to implement
     argument_types = {}

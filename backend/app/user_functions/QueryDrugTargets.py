@@ -74,7 +74,7 @@ class QueryDrugTargets(IrisCommand):
             for u in uniprot_ids:
                 gene = QueryUniprot.QueryUniprot.uniprot_id_to_gene_name(u)
                 gene_results = np.append(gene_results,np.array(list(gene)))
-                if count >= 5:
+                if count >= 100:
                     remaining = len(uniprot_ids) - count
                     if remaining < 1:
                         break
