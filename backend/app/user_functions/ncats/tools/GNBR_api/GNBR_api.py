@@ -15,6 +15,10 @@ pkl_file = open(os.path.join(GNBR_reference_dir, 'chem_GNBR_dict.pkl'), 'rb')
 chem_dict = pickle.load(pkl_file)
 pkl_file.close()
 
+pkl_file = open(os.path.join(GNBR_reference_dir, 'CTD_chem_mapping_dict.pkl'), 'rb')
+chem_entity_resolution = pickle.load(pkl_file)
+pkl_file.close()
+
 pkl_file = open(os.path.join(GNBR_reference_dir, 'disease_GNBR_dict.pkl'), 'rb')
 disease_dict = pickle.load(pkl_file)
 pkl_file.close()
@@ -292,10 +296,43 @@ def get_MEDICID(term):
     else:
         return 'ID:Unknown'
 
+def query_treatments_for_disease(disease, relationship="T"):
+        """
+        :param disease: common disease name
+        :param relationship: GNBR relationship
+        :param gene_names: return NCBI gene names instead of EntrezIDs
+        :param freq_correct: Correct for the frequency of annotation
+        :param return_scores: Return the score associated with the frequency correction
+        :return: list or dictionary of genes with the desired relationship to the disease
+        """
+        disease_id = disease_dict.get(disease.lower())
+
+        treatments = dict()
+        if disease_id in chem_disease_dict:
+            count = dict()
+            for entry in chem_disease_dict.get(disease_id):
+                print(entry)
+                id = entry[0]
+                if id in chem_dict:
+                    print("hit")
+                    if entry[1] == relationship:
+                        if id in count:
+                            count[id] += 1
+                        else:
+                            count[id] = 1
+
+            if len(count.keys()) == 0:
+                return None
+        count_sorted = sorted(count, key=lambda key: count[key], reverse=True)
+        out_list = []
+        for key in count_sorted:
+            out_list.append([chem_entity_resolution.get(key),key, count.get(key)])
+        print(out_list)
+
 if __name__ == "__main__":
 
-    print(query_term_for_matches("sickle cell trait"))
-
+    # print(query_term_for_matches("sickle cell trait"))
+    print(query_treatments_for_disease("rheumatoid arthritis"))
 
 
 
