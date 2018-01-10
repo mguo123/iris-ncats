@@ -27,6 +27,63 @@ class Mean(IrisCommand):
 
 mean = Mean()
 
+class Median(IrisCommand):
+    title = "median of {array}"
+    examples = ["get the median of {array}"]
+    argument_types = {"array":t.DataframeSelector("Give me a dataframe to select from?")}
+    def command(self, array):
+        import numpy as np
+        #print(np.median(array.to_matrix(),axis=0))
+        return iris_objects.IrisDataframe(column_names=array.column_names, column_types=array.column_types, data=[np.median(array.to_matrix(),axis=0)])
+    def explanation(self, result):
+        return result
+_Median = Median()
+
+class Min(IrisCommand):
+    title = "minimum of {array}"
+    examples = []
+    argument_types = {"array":t.DataframeSelector("Select a column to get the min?")}
+    def command(self, array):
+        import numpy as np
+        return iris_objects.IrisDataframe(column_names=array.column_names, column_types=array.column_types, data=[array.to_matrix().min(axis=0)])
+    def explanation(self, result):
+        return result
+_Min = Min()
+
+class Max(IrisCommand):
+    title = "maximum of {array}"
+    examples = ["max of {array}"]
+    argument_types = {"array":t.DataframeSelector("Give me a dataframe to select from?")}
+    def command(self, array):
+        import numpy as np
+        return iris_objects.IrisDataframe(column_names=array.column_names, column_types=array.column_types, data=[array.to_matrix().max(axis=0)])
+    def explanation(self, result):
+        return result
+_Max = Max()
+
+class StandardDeviation(IrisCommand):
+    title = "standard deviation of {array}"
+    examples = ["std {array}"]
+    argument_types = {"array":t.Array("What is the array you want to analyze?")}
+    def command(self, array):
+        import numpy as np
+        return np.std(array)
+    def explanation(self, result):
+        return "The standard deviation is {}!".format(result)
+_StandardDeviation = StandardDeviation()
+
+
+class Skew(IrisCommand):
+    title = "skewness of {array}"
+    examples = ["how skew is {array}"]
+    argument_types = {"array":t.DataframeSelector("Select a column to get the min?")}
+    def command(self, array):
+        from scipy.stats import skew
+        return iris_objects.IrisDataframe(column_names=array.column_names, column_types=array.column_types, data=[skew(array.to_matrix(),axis=0,nan_policy='omit')])
+    def explanation(self, result):
+        return ["Here are the skewness values (zero = not skew, positive = left tail):", result]
+_Skew = Skew()
+
 class LogTransform(IrisCommand):
     title = "log-transform {dataframe}"
     examples = [
@@ -78,6 +135,18 @@ class PearsonCorrelation(IrisCommand):
         return "Correlation of {} with p-value of {}".format(corr, pval)
 
 pearsonCorrelation = PearsonCorrelation()
+
+class GetPositiveCoefs(IrisCommand):
+    title = "select the most positive coefficients for {class_name} in {coefficients}"
+    argument_types = {
+        "coefficients": t.EnvVar("Which set of coefficients?"),
+        "class_name": t.String("Which class do you want to look at?")
+    }
+    def command(self, coefficients, class_name):
+        import numpy as np
+        return np.array([x[0] for x in coefficients.feature_names[class_name]["pos"]])
+
+getPositiveCoefs = GetPositiveCoefs()
 
 class FindQuartiles(IrisCommand):
     title = "find quartiles {array}"

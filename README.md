@@ -183,6 +183,15 @@ class TreatDisease(IrisCommand):
     def explanation(self, result):
         return ["Here is the answer", result]
 ```
+## NCATS Specific
+
+NCATS specific functions can be found in `backend\app\user_functions\`
+
+Things we need:
+* Documentation of Databases (smartAPI based)
+* Documentation of biomedical algorithms (logic)
+* Connecting Iris to SMART API
+
 
 ## Known Issues
 
