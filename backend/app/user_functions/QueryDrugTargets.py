@@ -78,7 +78,7 @@ class QueryDrugTargets(IrisCommand):
                     remaining = len(uniprot_ids) - count
                     if remaining < 1:
                         break
-                    gene_results = np.append(gene_results,np.array(list("and %s more" % remaining)))
+                    gene_results = np.append(gene_results,np.array(["and %s more" % remaining]))
                     break
                 count += 1
 
