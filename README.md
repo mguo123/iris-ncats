@@ -183,6 +183,7 @@ class TreatDisease(IrisCommand):
 ## NCATS Specific Data and Functions
 
 To setup the data folder: 
+
 1. Get data as below:
 ```
 wget 'https://www.dropbox.com/s/p3nrt2rbacl640x/DB_data.tar.gz?dl=1' -O 'DB_data.tar.gz'
@@ -197,6 +198,7 @@ fi
 
 ```
 Note: Need both `wget` and `sha256sum` for this to work
+
 2. Place `DB_data` folder in the folder `backend\app\user_functions\ncats`
 
 
