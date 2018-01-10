@@ -70,9 +70,17 @@ class QueryDrugTargets(IrisCommand):
 
             print("Fetching gene names for uniprot ids")
             gene_results = np.array([])
+            count = 0
             for u in uniprot_ids:
                 gene = QueryUniprot.QueryUniprot.uniprot_id_to_gene_name(u)
                 gene_results = np.append(gene_results,np.array(list(gene)))
+                if count >= 5:
+                    remaining = len(uniprot_ids) - count
+                    if remaining < 1:
+                        break
+                    gene_results = np.append(gene_results,np.array(list("and %s more" % remaining)))
+                    break
+                count += 1
 
             print(gene_results)
             return gene_results
