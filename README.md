@@ -186,18 +186,9 @@ To setup the data folder:
 
 1. Get data as below:
 ```
-wget 'https://www.dropbox.com/s/p3nrt2rbacl640x/DB_data.tar.gz?dl=1' -O 'DB_data.tar.gz'
-
-if [ $(sha256sum DB_data.tar.gz | cut -d$' ' -f1) == 321ab9a545b92874f6c4dd7a5aaaebf6e200cfabd8542f7d14f50ab5854219fe ]
-then
-   tar -xzvf DB_data.tar.gz
-   rm DB_data.tar.gz
-else
-   echo File downloaded improperly
-fi
+wget 'https://www.dropbox.com/s/iwl58rre8qcav6d/DB_data.tar.gz?dl=1' -O 'DB_data.tar.gz'
 
 ```
-Note: Need both `wget` and `sha256sum` for this to work
 
 2. Place `DB_data` folder in the folder `backend\app\user_functions\ncats`
 
