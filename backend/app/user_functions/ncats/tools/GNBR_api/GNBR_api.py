@@ -311,10 +311,10 @@ def query_treatments_for_disease(disease, relationship="T"):
         if disease_id in chem_disease_dict:
             count = dict()
             for entry in chem_disease_dict.get(disease_id):
-                print(entry)
+                # print(entry)
                 id = entry[0]
                 if id in chem_dict:
-                    print("hit")
+                    # print("hit")
                     if entry[1] == relationship:
                         if id in count:
                             count[id] += 1
@@ -328,6 +328,7 @@ def query_treatments_for_disease(disease, relationship="T"):
         for key in count_sorted:
             out_list.append([chem_entity_resolution.get(key),key, count.get(key)])
         print(out_list)
+        return out_list
 
 if __name__ == "__main__":
 

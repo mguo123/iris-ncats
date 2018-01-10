@@ -112,7 +112,9 @@ def Q2_query(QDrug, QDisease, options):
     # 
     elif len(options.gene_list) >0:
         out_name = drug + "__"
-        dis_gene_list = options.gene_list
+        disease = None
+        disease_id = None
+        dis_gene_list = [GNBR_api.resolve_gene_to_EntrezGeneID(gene) for gene in options.gene_list]
 
 
 
@@ -166,7 +168,7 @@ def Q2_query(QDrug, QDisease, options):
         if len(dis_gene_list) < 1:
             print("ERROR: No disease targets found")
             return "ERROR: No disease targets found"
-            
+
         if len(drug_gene_list) < 1:
             print("ERROR: No drug targets found")
             return "ERROR: No drug targets found"
@@ -209,10 +211,10 @@ def Q2_query(QDrug, QDisease, options):
         go_result_short = go_result[:min(5, len(go_result))]
 
         # Start saving results
-        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "drug_id": drug_id, "disease_id":disease_id,
+        result = {"GOENRICH":go_result, "drug_genes":drug_genes, "disease_genes":dis_genes, "drug_id": drug_id, "disease_id": disease_id,
                   "GOENRICH_short":go_result_short, "drug_genes_short":drug_genes_short, "disease_genes_short":dis_genes_short,
                   }
-
+            
 
         # Get tissue information
         print("Getting tissue information resolved to disease via: resolve_EntrezGeneID_to_NCBIGeneName")
@@ -232,7 +234,7 @@ def Q2_query(QDrug, QDisease, options):
 
         # Get Pubmed id, then get top 10 publication titles 
         print("Getting Pubmed IDs and Titles")
-        if options.gen_pubmed:
+        if options.gen_pubmed and QDisease is not None:
             PMIDs = GNBR_api.query_chemical_disease(drug, disease, get_PMIDs=True)
             if len(PMIDs) > 0:
                 PMID_df = pd.DataFrame([[x, get_PMID(x)] for x in PMIDs[:min(10, len(PMIDs))]], columns=["PMIDS", "Title"])

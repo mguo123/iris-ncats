@@ -1,16 +1,19 @@
 from iris import state_types as t
 from iris import IrisCommand
-from app.user_functions.Q1_main import Q1_query
+from app.user_functions.ncats.scripts.Q1_main import Q1_query
 from app.user_functions.ncats.tools.orange_apis import QueryUniprot
 from app.user_functions.ncats.tools.orange_apis import QueryChEMBL
-from iris import iris_objects
+
+
+# from iris import iris_objects
 import os
+import numpy as np
 
 
 class QueryDrugTargets(IrisCommand):
     # what iris will call the command + how it will appear in a hint
     # title = "how does {condition} protects against {condition}?"
-    title = "What genes does {drug} target?"
+    title = "What genes does drug target?"
     # give an example for iris to recognize the command
 
     examples = ["What are the targets of {drug}",
@@ -53,31 +56,33 @@ class QueryDrugTargets(IrisCommand):
             result_array.append('No drug targets identified in ChEMBL')
             return result_array
 
+        gene_results_str = ', '.join(results)
+
         result_array.append('The following genes were identified as drug targets in ChEMBL for %s' % drug)
-        result_array.append(results)
+        result_array.append(gene_results_str)
         return result_array
 
-    def fetch_gene_targets(self, drug):
+    def fetch_gene_targets(self,drug):
         # Fetch the uniprot ids for the drug targets from Chembl
         try:
             print("Fetching uniprot ids from ChEMBL for drug targets")
             uniprot_ids = QueryChEMBL.QueryChEMBL.get_target_uniprot_ids_for_drug(drug)
 
             print("Fetching gene names for uniprot ids")
-            gene_results = []
+            gene_results = np.array([])
             for u in uniprot_ids:
                 gene = QueryUniprot.QueryUniprot.uniprot_id_to_gene_name(u)
-                gene_results.append(gene)
+                gene_results = np.append(gene_results,np.array(list(gene)))
 
+            print(gene_results)
             return gene_results
         except Exception as e:
             print("Error fetching gene targets: %s" % e)
-            return []
-
+            return 'Error'
 
 
 _QueryDrugTargets = QueryDrugTargets()
 
-if __name__ == "__main__":
-    q = QueryDrugTargets()
-    print(q.fetch_gene_targets('clothiapine'))
+# if __name__ == "__main__":
+#     # q = QueryDrugTargets()
+#     print(fetch_gene_targets('clothiapine'))

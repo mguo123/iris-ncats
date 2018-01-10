@@ -2,9 +2,13 @@
 NCATS - Question 2 Iris Commands
 
 The Iris wrapper function that answers the questions
-How does drug(s) treat disease(s) 
+How does drug(s) treat disease(s)  [can take multiple drug-disease combindation]
+How does a drug affect a list of genes] 
+
 and
 What other conditions does drug impact?
+
+
 
 Note: print states print to console backend logger
 
@@ -37,21 +41,23 @@ class Options(object):
         self.gene_list = gene_list
 
 class DrugGenes(IrisCommand):
-    title = "How does {drug} affect these list of {genes}"
+    title = "How does {drug} affect these list of {genes}? "
     examples = []
     argument_types = {"drug":t.String("Okay, a couple more questions to set up this task. For confirmation: What is the drug you want to analyze?"), 
-                        "gene_list":t.List("What genes do you want to analyze? (enter NCBI gene names separated by commas"),
+                        "genes":t.List("What genes do you want to analyze? (enter NCBI gene names separated by commas)"),
                         "bool_image":t.YesNo("Would you like to visualize the results as a diagram?",
                                     yes=True, no=False),
                         "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
-                                    yes=True, no=False)
+                                    yes=True, no=False),
+                        "bool_other_disease":t.YesNo("Would you like to know other diseases that can be affected by the given drug?",
+                                    yes=True, no=False)                        
                         }
     # core logic of the command
-    def command(self, drug, gene_list, bool_image, bool_pubmed, bool_other_disease):
+    def command(self, drug, genes, bool_image, bool_pubmed, bool_other_disease):
         print('BEFORE QUERY!!!')
         # create options structure 
 
-        options = Options(gen_image=bool_image, gene_list=gene_list, gen_pubmed=bool_pubmed)
+        options = Options(gen_image=bool_image, gene_list=genes, gen_pubmed=bool_pubmed)
 
 
         answer = Q2_query(drug, None, options) # disease is none
@@ -164,7 +170,10 @@ class DrugGenes(IrisCommand):
 
         return result_array
 
-                        
+         
+_DrugGenes = DrugGenes()
+
+
 class DrugDisease(IrisCommand):
     # what iris will call the command + how it will appear in a hint
     title = "How does {drug} treat {disease}?"
@@ -177,19 +186,21 @@ class DrugDisease(IrisCommand):
                         "disease":t.String("What is the disease you want to analyze?"),
                         "bool_image":t.YesNo("Would you like to visualize the results as a diagram?",
                                     yes=True, no=False),
-                        "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
-                                    yes=True, no=False),
+                        # "bool_pubmed":t.YesNo("Would you like to get the list of pubmed IDs for reference?",
+                        #             yes=True, no=False),
                         "bool_other_disease":t.YesNo("Would you like to know other diseases that can be affected by this drug?",
                                     yes=True, no=False)
                             
                         }
     
     # core logic of the command
-    def command(self, drug, disease, bool_image, bool_pubmed, bool_other_disease):
+    # def command(self, drug, disease, bool_image, bool_pubmed, bool_other_disease):
+    def command(self, drug, disease, bool_image, bool_other_disease):
         print('BEFORE QUERY!!!')
         # create options structure 
 
-        options = Options(gen_image=bool_image, gen_pubmed=bool_pubmed)
+        options = Options(gen_image=bool_image)
+        # options = Options(gen_image=bool_image, gen_pubmed=bool_pubmed)
 
 
         answer = Q2_query(drug, disease, options)
@@ -263,17 +274,17 @@ class DrugDisease(IrisCommand):
         else:
             result_array.append('No differential tissue expression in disease state detected.')
 
-        if "pubmed" in result:
-            if isinstance(result["pubmed"], str):
-                result_array.append(result["pubmed"])
-            else:
-                result_array.append("Following are PMIDs that support the interaction: Full dataset saved as pmid_{drug_disease}.")        
-                pmid_df_short = iris_objects.IrisDataframe(data=result["pubmed_short"])
-                pmid_df = iris_objects.IrisDataframe(data=result["pubmed"])
-                self.iris.add_to_env('pmid' + query_name, pmid_df)
+        # if "pubmed" in result:
+        #     if isinstance(result["pubmed"], str):
+        #         result_array.append(result["pubmed"])
+        #     else:
+        #         result_array.append("Following are PMIDs that support the interaction: Full dataset saved as pmid_{drug_disease}.")        
+        #         pmid_df_short = iris_objects.IrisDataframe(data=result["pubmed_short"])
+        #         pmid_df = iris_objects.IrisDataframe(data=result["pubmed"])
+        #         self.iris.add_to_env('pmid' + query_name, pmid_df)
                
-                result_array.append(pmid_df_short)
-                # result_array.append("Full dataset saved as pmid_ids")
+        #         result_array.append(pmid_df_short)
+        #         # result_array.append("Full dataset saved as pmid_ids")
 
         # get other possible disease 
         if "other_disease" in result:
